@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Avabur-improved by Alorel</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Avabur-improved</h1>
+        <p class="header">Makes Relics of Avabur even better</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/Alorel/avabur-improved/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/Alorel/avabur-improved/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/Alorel/avabur-improved">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/Alorel">Alorel</a></p>
+
+
+      </header>
+      <section>
+        <p><a href="https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js"><img src="https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/install.png" alt="Install"></a></p>
+
+<hr>
+
+<p>This is a <strong>currently in-development</strong> UserScript (to be used with <a href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/">Greasemonkey</a> on Firefox or <a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en">Tampermonkey</a> on Chrome - only the latest versions of Chrome have been tested) for <a href="http://www.avabur.com/?ref=12345">Relics of Avabur</a>. It does not automate gameplay, but it does make things easier for you! Raise an issue on Github or whisper Alorel in-game if you need support or have suggestions.</p>
+
+<h2>
+<a id="current-features" class="anchor" href="#current-features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Current features:</h2>
+
+<ul>
+<li>UI general
+
+<ul>
+<li>Hovering a resource will now show its lowest market price like so (values are cached for a set amount of time):<img src="https://raw.githubusercontent.com/Alorel/avabur-improved/master/screenshots/scr-market-tooltips.png" alt="Screenshot">
+</li>
+<li>Fixed some of the CSS the devs left out ;) Hovering materials and fragments on the top bar will now display them in colour, just like all the other resources.</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="planned-features" class="anchor" href="#planned-features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Planned features:</h2>
+
+<ul>
+<li>Improvements on the inventory/market UI, making it much easier to sell ingredients/gear/gems</li>
+<li>Market alerts - be notified when an item is above/below a threshold</li>
+<li>Market watcher - historic graphs for price changes (stored locally on your machine)</li>
+<li>Event notifications (whispers for now)</li>
+<li>Squeezing out more information in general - once more data is available we might be able to predict your win rate on new mobs etc</li>
+<li>Various timers (next house upgrade, for example)</li>
+</ul>
+
+<h2>
+<a id="planned-features-if-the-game-devs-approve" class="anchor" href="#planned-features-if-the-game-devs-approve" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Planned features if the game devs approve:</h2>
+
+<ul>
+<li>Quest retaking. Instead of having to open the quest window, turn the quest in and take a new one, have one button that will fire all the requests in one click</li>
+</ul>
+
+<h2>
+<a id="greasemonkey-permissions" class="anchor" href="#greasemonkey-permissions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Greasemonkey permissions:</h2>
+
+<ul>
+<li>
+<code>GM_getValue</code>, <code>GM_setValue</code>, <code>GM_deleteValue</code>, <code>GM_listValues</code>:  these are simply used as an alternative to the browser's local storage. Userscript settings and runtime data are stored here.</li>
+<li>
+<code>GM_getResourceURL</code>, <code>GM_getResourceText</code>:  some assets, such as 3rd party libraries, CSS files and images are static and will hardly ever change, so it makes sense for them to just be downloaded once and read from disk.</li>
+<li>
+<code>GM_xmlhttpRequest</code> and the respective <code>@connect</code>s: right now a script update simply creates a toast message giving you a link to the changelog; in the future I plan on making the changelog viewable in-game by sending a request to GitHub. Unfortunately, this can't be done with jQuery's ajax calls due to cross-domain limitations, but it <em>can</em> be done with Greasemonkey as it makes a regular, non-ajax request.</li>
+<li>
+<code>GM_notification</code>: for the upcoming notifications</li>
+</ul>
+
+<h2>
+<a id="whens-the-next-batch-of-updates" class="anchor" href="#whens-the-next-batch-of-updates" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>When's the next batch of updates?</h2>
+
+<p>I'm busy with exams until late May - should be able to deliver a regular batch of updates after that</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
