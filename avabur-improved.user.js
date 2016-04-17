@@ -8,7 +8,7 @@
 // @include        http://avabur.com*
 // @include        https://www.avabur.com*
 // @include        http://www.avabur.com*
-// @version        0.1.2
+// @version        0.2
 // @icon           https://avabur.com/images/favicon.ico
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -24,10 +24,12 @@
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
-// @resource    ajax_loader     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader/0.1.gif
-// @resource    toast_css       https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
-// @resource    toast_js        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
-// @resource    jalc            https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jquery-ajax-local-cache/jalc-1.0.1.min.js
+// @resource    ajax_loader             https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader/0.1.gif
+// @resource    toast_css               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
+// @resource    toast_js                https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
+// @resource    jalc                    https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jquery-ajax-local-cache/jalc-1.0.1.min.js
+// @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved/0.1.min.css
+// @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip/0.1.html
 // @noframes
 // ==/UserScript==
 
@@ -78,13 +80,25 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
         /** CSS URLs to load */
         const LOAD_CSS = [
+            GM_getResourceURL("script_css"),
             GM_getResourceURL("toast_css")
         ];
 
-        /** The HTML element which will be used for currency tooltip colour references */
-        const $currencyTooltipColourReference = $("#currencyTooltipMarketable");
-        /** The market tooltip calculation holder */
-        const $currencyTooltipMarketInfo = $("<span/>").hide();
+        /** Our persistent DOM stuff */
+        const $DOM = {
+            currency_tooltip: {
+                /** The HTML element which will be used for currency tooltip colour references */
+                colour_reference: $("#currencyTooltipMarketable"),
+                /** Thr row we will be colouring */
+                table_row: null,
+                /** The 1st page low price */
+                market_low: null,
+                /** The 1st page avg price */
+                market_avg: null,
+                /** The 1st page high price */
+                market_high: null
+            }
+        };
 
         /** AJAX spinners throughout the page */
         const $AJAX_SPINNERS = {
@@ -97,6 +111,10 @@ if (typeof(window.sessionStorage) === "undefined") {
             /** Puts commas in large numbers */
             numberWithCommas: function (x) {
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            },
+            /** Toggles the visibility attribute of the element */
+            toggleVisibility: function ($el, shouldBeVisible) {
+                $el.css("visibility", shouldBeVisible ? "visible" : "hidden");
             },
             /**
              * @return
@@ -180,8 +198,14 @@ if (typeof(window.sessionStorage) === "undefined") {
                 success: {
                     /** Successful callback for the currency tooltip market info lookup */
                     currency_tooltip: function (r) {
-                        $AJAX_SPINNERS.currency_tooltip.hide();
-                        $currencyTooltipMarketInfo.text(fn.numberWithCommas(r.l[0].price)).show();
+                        const low = r.l[0].price,
+                            high = r.l[r.l.length - 1].price,
+                            avg = Math.round((parseFloat(low) + parseFloat(high)) / 2);
+
+                        fn.toggleVisibility($AJAX_SPINNERS.currency_tooltip, false);
+                        $DOM.currency_tooltip.market_low.text(fn.numberWithCommas(low));
+                        $DOM.currency_tooltip.market_avg.text(fn.numberWithCommas(avg));
+                        $DOM.currency_tooltip.market_high.text(fn.numberWithCommas(high));
                     }
                 },
                 /** Error callbacks */
@@ -247,20 +271,21 @@ if (typeof(window.sessionStorage) === "undefined") {
             currency_tooltips: new MutationObserver(
                 /** @param {MutationRecord[]} node */
                 function (node) {
-                    if (node.length && $currencyTooltipColourReference.is(":visible")) {
-                        const cssClass = $currencyTooltipColourReference.attr("class"),
+                    if (node.length && $DOM.currency_tooltip.colour_reference.is(":visible")) {
+                        const cssClass = $DOM.currency_tooltip.colour_reference.attr("class"),
                             marketID = cssClass.replace("crystals", "premium")
                                 .replace("materials", "weapon_scraps")
-                                .replace("fragments", "gem_fragments");
+                                .replace("fragments", "gem_fragments"),
+                            $allTDs = $DOM.currency_tooltip.table_row.find(">td");
 
-                        $currencyTooltipMarketInfo.attr("class", cssClass);
+                        $DOM.currency_tooltip.table_row.attr("class", cssClass);
 
                         if (cssClass === "gold") {
-                            $currencyTooltipMarketInfo.text("N/A").show();
-                            $AJAX_SPINNERS.currency_tooltip.hide();
+                            $allTDs.text("N/A");
+                            fn.toggleVisibility($AJAX_SPINNERS.currency_tooltip, false);
                         } else {
-                            $currencyTooltipMarketInfo.hide();
-                            $AJAX_SPINNERS.currency_tooltip.show();
+                            $allTDs.text(" ");
+                            fn.toggleVisibility($AJAX_SPINNERS.currency_tooltip, true);
 
                             (new Request("/market.php", CACHE_TTL.market)).post({
                                 type: "currency",
@@ -275,17 +300,19 @@ if (typeof(window.sessionStorage) === "undefined") {
         //Register currency tooltip code
         (function () {
             const $currencyTooltip = $("#currencyTooltip");
-            //Add our stuff to the currency tooltips
-            $currencyTooltip.append(
-                $("<div/>")
-                    .append("<span>Market lowest: </span>")
-                    .append($currencyTooltipMarketInfo)
-                    .append($AJAX_SPINNERS.currency_tooltip)
-            );
 
-
-            //Register observers
             if ($currencyTooltip.length) {
+                const $tooltipTable = $(GM_getResourceText("html_market_tooltip"));
+
+                $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
+                $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
+                $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
+                $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
+                $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
+
+                //Add our stuff to the currency tooltips
+                $currencyTooltip.append($tooltipTable);
+
                 OBSERVERS.currency_tooltips.observe($currencyTooltip[0], {
                     attributes: true
                 });
