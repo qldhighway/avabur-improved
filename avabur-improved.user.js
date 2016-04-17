@@ -6,7 +6,9 @@
 // @description    Some welcome additions to Avabur's UI choices
 // @include        https://avabur.com*
 // @include        http://avabur.com*
-// @version        0.1
+// @include        https://www.avabur.com*
+// @include        http://www.avabur.com*
+// @version        0.1.1
 // @icon           https://avabur.com/images/favicon.ico
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
