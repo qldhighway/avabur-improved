@@ -8,7 +8,7 @@
 // @include        http://avabur.com*
 // @include        https://www.avabur.com*
 // @include        http://www.avabur.com*
-// @version        0.1.1
+// @version        0.1.2
 // @icon           https://avabur.com/images/favicon.ico
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -24,14 +24,23 @@
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
+// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/develop/lib/jquery-ajax-local-cache/jalc.min.js
 // @resource    ajax_loader     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader/0.1.gif
 // @resource    toast_css       https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
 // @resource    toast_js        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
 // @noframes
 // ==/UserScript==
 
-(function ($) {
+(function ($, CACHE_STORAGE) {
     'use strict';
+    // $.ajax({
+    //     url: '/post',
+    //     localCache: CACHE_STORAGE,
+    //
+    //     cacheTTL: 1 / 360
+    // }).done(function (response) {
+    //     console.log(response.length);
+    // });
 
     eval(GM_getResourceText("toast_js"));
 
@@ -129,7 +138,7 @@
                 }
 
                 return 0;
-            }, Observers = {
+            }, OBSERVERS = {
                 currency_tooltips: new MutationObserver(
                     /** @param {MutationRecord[]|MutationRecord} node */
                     function (node) {
@@ -199,9 +208,11 @@
         );
 
         //Register observers
-        Observers.currency_tooltips.observe($currencyTooltip[0], {
-            attributes: true
-        });
+        if ($currencyTooltip.length) {
+            OBSERVERS.currency_tooltips.observe($currencyTooltip[0], {
+                attributes: true
+            });
+        }
 
         //Fix some CSS
         $("head").append('<style>.materials{color:' +
@@ -209,10 +220,11 @@
             '}.fragments{color:' +
             $("#gem_fragments").css("color") + '}</style>');
 
+        //Issue a "script updated" message if required
         if (versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
             $().toastmessage('showToast', {
-                text: GM_info.script.name + " has been updated! See the changelog "
-                + "<a href='https://github.com/Alorel/avabur-improved/releases' target='_blank'>here</a>",
+                text: GM_info.script.name + " has been updated! See the changelog " +
+                "<a href='https://github.com/Alorel/avabur-improved/releases' target='_blank'>here</a>",
                 sticky: true,
                 position: 'top-left',
                 type: 'success'
@@ -237,4 +249,4 @@
 
     //Cleanup
     LOAD_CSS = null;
-})(jQuery);
+})(jQuery, window.localStorage);
