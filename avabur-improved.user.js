@@ -8,6 +8,8 @@
 // @include        http://avabur.com*
 // @version        0.1
 // @icon           https://avabur.com/images/favicon.ico
+// @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
+// @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @run-at         document-end
 // @grant          GM_getValue
 // @grant          GM_setValue
