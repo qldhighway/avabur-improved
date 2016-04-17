@@ -9,7 +9,7 @@ This is a **currently in-development** UserScript (to be used with [Greasemonkey
 ## Current features:
 
  - UI general
-	 - Hovering a resource will now show its lowest market price like so (values are cached for a set amount of time):![Screenshot](https://raw.githubusercontent.com/Alorel/avabur-improved/master/screenshots/scr-market-tooltips.png)
+	 - Hovering a resource will now show its lowest, average and highest market prices like so (values are cached for a set amount of time):![Screenshot](https://raw.githubusercontent.com/Alorel/avabur-improved/master/screenshots/scr-market-tooltips.png)
 	 - Fixed some of the CSS the devs left out ;) Hovering materials and fragments on the top bar will now display them in colour, just like all the other resources.
 
 ## Planned features:
