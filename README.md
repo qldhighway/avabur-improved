@@ -6,7 +6,7 @@
 
 This is a **currently in-development** UserScript (to be used with [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) on Firefox or [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) on Chrome - only the latest versions of Chrome have been tested) for [Relics of Avabur](http://www.avabur.com/?ref=12345). It does not automate gameplay, but it does make things easier for you! Raise an issue on Github or whisper Alorel in-game if you need support or have suggestions.
 
-Current features:
+## Current features:
 
  - UI general
 	 - Hovering a resource will now show its lowest market price like so:![Screenshot](https://raw.githubusercontent.com/Alorel/avabur-improved/master/screenshots/scr-market-tooltips.png)
