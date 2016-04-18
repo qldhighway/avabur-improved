@@ -8,7 +8,7 @@
 // @include        http://avabur.com*
 // @include        https://www.avabur.com*
 // @include        http://www.avabur.com*
-// @version        0.2.3b
+// @version        0.3
 // @icon           https://avabur.com/images/favicon.ico
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -29,7 +29,7 @@
 // @resource    jalc                    https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jquery-ajax-local-cache/jalc-1.0.1.min.js
 
 // @resource    ajax_loader             https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
-// @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css
+// @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
 // @resource    html_side_menu          https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/side-menu.html
 // @noframes
@@ -72,8 +72,12 @@ if (typeof(window.sessionStorage) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
     (function ($, CACHE_STORAGE, MutationObserver) {
-        'use strict';
-        eval(GM_getResourceText("jalc"));
+        'use strict'; //https://github.com/Alorel/avabur-improved/blob/develop/avabur-improved.user.js
+
+        ////////////////////////////////////////////////////////////////////////
+        // These are the settings - you can safely change them, but they will //
+        // be overwritten during script updates                               //
+        ////////////////////////////////////////////////////////////////////////
 
         /** How long our AJAX cache is meant to last */
         const CACHE_TTL = {
@@ -85,6 +89,19 @@ if (typeof(window.sessionStorage) === "undefined") {
             GM_getResourceURL("script_css"),
             GM_getResourceURL("toast_css")
         ];
+
+        /**
+         * The URL where we check for updates. This is different from @updateURL because we want it to come through
+         * as a regular page load, not a request to the raw file
+         */
+        const UPDATE_URL = "https://github.com/Alorel/avabur-improved/blob/master/avabur-improved.user.js";
+
+        /////////////////////////////////////////////////////
+        // This is the script code. Don't change it unless //
+        // you know what you're doing ;)                   //
+        /////////////////////////////////////////////////////
+
+        eval(GM_getResourceText("jalc"));
 
         /** Our persistent DOM stuff */
         const $DOM = {
@@ -363,5 +380,26 @@ if (typeof(window.sessionStorage) === "undefined") {
                 delete LOAD_CSS[i];
             }
         })();
+
+        /* Check for updates. Running anonymously because this will only be run once per page load. Because the update
+         url in previous versions was set to github.com/[...]/raw/[...], not raw.githubusercontent.com/[...], it still has
+         the cross-site headers set, therefore regular jQuery $.get cannot be used
+         */
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: UPDATE_URL,
+            onload: function (r) {
+                const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
+                if (fn.versionCompare(GM_info.script.version, theirVersion) < 1) {
+                    $().toastmessage('showToast', {
+                        text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
+                        'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
+                        sticky: true,
+                        position: 'top-center',
+                        type: 'notice'
+                    });
+                }
+            }
+        });
     })(jQuery, window.sessionStorage, MutationObserver);
 }
