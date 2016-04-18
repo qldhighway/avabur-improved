@@ -24,18 +24,18 @@
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
+// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
 // @resource    toast_css               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
-// @resource    toast_js                https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
-// @resource    jalc                    https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jquery-ajax-local-cache/jalc-1.0.1.min.js
+
+// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/develop/lib/jalc-1.0.1.min.js
+// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/develop/lib/buzz-1.1.10.min.js
 
 // @resource    ajax_loader             https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
 // @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?3
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html
 // @noframes
 // ==/UserScript==
-
-eval(GM_getResourceText("toast_js"));
 
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
@@ -100,8 +100,6 @@ if (typeof(window.sessionStorage) === "undefined") {
         // This is the script code. Don't change it unless //
         // you know what you're doing ;)                   //
         /////////////////////////////////////////////////////
-
-        eval(GM_getResourceText("jalc"));
 
         /** Our persistent DOM stuff */
         const $DOM = {
