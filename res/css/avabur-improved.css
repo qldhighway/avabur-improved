@@ -13,3 +13,7 @@ table.avi > * > tr > * {
 .toast-item-close {
     cursor: pointer;
 }
+
+.toast-item p {
+    margin-right: 25px;
+}
