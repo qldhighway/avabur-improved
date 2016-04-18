@@ -31,7 +31,7 @@
 // @resource    ajax_loader             https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
 // @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
-// @resource    html_side_menu          https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/side-menu.html
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html
 // @noframes
 // ==/UserScript==
 
@@ -121,6 +121,10 @@ if (typeof(window.sessionStorage) === "undefined") {
             modal: {
                 /** The outer wrapper */
                 modal_wrapper: $("#modalWrapper"),
+                /** The faded background for modals */
+                modal_background: $("#modalBackground"),
+                /** The title for modal windows */
+                modal_title: $("#modalTitle"),
                 /** The script settings modal */
                 script_settings: $(GM_getResourceText("html_settings_modal"))
             }
@@ -361,14 +365,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 type: 'success'
             });
         }
-
-        //Register our side menu
-        (function () {
-            const $sideMenu = $(GM_getResourceText("html_side_menu"));
-            $sideMenu.find("h5").text(GM_info.script.name);
-            $("#navigationWrapper").after($sideMenu);
-        })();
-
         GM_setValue("last_ver", GM_info.script.version);
 
         //Load our CSS
@@ -381,10 +377,25 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         })();
 
-        /* Check for updates. Running anonymously because this will only be run once per page load. Because the update
-         url in previous versions was set to github.com/[...]/raw/[...], not raw.githubusercontent.com/[...], it still has
-         the cross-site headers set, therefore regular jQuery $.get cannot be used
-         */
+        //Create our settings modal
+        $("#modalContent").append($DOM.modal.script_settings);
+
+        //Register our side menu
+        (function () {
+            const $helpSection = $("#helpSection"),
+                $menuLink = $('<a href="javascript:;">' + GM_info.script.name + " " + GM_info.script.version + '</a>')
+                    .click(function () {
+                        $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
+                        $DOM.modal.script_settings.show().siblings().hide();
+                        $DOM.modal.modal_wrapper.fadeIn();
+                        $DOM.modal.modal_background.fadeIn();
+                    });
+
+            $helpSection.append($menuLink);
+            $helpSection.parent().css("margin-bottom", $menuLink.height());
+        })();
+
+        //Check for updates
         GM_xmlhttpRequest({
             method: "GET",
             url: UPDATE_URL,
