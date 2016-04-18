@@ -393,8 +393,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $DOM.modal.modal_background.fadeIn();
                 });
 
+
             $helpSection.append($menuLink);
-            $helpSection.parent().css("margin-bottom", $menuLink.height());
+
+            $("#navWrapper").css("padding-top", $menuLink.height());
         })();
 
         //Check for updates
