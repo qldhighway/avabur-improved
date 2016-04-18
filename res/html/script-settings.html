@@ -5,8 +5,29 @@
         </a>
     </nav>
     <div class="mt10">
-        <div data-menu="notifications">
-            We da notifications
+        <div data-menu="notifications table-responsive">
+            <table class="table table-condensed table-hover table-bordered table-striped">
+                <thead>
+                <tr>
+                    <th>Notification</th>
+                    <th>Enable sound</th>
+                    <th>Enable floater</th>
+                </tr>
+                </thead>
+                <tbody id="avi-settings">
+                <tr data-notification="whisper">
+                    <td>Whisper received</td>
+                    <td>
+                        <input type="checkbox" data-notify="sound" class="show"/>
+                        <a href="javascript:;" data-demo="whisper-sound" class="show">Demo</a>
+                    </td>
+                    <td>
+                        <input type="checkbox" data-notify="gm" class="show"/>
+                        <a href="javascript:;" data-demo="whisper-gm" class="show">Demo</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
