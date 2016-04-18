@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           AvaburImproved
+// @name           Avabur Improved
 // @namespace      org.alorel.avaburimproved
 // @author         Alorel <a.molcanovas@gmail.com>
 // @homepage       https://github.com/Alorel/avabur-improved
@@ -8,7 +8,7 @@
 // @include        http://avabur.com*
 // @include        https://www.avabur.com*
 // @include        http://www.avabur.com*
-// @version        0.2
+// @version        0.2.3b
 // @icon           https://avabur.com/images/favicon.ico
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -24,12 +24,14 @@
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
-// @resource    ajax_loader             https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader/0.1.gif
 // @resource    toast_css               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
 // @resource    toast_js                https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
 // @resource    jalc                    https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jquery-ajax-local-cache/jalc-1.0.1.min.js
-// @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved/0.1.min.css
-// @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip/0.1.html
+
+// @resource    ajax_loader             https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
+// @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css
+// @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
+// @resource    html_side_menu          https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/side-menu.html
 // @noframes
 // ==/UserScript==
 
@@ -97,6 +99,13 @@ if (typeof(window.sessionStorage) === "undefined") {
                 market_avg: null,
                 /** The 1st page high price */
                 market_high: null
+            },
+            /** Game modals */
+            modal: {
+                /** The outer wrapper */
+                modal_wrapper: $("#modalWrapper"),
+                /** The script settings modal */
+                script_settings: $(GM_getResourceText("html_settings_modal"))
             }
         };
 
@@ -335,6 +344,13 @@ if (typeof(window.sessionStorage) === "undefined") {
                 type: 'success'
             });
         }
+
+        //Register our side menu
+        (function () {
+            const $sideMenu = $(GM_getResourceText("html_side_menu"));
+            $sideMenu.find("h5").text(GM_info.script.name);
+            $("#navigationWrapper").after($sideMenu);
+        })();
 
         GM_setValue("last_ver", GM_info.script.version);
 
