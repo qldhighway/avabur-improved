@@ -25,15 +25,17 @@
 // @connect        github.com
 // @connect        self
 // @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
-// @resource    toast_css               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
+// @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
+// @resource    css_toast               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
 
 // @require        https://raw.githubusercontent.com/Alorel/avabur-improved/develop/lib/jalc-1.0.1.min.js
-// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/develop/lib/buzz-1.1.10.min.js
 
-// @resource    ajax_loader             https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
-// @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
+// @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html
+// @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/message_ding.wav
+// @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/circ_saw.wav
 // @noframes
 // ==/UserScript==
 
@@ -71,7 +73,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else if (typeof(MutationObserver) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
-    (function ($, CACHE_STORAGE, MutationObserver) {
+    (function ($, CACHE_STORAGE, MutationObserver, buzz) {
         'use strict'; //https://github.com/Alorel/avabur-improved/blob/develop/avabur-improved.user.js
 
         ////////////////////////////////////////////////////////////////////////
@@ -86,8 +88,8 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
         /** CSS URLs to load */
         const LOAD_CSS = [
-            GM_getResourceURL("script_css"),
-            GM_getResourceURL("toast_css")
+            GM_getResourceURL("css_script"),
+            GM_getResourceURL("css_toast")
         ];
 
         /**
@@ -128,10 +130,16 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
+        var b = new buzz.sound(GM_getResourceURL("sfx_circ_saw"));
+        b.play();
+        setTimeout(function () {
+            b.play();
+        }, 5000);
+
         /** AJAX spinners throughout the page */
         const $AJAX_SPINNERS = {
             /** The spinner @ the currency tooltip */
-            currency_tooltip: $('<img src="' + GM_getResourceURL("ajax_loader") + '"/>')
+            currency_tooltip: $('<img src="' + GM_getResourceURL("img_ajax_loader") + '"/>')
         };
 
         /** Misc function container */
@@ -431,5 +439,5 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }
             }
         });
-    })(jQuery, window.sessionStorage, MutationObserver);
+    })(jQuery, window.sessionStorage, MutationObserver, buzz);
 }
