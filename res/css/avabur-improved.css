@@ -9,3 +9,7 @@ table.avi > * > tr > * {
     padding: 2px;
     text-align: center;
 }
+
+.toast-item-close {
+    cursor: pointer;
+}
