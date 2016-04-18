@@ -33,7 +33,7 @@
 // @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
 // @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?4
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?2
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?3
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/message_ding.wav.txt
 // @noframes
@@ -346,7 +346,15 @@ if (typeof(window.sessionStorage) === "undefined") {
                             }).done(Request.prototype.callbacks.success.currency_tooltip);
                         }
                     }
-                })
+                }),
+            /** Makes sure the script settings modal doesn't get nasty with the other game modals */
+            script_settings: new MutationObserver(
+                function () {
+                    if (!$DOM.modal.script_settings.is(":visible")) {
+                        $DOM.modal.script_settings.hide();
+                    }
+                }
+            )
         };
 
         //Register currency tooltip code
@@ -402,6 +410,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         //Create our settings modal
         $("#modalContent").append($DOM.modal.script_settings);
         fn.tabify($DOM.modal.script_settings);
+        OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
 
         //Register our side menu entry
         (function () {
