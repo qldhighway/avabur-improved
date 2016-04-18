@@ -33,7 +33,7 @@
 // @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
 // @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?4
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?3
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?6
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/message_ding.wav.txt
 // @noframes
@@ -143,6 +143,19 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /** Misc function container */
         const fn = {
+            /**
+             * Creates a floaty notification
+             * @param {String} text Text to display
+             * @param {Object} [options] Overrides as shown here: https://tampermonkey.net/documentation.php#GM_notification
+             */
+            notification: function (text, options) {
+                GM_notification($.extend({
+                    text: text,
+                    title: GM_info.script.name,
+                    highlight: true,
+                    timeout: 5
+                }, options || {}));
+            },
             /**
              * Tabifies the div
              * @param {jQuery|$|HTMLElement|*} $container The div to tabify
@@ -357,6 +370,55 @@ if (typeof(window.sessionStorage) === "undefined") {
             )
         };
 
+        const Demo = function (kind) {
+            this.kind = kind;
+        };
+
+        Demo.prototype.kinds = {
+            SOUND: 1,
+            GM_NOTIFICATION: 2
+        };
+        Demo.prototype.scenarios = {
+            "whisper-sound": {
+                kind: Demo.prototype.kinds.SOUND,
+                src: SFX.msg_ding
+            },
+            "whisper-gm": {
+                kind: Demo.prototype.kinds.GM_NOTIFICATION,
+                src: SFX.msg_ding
+            }
+        };
+        Demo.prototype.play = function () {
+            if (typeof(this.scenarios[this.kind]) !== "undefined") {
+                const scenario = this.scenarios[this.kind];
+
+                switch (scenario.kind) {
+                    case Demo.prototype.kinds.SOUND:
+                        if (!buzz.isWAVSupported()) {
+                            Toast.incompatibility("WAV sounds");
+                        } else {
+                            scenario.src.play();
+                        }
+                        break;
+                    case Demo.prototype.kinds.GM_NOTIFICATION:
+                        fn.notification("[00:00:00] Vysn: no cookie for you!");
+                        break;
+                    default:
+                        Toast.error("Misconfigured demo scenario: " + this.kind);
+                }
+            } else {
+                Toast.error("Invalid demo scenario picked: " + this.kind);
+            }
+        };
+
+        const $HANDLERS = {
+            click: {
+                demo: function () {
+                    (new Demo($(this).attr("data-demo"))).play();
+                }
+            }
+        };
+
         //Register currency tooltip code
         (function () {
             const $currencyTooltip = $("#currencyTooltip");
@@ -410,6 +472,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         //Create our settings modal
         $("#modalContent").append($DOM.modal.script_settings);
         fn.tabify($DOM.modal.script_settings);
+        $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
         OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
 
         //Register our side menu entry
