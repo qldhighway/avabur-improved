@@ -31,7 +31,7 @@
 // @resource    ajax_loader             https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
 // @resource    script_css              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?2
 // @noframes
 // ==/UserScript==
 
@@ -138,6 +138,23 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /** Misc function container */
         const fn = {
+            /**
+             * Tabifies the div
+             * @param {jQuery|$|HTMLElement|*} $container The div to tabify
+             */
+            tabify: function ($container) {
+                const $nav = $container.find(">nav>*"),
+                    $tabs = $container.find(">div>*"),
+                    $activeNav = $nav.filter(".active");
+
+                $nav.click(function () {
+                    const $this = $(this);
+                    $tabs.filter("[data-menu='" + $this.attr("data-menu") + "']").show().siblings().hide();
+                    $this.addClass("active").siblings().removeClass("active");
+                });
+
+                ($activeNav.length ? $activeNav : $nav).first().click();
+            },
             /** Puts commas in large numbers */
             numberWithCommas: function (x) {
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -379,8 +396,9 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         //Create our settings modal
         $("#modalContent").append($DOM.modal.script_settings);
+        fn.tabify($DOM.modal.script_settings);
 
-        //Register our side menu
+        //Register our side menu entry
         (function () {
             const $helpSection = $("#helpSection"),
                 $menuLink = $('<a href="javascript:;"/>')
