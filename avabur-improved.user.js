@@ -383,13 +383,15 @@ if (typeof(window.sessionStorage) === "undefined") {
         //Register our side menu
         (function () {
             const $helpSection = $("#helpSection"),
-                $menuLink = $('<a href="javascript:;">' + GM_info.script.name + " " + GM_info.script.version + '</a>')
-                    .click(function () {
-                        $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
-                        $DOM.modal.script_settings.show().siblings().hide();
-                        $DOM.modal.modal_wrapper.fadeIn();
-                        $DOM.modal.modal_background.fadeIn();
-                    });
+                $menuLink = $('<a href="javascript:;"/>').append(
+                    '<img src="images/favicon.ico"/>' +
+                    '<span>' + GM_info.script.name + " " + GM_info.script.version + '</span>'
+                ).click(function () {
+                    $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
+                    $DOM.modal.script_settings.show().siblings().hide();
+                    $DOM.modal.modal_wrapper.fadeIn();
+                    $DOM.modal.modal_background.fadeIn();
+                });
 
             $helpSection.append($menuLink);
             $helpSection.parent().css("margin-bottom", $menuLink.height());
