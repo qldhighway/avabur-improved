@@ -5,8 +5,8 @@
         </a>
     </nav>
     <div class="mt10">
-        <div data-menu="notifications table-responsive">
-            <table class="table table-condensed table-hover table-bordered table-striped">
+        <div data-menu="notifications">
+            <table class="table table-condensed table-bordered">
                 <thead>
                 <tr>
                     <th>Notification</th>
@@ -17,12 +17,14 @@
                 <tbody id="avi-settings">
                 <tr data-notification="whisper">
                     <td>Whisper received</td>
-                    <td>
-                        <input type="checkbox" data-notify="sound" class="show"/>
+                    <td class="label">
+                        <input type="checkbox" data-notify="sound"/>
+                        <div></div>
                         <a href="javascript:;" data-demo="whisper-sound" class="show">Demo</a>
                     </td>
-                    <td>
+                    <td class="label">
                         <input type="checkbox" data-notify="gm" class="show"/>
+                        <div></div>
                         <a href="javascript:;" data-demo="whisper-gm" class="show">Demo</a>
                     </td>
                 </tr>

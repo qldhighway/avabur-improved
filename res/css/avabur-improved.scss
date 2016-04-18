@@ -1,0 +1,25 @@
+table.avi {
+  border-collapse: collapse;
+  font-size: small;
+  font-weight: normal;
+
+  > thead, > tbody {
+    > tr > * {
+      border: 1px solid;
+      padding: 2px;
+      text-align: center;
+    }
+  }
+
+  td.label {
+    cursor: pointer;
+  }
+}
+
+.toast-item-close {
+  cursor: pointer;
+}
+
+.toast-item p {
+  margin-right: 25px;
+}
