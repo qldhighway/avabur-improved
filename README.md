@@ -42,7 +42,7 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
  static and will hardly ever change, so it makes sense for them to just be downloaded once and read from disk.
  - `GM_xmlhttpRequest` and the respective `@connect`s: Used to check for updates. In the future it will also be used to
  view the changelog.
- - `GM_notification`: for the upcoming notifications
+ - `GM_notification`: The name is self-explanatory now, isn't it? This is Greasemonkey's API for HTML5 notifications.
 
 ## When's the next batch of updates?
 I'm busy with exams until late May - should be able to deliver a regular batch of updates after that
