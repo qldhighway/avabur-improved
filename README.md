@@ -36,9 +36,12 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
 
 ## Greasemonkey permissions:
 
- - `GM_getValue`, `GM_setValue`, `GM_deleteValue`, `GM_listValues`:  these are simply used as an alternative to the browser's local storage. Userscript settings and runtime data are stored here.
- - `GM_getResourceURL`, `GM_getResourceText`:  some assets, such as 3rd party libraries, CSS files and images are static and will hardly ever change, so it makes sense for them to just be downloaded once and read from disk.
- - `GM_xmlhttpRequest` and the respective `@connect`s: right now a script update simply creates a toast message giving you a link to the changelog; in the future I plan on making the changelog viewable in-game by sending a request to GitHub. Unfortunately, this can't be done with jQuery's ajax calls due to cross-domain limitations, but it *can* be done with Greasemonkey as it makes a regular, non-ajax request.
+ - `GM_getValue`, `GM_setValue`, `GM_deleteValue`, `GM_listValues`:  these are simply used as an alternative to
+ the browser's local storage. Userscript settings and runtime data are stored here.
+ - `GM_getResourceURL`, `GM_getResourceText`:  some assets, such as 3rd party libraries, CSS files and images are
+ static and will hardly ever change, so it makes sense for them to just be downloaded once and read from disk.
+ - `GM_xmlhttpRequest` and the respective `@connect`s: Used to check for updates. In the future it will also be used to
+ view the changelog.
  - `GM_notification`: for the upcoming notifications
 
 ## When's the next batch of updates?
