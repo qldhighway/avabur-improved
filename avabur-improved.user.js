@@ -9,8 +9,8 @@
 // @include        https://www.avabur.com*
 // @include        http://www.avabur.com*
 // @version        0.3
-// @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/logo-16.png
-// @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/logo-64.png
+// @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
+// @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @run-at         document-end
@@ -27,16 +27,14 @@
 // @connect        self
 // @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
+// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jalc-1.0.1.min.js
 // @resource    css_toast               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
-
-// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/develop/lib/jalc-1.0.1.min.js
-
-// @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?6
-// @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?9
-// @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/circ_saw.wav.txt
-// @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/message_ding.wav.txt
+// @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader.gif
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?7
+// @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?10
+// @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
+// @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 // @noframes
 // ==/UserScript==
 
@@ -377,9 +375,9 @@ if (typeof(window.sessionStorage) === "undefined") {
         const OBSERVERS = {
             /** Mutation observer for the currency page tooltip */
             currency_tooltips: new MutationObserver(
-                /** @param {MutationRecord[]} node */
-                function (node) {
-                    if (node.length && $DOM.currency_tooltip.colour_reference.is(":visible")) {
+                /** @param {MutationRecord[]} records */
+                function (records) {
+                    if (records.length && $DOM.currency_tooltip.colour_reference.is(":visible")) {
                         const cssClass = $DOM.currency_tooltip.colour_reference.attr("class"),
                             marketID = cssClass.replace("crystals", "premium")
                                 .replace("materials", "weapon_scraps")
@@ -404,10 +402,35 @@ if (typeof(window.sessionStorage) === "undefined") {
                     }
                 }),
             /** Makes sure the script settings modal doesn't get nasty with the other game modals */
-            script_settings: new MutationObserver(
-                function () {
+            script_settings: new MutationObserver(function () {
                     if (!$DOM.modal.script_settings.is(":visible")) {
                         $DOM.modal.script_settings.hide();
+                    }
+                }
+            ),
+            chat_whispers: new MutationObserver(
+                /** @param {MutationRecord[]} records */
+                function (records) {
+                    const sound_on = Settings.settings.notifications.all.sound && Settings.settings.notifications.whisper.sound;
+                    const gm_on = Settings.settings.notifications.all.gm && Settings.settings.notifications.whisper.gm;
+
+                    if (sound_on || gm_on) {
+                        for (var i = 0; i < records.length; i++) {
+                            const addedNodes = records[i].addedNodes;
+                            if (addedNodes.length) {
+                                for (var j = 0; j < addedNodes.length; j++) {
+                                    const text = $(addedNodes[j]).text();
+                                    if (text.match(/^\[[0-9]+:[0-9]+:[0-9]+]\s*Whisper from/)) {
+                                        if (gm_on) {
+                                            fn.notification(text);
+                                        }
+                                        if (sound_on) {
+                                            SFX.msg_ding.play();
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             )
@@ -444,7 +467,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
                         break;
                     case Demo.prototype.kinds.GM_NOTIFICATION:
-                        fn.notification("[00:00:00] Vysn: no cookie for you!");
+                        fn.notification("[00:00:00] Whisper from Alorel: send me all of your crystals.");
                         break;
                     default:
                         Toast.error("Misconfigured demo scenario: " + this.kind);
@@ -548,6 +571,14 @@ if (typeof(window.sessionStorage) === "undefined") {
                 $helpSection.append($menuLink);
 
                 $("#navWrapper").css("padding-top", $menuLink.height());
+            },
+            "Staring whisper monitor": function () {
+                OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
+                    childList: true
+                });
+            },
+            "Applying the scripts tooltips": function () {
+                $(".avi-tip").tooltip();
             },
             "Checking GitHub for updates": function () {
                 GM_xmlhttpRequest({

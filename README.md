@@ -12,13 +12,14 @@ This is a **currently in-development** UserScript (to be used with [Greasemonkey
 	 - Hovering a resource will now show its lowest, average and highest market prices like so (values are cached for a set amount of time):
 	 - ![Screenshot](https://raw.githubusercontent.com/Alorel/avabur-improved/master/screenshots/scr-market-tooltips.png)
 	 - Fixed some of the CSS the devs left out ;) Hovering materials and fragments on the top bar will now display them in colour, just like all the other resources.
+ - Notifications
+     - Sound and/or browser notifications on *whispers*
 
 ## Planned features:
 
  - Improvements on the inventory/market UI, making it much easier to sell ingredients/gear/gems
  - Market alerts - be notified when an item is above/below a threshold
  - Market watcher - historic graphs for price changes (stored locally on your machine)
- - Event notifications (whispers for now)
  - Squeezing out more information in general - once more data is available we might be able to predict your win rate on new mobs etc
  - Various timers (next house upgrade, for example)
 
