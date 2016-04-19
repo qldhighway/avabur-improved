@@ -32,7 +32,7 @@
 // @require        https://raw.githubusercontent.com/Alorel/avabur-improved/develop/lib/jalc-1.0.1.min.js
 
 // @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?5
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?6
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?9
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/circ_saw.wav.txt
@@ -106,16 +106,29 @@ if (typeof(window.sessionStorage) === "undefined") {
 
 
         const SettingsHandler = function () {
-            this.settings = {};
+            /** @type SettingsHandler.defaults */
+            this.settings = this.defaults;
             this.load();
         };
 
         SettingsHandler.prototype = {
+            /** Default settings */
             defaults: {
+                /**
+                 * Notification settings.
+                 * sound: [bool] Whether to play a sound
+                 * gm: [bool] Whether to show the Greasemonkey notification
+                 */
                 notifications: {
-                    whisper: {
+                    /** Global overrides */
+                    all: {
                         sound: false,
                         gm: false
+                    },
+                    /** Whisper notifcations */
+                    whisper: {
+                        sound: true,
+                        gm: true
                     }
                 }
             },
@@ -123,17 +136,11 @@ if (typeof(window.sessionStorage) === "undefined") {
                 GM_setValue("settings", JSON.stringify(this.settings));
             },
             load: function () {
-                this.settings = $.extend(true, JSON.parse(GM_getValue("settings") || "{}"), this.defaults);
-            },
-            print: function () {
-                console.log(this.settings);
+                this.settings = $.extend(true, this.defaults, JSON.parse(GM_getValue("settings") || "{}"));
             }
         };
 
         const Settings = new SettingsHandler();
-
-        Settings.print();
-        console.log(JSON.parse(GM_getValue("settings") || "{}"));
 
         /* /(([0-9])+\s(minutes|seconds|hours))/g
          ^ tmp - will be used for future update
@@ -454,7 +461,18 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }
             },
             change: {
-                settings: {}
+                settings_notification: function () {
+                    const $this = $(this);
+                    Settings.settings.notifications[$this.data("notification")][$this.data("type")] = $this.is(":checked");
+                    Settings.save();
+                }
+            },
+            each: {
+                settings_notification: function () {
+                    const $this = $(this);
+
+                    $this.prop("checked", Settings.settings.notifications[$this.data("notification")][$this.data("type")]);
+                }
             }
         };
 
@@ -510,6 +528,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                 $("#modalContent").append($DOM.modal.script_settings);
                 fn.tabify($DOM.modal.script_settings);
                 $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
+                $DOM.modal.script_settings.find('[data-setting="notifications"]')
+                    .each($HANDLERS.each.settings_notification)
+                    .change($HANDLERS.change.settings_notification);
                 OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
             },
             "Registering side menu entry": function () {

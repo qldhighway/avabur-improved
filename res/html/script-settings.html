@@ -6,6 +6,7 @@
     </nav>
     <div class="mt10">
         <div data-menu="notifications">
+
             <table class="table table-condensed table-bordered avi">
                 <thead>
                 <tr>
@@ -15,7 +16,23 @@
                 </tr>
                 </thead>
                 <tbody id="avi-settings">
-                <tr data-notification="whisper">
+                <tr>
+                    <td>
+                        <span class="bold avi-tip"
+                              title="By unticking these you will suppress all notifications of the given type">
+                            Global overrides
+                        </span>
+                    </td>
+                    <td>
+                        <input type="checkbox" data-setting="notifications" data-notification="all"
+                               data-type="sound"/>
+                    </td>
+                    <td>
+                        <input type="checkbox" data-setting="notifications" data-notification="all"
+                               data-type="gm"/>
+                    </td>
+                </tr>
+                <tr>
                     <td>Whisper received</td>
                     <td>
                         <input type="checkbox" data-setting="notifications" data-notification="whisper"
