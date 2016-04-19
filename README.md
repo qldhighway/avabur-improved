@@ -18,8 +18,8 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
 	 for a set amount of time) [[Screenshot](https://github.com/Alorel/avabur-improved/blob/master/screenshots/scr-market-tooltips.png)]
 	 - Fixed some of the CSS the devs left out ;) Hovering materials and fragments on the top bar will now display
 	 them in colour, just like all the other resources.
- - Notifications
-     - Sound and/or browser notifications on *whispers* [[Screenshot](https://github.com/Alorel/avabur-improved/blob/master/screenshots/gi-settings.png)]
+ - Notifications (can be configured in the [script settings](https://github.com/Alorel/avabur-improved/blob/master/screenshots/gi-settings.png), off by default)
+     - Sound and/or browser notifications on *whispers*
 
 ## Planned features:
 
