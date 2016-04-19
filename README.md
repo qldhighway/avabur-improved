@@ -13,7 +13,7 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
 
 ## Current features:
 
- - UI general
+ - UI header bar
 	 - Hovering a resource will now show its lowest, average and highest market prices like so (values are cached
 	 for a set amount of time) [[Screenshot](https://github.com/Alorel/avabur-improved/blob/master/screenshots/scr-market-tooltips.png)]
 	 - Fixed some of the CSS the devs left out ;) Hovering materials and fragments on the top bar will now display
@@ -28,6 +28,7 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
  - Market watcher - historic graphs for price changes (stored locally on your machine)
  - Squeezing out more information in general - once more data is available we might be able to predict your win rate on new mobs etc
  - Various timers (next house upgrade, for example)
+ - Fewer clicks for crafting/carving
 
 ## Planned features if the game devs approve:
 
