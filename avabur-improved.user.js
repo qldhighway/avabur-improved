@@ -9,7 +9,8 @@
 // @include        https://www.avabur.com*
 // @include        http://www.avabur.com*
 // @version        0.3
-// @icon           https://avabur.com/images/favicon.ico
+// @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/logo-16.png
+// @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @run-at         document-end
@@ -33,7 +34,7 @@
 // @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/img/ajax-loader.gif
 // @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?5
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?7
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?9
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/sfx/message_ding.wav.txt
 // @noframes
@@ -102,6 +103,41 @@ if (typeof(window.sessionStorage) === "undefined") {
         // This is the script code. Don't change it unless //
         // you know what you're doing ;)                   //
         /////////////////////////////////////////////////////
+
+
+        const SettingsHandler = function () {
+            this.settings = {};
+            this.load();
+        };
+
+        SettingsHandler.prototype = {
+            defaults: {
+                notifications: {
+                    whisper: {
+                        sound: false,
+                        gm: false
+                    }
+                }
+            },
+            save: function () {
+                GM_setValue("settings", JSON.stringify(this.settings));
+            },
+            load: function () {
+                this.settings = $.extend(true, JSON.parse(GM_getValue("settings") || "{}"), this.defaults);
+            },
+            print: function () {
+                console.log(this.settings);
+            }
+        };
+
+        const Settings = new SettingsHandler();
+
+        Settings.print();
+        console.log(JSON.parse(GM_getValue("settings") || "{}"));
+
+        /* /(([0-9])+\s(minutes|seconds|hours))/g
+         ^ tmp - will be used for future update
+         */
 
         /** Our persistent DOM stuff */
         const $DOM = {
@@ -416,99 +452,109 @@ if (typeof(window.sessionStorage) === "undefined") {
                 demo: function () {
                     (new Demo($(this).attr("data-demo"))).play();
                 }
+            },
+            change: {
+                settings: {}
             }
         };
 
-        //Register currency tooltip code
-        (function () {
-            const $currencyTooltip = $("#currencyTooltip");
 
-            if ($currencyTooltip.length) {
-                const $tooltipTable = $(GM_getResourceText("html_market_tooltip"));
+        const ON_LOAD = {
+            "Registering currency tooltip scanner": function () {
+                const $currencyTooltip = $("#currencyTooltip");
 
-                $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
-                $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
-                $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
-                $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
-                $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
+                if ($currencyTooltip.length) {
+                    const $tooltipTable = $(GM_getResourceText("html_market_tooltip"));
 
-                //Add our stuff to the currency tooltips
-                $currencyTooltip.append($tooltipTable);
+                    $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
+                    $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
+                    $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
+                    $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
+                    $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
 
-                OBSERVERS.currency_tooltips.observe($currencyTooltip[0], {
-                    attributes: true
-                });
-            }
-        })();
+                    //Add our stuff to the currency tooltips
+                    $currencyTooltip.append($tooltipTable);
 
-        //Fix some CSS
-        $("head").append('<style>.materials{color:' +
-            $("#crafting_materials").css("color") +
-            '}.fragments{color:' +
-            $("#gem_fragments").css("color") + '}</style>');
-
-        //Issue a "script updated" message if required
-        if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
-            $().toastmessage('showToast', {
-                text: GM_info.script.name + " has been updated! See the changelog " +
-                "<a href='https://github.com/Alorel/avabur-improved/releases' target='_blank'>here</a>",
-                sticky: true,
-                position: 'top-left',
-                type: 'success'
-            });
-        }
-        GM_setValue("last_ver", GM_info.script.version);
-
-        //Load our CSS
-        (function () {
-            const $head = $("head");
-
-            for (var i = 0; i < LOAD_CSS.length; i++) {
-                $head.append("<link type='text/css' rel='stylesheet' href='" + LOAD_CSS[i] + "'/>");
-                delete LOAD_CSS[i];
-            }
-        })();
-
-        //Create our settings modal
-        $("#modalContent").append($DOM.modal.script_settings);
-        fn.tabify($DOM.modal.script_settings);
-        $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
-        OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
-
-        //Register our side menu entry
-        (function () {
-            const $helpSection = $("#helpSection"),
-                $menuLink = $('<a href="javascript:;"/>')
-                    .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
-                    .click(function () {
-                        $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
-                        $DOM.modal.script_settings.show().siblings().hide();
-                        $DOM.modal.modal_wrapper.fadeIn();
-                        $DOM.modal.modal_background.fadeIn();
-                    });
-
-
-            $helpSection.append($menuLink);
-
-            $("#navWrapper").css("padding-top", $menuLink.height());
-        })();
-
-        //Check for updates
-        GM_xmlhttpRequest({
-            method: "GET",
-            url: UPDATE_URL,
-            onload: function (r) {
-                const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
-                if (fn.versionCompare(GM_info.script.version, theirVersion) < 1) {
-                    $().toastmessage('showToast', {
-                        text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
-                        'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
-                        sticky: true,
-                        position: 'top-center',
-                        type: 'notice'
+                    OBSERVERS.currency_tooltips.observe($currencyTooltip[0], {
+                        attributes: true
                     });
                 }
+            },
+            "Fixing some game CSS": function () {
+                $("head").append('<style>.materials{color:' +
+                    $("#crafting_materials").css("color") +
+                    '}.fragments{color:' +
+                    $("#gem_fragments").css("color") + '}</style>');
+            },
+            "Checking if the script has been updated": function () {
+                if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
+                    $().toastmessage('showToast', {
+                        text: GM_info.script.name + " has been updated! See the changelog " +
+                        "<a href='https://github.com/Alorel/avabur-improved/releases' target='_blank'>here</a>",
+                        sticky: true,
+                        position: 'top-left',
+                        type: 'success'
+                    });
+                }
+                GM_setValue("last_ver", GM_info.script.version);
+            },
+            "Loading script CSS": function () {
+                const $head = $("head");
+
+                for (var i = 0; i < LOAD_CSS.length; i++) {
+                    $head.append("<link type='text/css' rel='stylesheet' href='" + LOAD_CSS[i] + "'/>");
+                    delete LOAD_CSS[i];
+                }
+            },
+            "Configuring script modal": function () {
+                $("#modalContent").append($DOM.modal.script_settings);
+                fn.tabify($DOM.modal.script_settings);
+                $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
+                OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
+            },
+            "Registering side menu entry": function () {
+                const $helpSection = $("#helpSection"),
+                    $menuLink = $('<a href="javascript:;"/>')
+                        .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
+                        .click(function () {
+                            $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
+                            $DOM.modal.script_settings.show().siblings().hide();
+                            $DOM.modal.modal_wrapper.fadeIn();
+                            $DOM.modal.modal_background.fadeIn();
+                        });
+
+
+                $helpSection.append($menuLink);
+
+                $("#navWrapper").css("padding-top", $menuLink.height());
+            },
+            "Checking GitHub for updates": function () {
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: UPDATE_URL,
+                    onload: function (r) {
+                        const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
+                        if (fn.versionCompare(GM_info.script.version, theirVersion) < 1) {
+                            $().toastmessage('showToast', {
+                                text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
+                                'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
+                                sticky: true,
+                                position: 'top-center',
+                                type: 'notice'
+                            });
+                        }
+                    }
+                });
             }
-        });
+        };
+
+        (function () {
+            const keys = Object.keys(ON_LOAD);
+            for (var i = 0; i < keys.length; i++) {
+                console.log("[" + GM_info.script.name + "] " + keys[i]);
+                ON_LOAD[keys[i]]();
+                delete ON_LOAD[keys[i]];
+            }
+        })();
     })(jQuery, window.sessionStorage, MutationObserver, buzz);
 }
