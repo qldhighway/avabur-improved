@@ -8,7 +8,7 @@
 // @include        http://avabur.com*
 // @include        https://www.avabur.com*
 // @include        http://www.avabur.com*
-// @version        0.3.1
+// @version        0.3.2
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -586,7 +586,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     url: UPDATE_URL,
                     onload: function (r) {
                         const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
-                        if (fn.versionCompare(GM_info.script.version, theirVersion) < 1) {
+                        if (fn.versionCompare(GM_info.script.version, theirVersion) < 0) {
                             $().toastmessage('showToast', {
                                 text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
                                 'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
