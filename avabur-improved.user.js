@@ -8,7 +8,7 @@
 // @include        http://avabur.com*
 // @include        https://www.avabur.com*
 // @include        http://www.avabur.com*
-// @version        0.3.2
+// @version        0.4
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -168,6 +168,13 @@ if (typeof(window.sessionStorage) === "undefined") {
                 modal_title: $("#modalTitle"),
                 /** The script settings modal */
                 script_settings: $(GM_getResourceText("html_settings_modal"))
+            },
+            /** Navigation items */
+            nav: {
+                market: $("#viewMarket")
+            },
+            market: {
+                navlinks: $("#marketTypeSelector").find("a")
             }
         };
 
@@ -221,6 +228,22 @@ if (typeof(window.sessionStorage) === "undefined") {
             /** Toggles the visibility attribute of the element */
             toggleVisibility: function ($el, shouldBeVisible) {
                 $el.css("visibility", shouldBeVisible ? "visible" : "hidden");
+            },
+            openStdModal: function (item) {
+                var $el;
+                if (item instanceof $) {
+                    $el = item;
+                } else if (item instanceof HTMLElement || typeof(item) === "string") {
+                    $el = $(item);
+                } else {
+                    console.error("Failed to open modal: Invalid selector as shown below");
+                    console.error(item);
+                    return false;
+                }
+
+                $el.show().siblings().hide();
+                $DOM.modal.modal_background.fadeIn();
+                $DOM.modal.modal_wrapper.fadeIn();
             },
             /**
              * @return
@@ -481,6 +504,28 @@ if (typeof(window.sessionStorage) === "undefined") {
             click: {
                 demo: function () {
                     (new Demo($(this).attr("data-demo"))).play();
+                },
+                topbar_currency: function () {
+                    var type = $(this).find(">td:first").text().trim();
+                    type = type.substring(0, type.length - 1);
+                    const $document = $(document),
+                        $ajaxListener = function (evt, xhr, opts) {
+                            if (opts.url === "market.php") {
+                                $document.unbind("ajaxComplete", $ajaxListener);
+                                $DOM.market.navlinks.removeClass("active")
+                                    .filter("a:contains('" + type + "')").addClass("active").click();
+                            }
+                        };
+
+                    $document.ajaxComplete($ajaxListener);
+                    $DOM.nav.market.click();
+                },
+                script_menu: function () {
+                    $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
+                    fn.openStdModal($DOM.modal.script_settings);
+                    // $DOM.modal.script_settings.show().siblings().hide();
+                    // $DOM.modal.modal_wrapper.fadeIn();
+                    // $DOM.modal.modal_background.fadeIn();
                 }
             },
             change: {
@@ -560,17 +605,16 @@ if (typeof(window.sessionStorage) === "undefined") {
                 const $helpSection = $("#helpSection"),
                     $menuLink = $('<a href="javascript:;"/>')
                         .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
-                        .click(function () {
-                            $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
-                            $DOM.modal.script_settings.show().siblings().hide();
-                            $DOM.modal.modal_wrapper.fadeIn();
-                            $DOM.modal.modal_background.fadeIn();
-                        });
+                        .click($HANDLERS.click.script_menu);
 
 
                 $helpSection.append($menuLink);
 
                 $("#navWrapper").css("padding-top", $menuLink.height());
+            },
+            "Registering market shortcuts": function () {
+                $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
+                    .click($HANDLERS.click.topbar_currency);
             },
             "Staring whisper monitor": function () {
                 OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {

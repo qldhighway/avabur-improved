@@ -16,6 +16,7 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
  - UI header bar
 	 - Hovering a resource will now show its lowest, average and highest market prices like so (values are cached
 	 for a set amount of time) [[Screenshot](https://github.com/Alorel/avabur-improved/blob/master/screenshots/scr-market-tooltips.png)]
+	 - Clicking a sellable resource (crystals, plat, wood etc) will take you to that resource's market page
 	 - Fixed some of the CSS the devs left out ;) Hovering materials and fragments on the top bar will now display
 	 them in colour, just like all the other resources.
  - Notifications (can be configured in the [script settings](https://github.com/Alorel/avabur-improved/blob/master/screenshots/gi-settings.png), off by default)
