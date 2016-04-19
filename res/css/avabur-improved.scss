@@ -1,9 +1,14 @@
+.avi-margin-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 table.avi {
+  @extend .avi-margin-auto;
   border-collapse: collapse;
   font-size: small;
   font-weight: normal;
   width: auto;
-  margin: auto;
 
   > thead, > tbody {
     > tr > * {
