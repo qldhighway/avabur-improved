@@ -14,6 +14,28 @@ table.avi {
   }
 }
 
+.avi-table {
+  display: table;
+
+  > * {
+    display: table-row;
+
+    > * {
+      display: table-cell;
+      padding: 2px;
+    }
+  }
+}
+
+ul.avi {
+  list-style: none;
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+  -webkit-margin-start: 0;
+  -webkit-margin-end: 0;
+  -webkit-padding-start: 0;
+}
+
 .avi-tip {
   border-bottom: 1px dotted;
 }
