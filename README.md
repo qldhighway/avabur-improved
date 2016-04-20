@@ -30,6 +30,8 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
  - Squeezing out more information in general - once more data is available we might be able to predict your win rate on new mobs etc
  - Various timers (next house upgrade, for example)
  - Fewer clicks for crafting/carving
+ - [Item multisend](https://github.com/Alorel/avabur-improved/blob/develop/user-suggestions/item-multisend.txt)
+ - Ingredient price lookup
 
 ## Planned features if the game devs approve:
 
