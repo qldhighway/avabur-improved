@@ -1,0 +1,14 @@
+[20:11:36] Whisper to GanjaNewb: All I'll need when I get to it is some cheap gems to test the thing, so I might ask you for some (and send them back to you throughout a few days) :)
+[20:10:54] Whisper from GanjaNewb: thats fine :) Appreciate it
+[20:10:20] Whisper to GanjaNewb: Ouch! I'll definitely look into it. I'll let you know when I have time for it (want to finish a couple of house related things first). Although, with the exams coming up it might be the end of May until I have time
+[20:09:36] Whisper from GanjaNewb: just what you said with check boxes and send all would be SO fucking awesome man.
+[20:08:48] Whisper from GanjaNewb: takes me like five-ten minutes to reopen menus and type and send them all lol
+[20:08:11] Whisper from GanjaNewb: well I'll be around for a while lol :) I've invested heavily into Avabur :) It's only a pain in the ass when I get orders for an entire relic set up ( 30 gems at a time )
+[20:07:36] Whisper to GanjaNewb: But thanks a ton for the suggestion - I never needed to send people gems so I would've never known that this is an issue :)
+[20:07:01] Whisper to GanjaNewb: What I'll probably do (since code-wise they look like completely different, unrelated items) is add some checkboxes to the inventory screen, and a "send all" button, though that will take a while since I have exams soon
+[20:05:57] Whisper from GanjaNewb: yeah I got about 10-15 of the same type laying around
+[20:05:35] Whisper to GanjaNewb: (since I can't afford enough testing gems)
+[20:05:05] Whisper to GanjaNewb: And I'll probably need your help with it later - just us two sending gems back and forth to eachother
+[20:04:26] Whisper to GanjaNewb: I'll add that to my list of planned updates. I've crafted two gems so far and they're showing up as separate items in the inventory, though, so might be a bit of a challenge
+[20:02:57] Whisper from GanjaNewb: someone orders 30 harvesting gems, I have to manually type/send each gem....
+[20:02:28] Whisper from GanjaNewb: is it possible to make a script that would allow you send, 5x gems to the same user without having to redo the send funtion and type each time?
