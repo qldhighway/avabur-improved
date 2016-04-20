@@ -73,3 +73,11 @@ ul.avi {
     margin-right: 25px;
   }
 }
+
+.popover {
+  background-color: inherit;
+
+  > .arrow {
+    display: none
+  }
+}

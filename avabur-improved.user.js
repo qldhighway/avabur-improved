@@ -34,8 +34,8 @@
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?2
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?1
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?5
 // @noframes
 // ==/UserScript==
 
@@ -156,6 +156,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         /** Our persistent DOM stuff */
         const $DOM = {
             currency_tooltip: {
+                the_tooltip: $("#currencyTooltip"),
                 /** The HTML element which will be used for currency tooltip colour references */
                 colour_reference: $("#currencyTooltipMarketable"),
                 /** Thr row we will be colouring */
@@ -465,6 +466,27 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
                     }
                 }
+            ),
+            inventory_table: new MutationObserver(
+                /** @param {MutationRecord[]} records */
+                function (records) {
+                    for (var i = 0; i < records.length; i++) {
+                        if (records[i].addedNodes.length) {
+                            for (var n = 0; n < records[i].addedNodes.length; n++) {
+                                if (records[i].addedNodes[n] instanceof HTMLTableSectionElement) {
+                                    const $tbody = $(records[i].addedNodes[n]);
+
+                                    if ($tbody.find("th:contains(Ingredient)").length) { //Bingo!
+                                        $tbody.find(">tr>[data-th=Item]").each($HANDLERS.each.inventory_table_ingredients);
+                                    }
+
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
             )
         };
 
@@ -551,16 +573,41 @@ if (typeof(window.sessionStorage) === "undefined") {
                     const $this = $(this);
 
                     $this.prop("checked", Settings.settings.notifications[$this.data("notification")][$this.data("type")]);
+                },
+                inventory_table_ingredients: function () {
+                    var $this = $(this),
+                        ingredient = $this.text().trim(),
+                        $span = $('<span>' + ingredient + '</span>');
+                    $this.html($span);
+
+                    $span.popover({
+                        title: ingredient,
+                        html: true,
+                        trigger: "hover",
+                        content: '<a>test</a>'
+                    });
+                    $this.mouseenter(function () {
+                        setTimeout(function () {
+                            console.log($this.attr("aria-describedby"));
+                        }, 5);
+                    });
+                    $this.mouseenter(function () {
+                        setTimeout(function () {
+                            console.log($this.attr("aria-describedby"));
+                        }, 10);
+                    });
+                    $this.mouseenter(function () {
+                        setTimeout(function () {
+                            console.log($this.attr("aria-describedby"));
+                        }, 100);
+                    });
                 }
             }
         };
 
-
-        const ON_LOAD = {
-            "Registering currency tooltip scanner": function () {
-                const $currencyTooltip = $("#currencyTooltip");
-
-                if ($currencyTooltip.length) {
+        (function () {
+            const ON_LOAD = {
+                "Registering currency tooltip scanner": function () {
                     const $tooltipTable = $(GM_getResourceText("html_market_tooltip"));
 
                     $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
@@ -570,105 +617,108 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
 
                     //Add our stuff to the currency tooltips
-                    $currencyTooltip.append($tooltipTable);
+                    $DOM.currency_tooltip.the_tooltip.append($tooltipTable);
 
-                    OBSERVERS.currency_tooltips.observe($currencyTooltip[0], {
+                    OBSERVERS.currency_tooltips.observe($DOM.currency_tooltip.the_tooltip[0], {
                         attributes: true
                     });
-                }
-            },
-            "Fixing some game CSS": function () {
-                $("head").append('<style>.materials{color:' +
-                    $("#crafting_materials").css("color") +
-                    '}.fragments{color:' +
-                    $("#gem_fragments").css("color") + '}</style>');
-            },
-            "Checking if the script has been updated": function () {
-                if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
-                    $().toastmessage('showToast', {
-                        text: GM_info.script.name + " has been updated! See the changelog " +
-                        "<a href='https://github.com/Alorel/avabur-improved/releases' target='_blank'>here</a>",
-                        sticky: true,
-                        position: 'top-left',
-                        type: 'success'
-                    });
-                }
-                GM_setValue("last_ver", GM_info.script.version);
-            },
-            "Loading script CSS": function () {
-                const $head = $("head");
-
-                for (var i = 0; i < LOAD_CSS.length; i++) {
-                    $head.append("<link type='text/css' rel='stylesheet' href='" + LOAD_CSS[i] + "'/>");
-                    delete LOAD_CSS[i];
-                }
-            },
-            "Configuring script modal": function () {
-                $("#modalContent").append($DOM.modal.script_settings);
-                fn.tabify($DOM.modal.script_settings);
-                $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
-                $DOM.modal.script_settings.find('[data-setting="notifications"]')
-                    .each($HANDLERS.each.settings_notification)
-                    .change($HANDLERS.change.settings_notification);
-                OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
-            },
-            "Registering side menu entry": function () {
-                const $helpSection = $("#helpSection"),
-                    $menuLink = $('<a href="javascript:;"/>')
-                        .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
-                        .click($HANDLERS.click.script_menu);
-
-                $helpSection.append($menuLink);
-                $("#navWrapper").css("padding-top", $menuLink.height());
-            },
-            "Registering market shortcuts": function () {
-                $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
-                    .click($HANDLERS.click.topbar_currency);
-            },
-            "Staring whisper monitor": function () {
-                OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
-                    childList: true
-                });
-            },
-            "Applying the scripts tooltips": function () {
-                $(".avi-tip").tooltip();
-            },
-            "Collecting tradeskill material IDs": function () {
-                (new Request("/market.php", 1)).post({
-                    type: "ingredient",
-                    page: 0,
-                    st: "all"
-                }).done(function (r) {
-                    const select = $("<select/>");
-                    select.html(r.filter);
-
-                    select.find(">option:not([value=all])").each(function () {
-                        const $this = $(this);
-                        TRADESKILL_MATS[$this.text().trim()] = parseInt($this.val());
-                    });
-                });
-            },
-            "Checking GitHub for updates": function () {
-                GM_xmlhttpRequest({
-                    method: "GET",
-                    url: UPDATE_URL,
-                    onload: function (r) {
-                        const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
-                        if (fn.versionCompare(GM_info.script.version, theirVersion) < 0) {
-                            $().toastmessage('showToast', {
-                                text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
-                                'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
-                                sticky: true,
-                                position: 'top-center',
-                                type: 'notice'
-                            });
-                        }
+                },
+                "Fixing some game CSS": function () {
+                    $("head").append('<style>.materials{color:' +
+                        $("#crafting_materials").css("color") +
+                        '}.fragments{color:' +
+                        $("#gem_fragments").css("color") + '}</style>');
+                },
+                "Checking if the script has been updated": function () {
+                    if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
+                        $().toastmessage('showToast', {
+                            text: GM_info.script.name + " has been updated! See the changelog " +
+                            "<a href='https://github.com/Alorel/avabur-improved/releases' target='_blank'>here</a>",
+                            sticky: true,
+                            position: 'top-left',
+                            type: 'success'
+                        });
                     }
-                });
-            }
-        };
+                    GM_setValue("last_ver", GM_info.script.version);
+                },
+                "Loading script CSS": function () {
+                    const $head = $("head");
 
-        (function () {
+                    for (var i = 0; i < LOAD_CSS.length; i++) {
+                        $head.append("<link type='text/css' rel='stylesheet' href='" + LOAD_CSS[i] + "'/>");
+                        delete LOAD_CSS[i];
+                    }
+                },
+                "Configuring script modal": function () {
+                    $("#modalContent").append($DOM.modal.script_settings);
+                    fn.tabify($DOM.modal.script_settings);
+                    $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
+                    $DOM.modal.script_settings.find('[data-setting="notifications"]')
+                        .each($HANDLERS.each.settings_notification)
+                        .change($HANDLERS.change.settings_notification);
+                    OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
+                },
+                "Registering side menu entry": function () {
+                    const $helpSection = $("#helpSection"),
+                        $menuLink = $('<a href="javascript:;"/>')
+                            .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
+                            .click($HANDLERS.click.script_menu);
+
+                    $helpSection.append($menuLink);
+                    $("#navWrapper").css("padding-top", $menuLink.height());
+                },
+                "Registering market shortcuts": function () {
+                    $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
+                        .click($HANDLERS.click.topbar_currency);
+                },
+                "Registering Inventory table observer": function () {
+                    OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
+                        childList: true,
+                        characterData: true
+                    })
+                },
+                "Staring whisper monitor": function () {
+                    OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
+                        childList: true
+                    });
+                },
+                "Applying the scripts tooltips": function () {
+                    $(".avi-tip").tooltip();
+                },
+                "Collecting tradeskill material IDs": function () {
+                    (new Request("/market.php", 1)).post({
+                        type: "ingredient",
+                        page: 0,
+                        st: "all"
+                    }).done(function (r) {
+                        const select = $("<select/>");
+                        select.html(r.filter);
+
+                        select.find(">option:not([value=all])").each(function () {
+                            const $this = $(this);
+                            TRADESKILL_MATS[$this.text().trim()] = parseInt($this.val());
+                        });
+                    });
+                },
+                "Checking GitHub for updates": function () {
+                    GM_xmlhttpRequest({
+                        method: "GET",
+                        url: UPDATE_URL,
+                        onload: function (r) {
+                            const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
+                            if (fn.versionCompare(GM_info.script.version, theirVersion) < 0) {
+                                $().toastmessage('showToast', {
+                                    text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
+                                    'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
+                                    sticky: true,
+                                    position: 'top-center',
+                                    type: 'notice'
+                                });
+                            }
+                        }
+                    });
+                }
+            };
             const keys = Object.keys(ON_LOAD);
             for (var i = 0; i < keys.length; i++) {
                 console.log("[" + GM_info.script.name + "] " + keys[i]);
