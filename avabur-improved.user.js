@@ -35,7 +35,7 @@
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?2
 // @noframes
 // ==/UserScript==
 
@@ -614,15 +614,12 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             "Registering side menu entry": function () {
                 const $helpSection = $("#helpSection"),
-                    $menuLink = $('<a href="javascript:;" class="avi-highlight"/>')
+                    $menuLink = $('<a href="javascript:;"/>')
                         .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
                         .click($HANDLERS.click.script_menu);
 
                 $helpSection.append($menuLink);
                 $("#navWrapper").css("padding-top", $menuLink.height());
-                setTimeout(function () {
-                    $menuLink.removeClass("avi-highlight");
-                }, 2000);
             },
             "Registering market shortcuts": function () {
                 $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
