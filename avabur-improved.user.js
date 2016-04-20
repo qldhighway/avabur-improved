@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.4
+// @version        0.4.1
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -28,14 +28,13 @@
 // @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
 // @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jalc-1.0.1.min.js
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?8
 // @resource    css_toast               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
 // @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader.gif
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?1
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
-
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?1
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?5
 // @noframes
 // ==/UserScript==
 
@@ -215,6 +214,32 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }, options || {}));
             },
             /**
+             * Opens the market
+             * @param {String} type The top category name
+             */
+            openMarket: function (type) {
+                const $document = $(document);
+
+                const $openCategory = function (evt, xhr, opts) {
+                    if (opts.url === "market.php") {
+                        $document.unbind("ajaxComplete", $openCategory);
+                        $DOM.market.navlinks.removeClass("active")
+                            .filter("a:contains('" + type + "')").addClass("active").click();
+                    }
+                };
+
+                $document.ajaxComplete($openCategory);
+                $DOM.nav.market.click();
+            },
+            analysePrice: function (arr) {
+                const ret = {
+                    low: arr[0].price,
+                    high: arr[arr.length - 1].price
+                };
+                ret.avg = Math.round((parseFloat(ret.low) + parseFloat(ret.high)) / 2);
+                return ret;
+            },
+            /**
              * Tabifies the div
              * @param {jQuery|$|HTMLElement|*} $container The div to tabify
              */
@@ -337,14 +362,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                 success: {
                     /** Successful callback for the currency tooltip market info lookup */
                     currency_tooltip: function (r) {
-                        const low = r.l[0].price,
-                            high = r.l[r.l.length - 1].price,
-                            avg = Math.round((parseFloat(low) + parseFloat(high)) / 2);
+                        const analysis = fn.analysePrice(r.l);
 
                         fn.toggleVisibility($AJAX_SPINNERS.currency_tooltip, false);
-                        $DOM.currency_tooltip.market_low.text(fn.numberWithCommas(low));
-                        $DOM.currency_tooltip.market_avg.text(fn.numberWithCommas(avg));
-                        $DOM.currency_tooltip.market_high.text(fn.numberWithCommas(high));
+                        $DOM.currency_tooltip.market_low.text(fn.numberWithCommas(analysis.low));
+                        $DOM.currency_tooltip.market_avg.text(fn.numberWithCommas(analysis.avg));
+                        $DOM.currency_tooltip.market_high.text(fn.numberWithCommas(analysis.high));
                     }
                 },
                 /** Error callbacks */
@@ -539,26 +562,16 @@ if (typeof(window.sessionStorage) === "undefined") {
                     (new Demo($(this).attr("data-demo"))).play();
                 },
                 topbar_currency: function () {
-                    var type = $(this).find(">td:first").text().trim();
-                    type = type.substring(0, type.length - 1);
-                    const $document = $(document),
-                        $ajaxListener = function (evt, xhr, opts) {
-                            if (opts.url === "market.php") {
-                                $document.unbind("ajaxComplete", $ajaxListener);
-                                $DOM.market.navlinks.removeClass("active")
-                                    .filter("a:contains('" + type + "')").addClass("active").click();
-                            }
-                        };
-
-                    $document.ajaxComplete($ajaxListener);
-                    $DOM.nav.market.click();
+                    const type = $(this).find(">td:first").text().trim();
+                    fn.openMarket(type.substring(0, type.length - 1));
+                },
+                ingredient: function () {
+                    $DOM.modal.modal_background.click();
+                    fn.openMarket("Ingredients");
                 },
                 script_menu: function () {
                     $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
                     fn.openStdModal($DOM.modal.script_settings);
-                    // $DOM.modal.script_settings.show().siblings().hide();
-                    // $DOM.modal.modal_wrapper.fadeIn();
-                    // $DOM.modal.modal_background.fadeIn();
                 }
             },
             change: {
@@ -568,6 +581,41 @@ if (typeof(window.sessionStorage) === "undefined") {
                     Settings.save();
                 }
             },
+            mouseenter: {
+                inventory_table_ingredient: function () {
+                    const $this = $(this),
+                        ingredient = $this.text().trim();
+
+                    if (typeof(TRADESKILL_MATS[ingredient]) === "undefined") {
+                        Toast.error("Failed to lookup " + ingredient + ": ID not found");
+                    } else {
+                        (new Request("/market.php", CACHE_TTL.market))
+                            .post({
+                                type: "ingredient",
+                                page: 0,
+                                q: 0,
+                                ll: 0,
+                                hl: 0,
+                                st: TRADESKILL_MATS[ingredient]
+                            }).done(function (r) {
+                            const describedBy = $this.attr("aria-describedby"),
+                                $describedBy = $("#" + describedBy);
+
+                            if (!describedBy || !$describedBy.length) {
+                                console.error("Failed to lookup " + ingredient + ": $describedBy not found");
+                            } else {
+                                const analysis = fn.analysePrice(r.l),
+                                    $tds = $describedBy.find("tr[data-id=prices]>td");
+                                console.log(analysis);
+
+                                $tds.first().text(fn.numberWithCommas(analysis.low))
+                                    .next().text(fn.numberWithCommas(analysis.avg))
+                                    .next().text(fn.numberWithCommas(analysis.high));
+                            }
+                        });
+                    }
+                }
+            },
             each: {
                 settings_notification: function () {
                     const $this = $(this);
@@ -575,7 +623,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $this.prop("checked", Settings.settings.notifications[$this.data("notification")][$this.data("type")]);
                 },
                 inventory_table_ingredients: function () {
-                    var $this = $(this),
+                    const $this = $(this),
                         ingredient = $this.text().trim(),
                         $span = $('<span>' + ingredient + '</span>');
                     $this.html($span);
@@ -584,23 +632,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                         title: ingredient,
                         html: true,
                         trigger: "hover",
-                        content: '<a>test</a>'
+                        content: GM_getResourceText("html_market_tooltip")
                     });
-                    $this.mouseenter(function () {
-                        setTimeout(function () {
-                            console.log($this.attr("aria-describedby"));
-                        }, 5);
-                    });
-                    $this.mouseenter(function () {
-                        setTimeout(function () {
-                            console.log($this.attr("aria-describedby"));
-                        }, 10);
-                    });
-                    $this.mouseenter(function () {
-                        setTimeout(function () {
-                            console.log($this.attr("aria-describedby"));
-                        }, 100);
-                    });
+
+                    $span.mouseenter($HANDLERS.mouseenter.inventory_table_ingredient)
+                        .css("cursor", "pointer")
+                        .click($HANDLERS.click.ingredient);
                 }
             }
         };
@@ -675,7 +712,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
                         childList: true,
                         characterData: true
-                    })
+                    });
                 },
                 "Staring whisper monitor": function () {
                     OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {

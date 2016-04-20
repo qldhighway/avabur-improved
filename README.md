@@ -21,6 +21,9 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
 	 them in colour, just like all the other resources.
  - Notifications (can be configured in the [script settings](https://github.com/Alorel/avabur-improved/blob/master/screenshots/gi-settings.png), off by default)
      - Sound and/or browser notifications on *whispers*
+ - Inventory
+     - Ingredients are getting some love! Hover them to see their current market price, click them to go to the
+     ingredients market tab. Unfortunately, the ingredient does not get auto-filtered. [[Screenshot](https://github.com/Alorel/avabur-improved/blob/master/screenshots/scr-fish-fin.png)]
 
 ## Planned features:
 
