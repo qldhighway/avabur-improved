@@ -39,7 +39,8 @@
 
 // @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?1
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?3
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?4
+// @resource    css_house_timer_remove  https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/house-timer-remove.min.css
 // @noframes
 // ==/UserScript==
 
@@ -232,7 +233,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                 const interval = new Interval("house_status"),
                     end = function () {
                         interval.clear();
-                        $DOM.house_monitor.status.text("Ready!").addClass("avi-highlight");
+                        $DOM.house_monitor.status.text("Ready!").addClass("avi-highlight").append(
+                            $("<a href='javascript:;'> (refresh)</a>").click($HANDLERS.click.house_state_refresh)
+                        );
                         if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
                             fn.notification(Demo.prototype.gm_texts.construction);
                         }
@@ -427,9 +430,16 @@ if (typeof(window.sessionStorage) === "undefined") {
                     },
                     house_requery: function (evt, r, opts) {
                         if (opts.url.indexOf("house") !== -1 && typeof(r.responseJSON.m) !== "undefined") {
-                            console.log(r.responseJSON.m);
+                            console.debug({
+                                response: r.responseJSON.m,
+                                opts: opts
+                            });
                             fn.handle_house_status_update(r.responseJSON.m);
                         }
+                    },
+                    house_state_refresh: function (r) {
+                        console.debug(r);
+                        fn.handle_house_status_update(r.m);
                     }
                 },
                 /** Error callbacks */
@@ -610,7 +620,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             )
         };
 
-        const TRADESKILL_MATS = {};
+        var TRADESKILL_MATS = {};
 
         const Demo = function (kind) {
             this.kind = kind;
@@ -669,6 +679,9 @@ if (typeof(window.sessionStorage) === "undefined") {
             click: {
                 demo: function () {
                     (new Demo($(this).attr("data-demo"))).play();
+                },
+                house_state_refresh: function () {
+                    $.post("/house.php", {}, Request.prototype.callbacks.success.house_state_refresh);
                 },
                 topbar_currency: function () {
                     const type = $(this).find(">td:first").text().trim();
@@ -843,19 +856,28 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $(".avi-tip").tooltip();
                 },
                 "Collecting tradeskill material IDs": function () {
-                    (new Request("/market.php", 1)).post({
-                        type: "ingredient",
-                        page: 0,
-                        st: "all"
-                    }).done(function (r) {
-                        const select = $("<select/>");
-                        select.html(r.filter);
+                    const cached_ids = window.sessionStorage.getItem("TRADESKILL_MATERIAL_IDS");
+                    if (cached_ids) {
+                        TRADESKILL_MATS = JSON.parse(cached_ids);
+                    } else {
+                        $.post("/market.php", {
+                            type: "ingredient",
+                            page: 0,
+                            st: "all"
+                        }, function (r) {
+                            const select = $("<select/>"),
+                                mats = {};
+                            select.html(r.filter);
 
-                        select.find(">option:not([value=all])").each(function () {
-                            const $this = $(this);
-                            TRADESKILL_MATS[$this.text().trim()] = parseInt($this.val());
+                            select.find(">option:not([value=all])").each(function () {
+                                const $this = $(this);
+                                mats[$this.text().trim()] = parseInt($this.val());
+                            });
+
+                            window.sessionStorage.setItem("TRADESKILL_MATERIAL_IDS", JSON.stringify(mats));
+                            TRADESKILL_MATS = mats;
                         });
-                    });
+                    }
                 },
                 "Checking GitHub for updates": function () {
                     GM_xmlhttpRequest({

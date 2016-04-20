@@ -81,13 +81,3 @@ ul.avi {
     display: none
   }
 }
-
-#houseTimerTable {
-  [data-typeid='Construction'] {
-    @extend .avi-force-hide;
-  }
-}
-
-#constructionNotifier {
-  @extend .avi-force-hide;
-}
