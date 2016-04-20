@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.4.2
+// @version        0.4.3
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -168,6 +168,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                 market_avg: null,
                 /** The 1st page high price */
                 market_high: null
+            },
+            inventory: {
+                overflow_preventing_container: $("#mCSB_4_container")
             },
             /** Game modals */
             modal: {
@@ -505,6 +508,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                                         $tbody.find(">tr>[data-th=Item]").each($HANDLERS.each.inventory_table_ingredients);
                                     }
 
+                                    $DOM.inventory.overflow_preventing_container.css("height", "auto")
+                                        .css("height", $DOM.inventory.overflow_preventing_container.height() + 150);
                                     break;
                                 }
                             }
