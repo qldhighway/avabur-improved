@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.4.3
+// @version        0.5
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -28,15 +28,18 @@
 // @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
 // @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jalc-1.0.1.min.js
+// @require        https://raw.githubusercontent.com/Alorel/alo-timer/master/src/alotimer.min.js
 
 // @resource    css_toast               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
 // @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader.gif
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?0.4.2
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.4.2
+
+// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?1
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @noframes
 // ==/UserScript==
 
@@ -74,7 +77,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else if (typeof(MutationObserver) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
-    (function ($, CACHE_STORAGE, MutationObserver, buzz) {
+    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer) {
         'use strict'; //https://github.com/Alorel/avabur-improved/blob/develop/avabur-improved.user.js
 
         ////////////////////////////////////////////////////////////////////////
@@ -131,6 +134,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                     whisper: {
                         sound: true,
                         gm: true
+                    },
+                    construction: {
+                        sound: true,
+                        gm: true
                     }
                 }
             },
@@ -146,12 +153,6 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /* /(([0-9])+\s(minutes|seconds|hours))/g
          ^ tmp - will be used for future update
-         */
-
-        /*
-         timers styles:
-         left: col-xs-6 col-md-12 col-lg-5
-         right: col-xs-6 col-md-12 col-lg-7
          */
 
         /** Our persistent DOM stuff */
@@ -187,6 +188,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             nav: {
                 market: $("#viewMarket")
             },
+            house_monitor: {},
             market: {
                 navlinks: $("#marketTypeSelector").find("a")
             }
@@ -205,6 +207,27 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /** Misc function container */
         const fn = {
+            parseTimeStringLong: function (str) {
+                var time = 0;
+                const match = str.match(/([0-9]+\s+(hours?|minutes?|seconds?))/g);
+
+                for (var i = 0; i < match.length; i++) {
+                    const currentMatch = match[i].toLowerCase();
+                    const number = currentMatch.match(/[0-9]+/);
+                    var multiplier;
+                    if (currentMatch.indexOf("hour") !== -1) {
+                        multiplier = 3600000;
+                    } else if (currentMatch.indexOf("minute") !== -1) {
+                        multiplier = 60000;
+                    } else {
+                        multiplier = 1000;
+                    }
+
+                    time += parseInt(number) * multiplier;
+                }
+
+                return time;
+            },
             /**
              * Creates a floaty notification
              * @param {String} text Text to display
@@ -432,6 +455,31 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
+        const Interval = function (name) {
+            this.name = name;
+        };
+
+        Interval.prototype = {
+            _intervals: {},
+            isRunning: function () {
+                return typeof(this._intervals[this.name]) !== "undefined"
+            },
+            clear: function () {
+                if (this.isRunning()) {
+                    clearInterval(this._intervals[this.name]);
+                    delete this._intervals[this.name];
+                    return true;
+                }
+
+                return false;
+            },
+            set: function (callback, frequency) {
+                this.clear();
+                this._intervals[this.name] = setInterval(callback, frequency);
+                return this._intervals[this.name];
+            }
+        };
+
         /** Collection of mutation observers the script uses */
         const OBSERVERS = {
             /** Mutation observer for the currency page tooltip */
@@ -469,6 +517,39 @@ if (typeof(window.sessionStorage) === "undefined") {
                     }
                 }
             ),
+            house_status: new MutationObserver(function (records) {
+                for (var i = 0; i < records.length; i++) {
+                    if (records[i].addedNodes.length) {
+                        const interval = new Interval("house_status"),
+                            text = records[i].target.innerText.trim(),
+                            end = function () {
+                                interval.clear();
+                                $DOM.house_monitor.status.text("Ready!").addClass("avi-highlight");
+                                if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
+                                    fn.notification(Demo.prototype.gm_texts.construction);
+                                }
+                                if (Settings.settings.notifications.construction.sound && Settings.settings.notifications.all.sound) {
+                                    SFX.circ_saw.play();
+                                }
+                            };
+                        console.log(text);
+                        interval.clear();
+
+                        if (text.indexOf("available again") !== -1) { // Working
+                            const timer = new AloTimer(fn.parseTimeStringLong(text));
+                            interval.set(function () {
+                                if (timer.isFinished()) {
+                                    end();
+                                }
+                                $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
+                            }, 1000);
+                        } else {
+                            end();
+                        }
+                        break;
+                    }
+                }
+            }),
             chat_whispers: new MutationObserver(
                 /** @param {MutationRecord[]} records */
                 function (records) {
@@ -530,6 +611,10 @@ if (typeof(window.sessionStorage) === "undefined") {
             SOUND: 1,
             GM_NOTIFICATION: 2
         };
+        Demo.prototype.gm_texts = {
+            whisper: "[00:00:00] Whisper from Alorel: send me all of your crystals.",
+            construction: "Construction has finished!"
+        };
         Demo.prototype.scenarios = {
             "whisper-sound": {
                 kind: Demo.prototype.kinds.SOUND,
@@ -537,7 +622,15 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             "whisper-gm": {
                 kind: Demo.prototype.kinds.GM_NOTIFICATION,
-                src: SFX.msg_ding
+                src: Demo.prototype.gm_texts.whisper
+            },
+            "construction-sound": {
+                kind: Demo.prototype.kinds.SOUND,
+                src: SFX.circ_saw
+            },
+            "construction-gm": {
+                kind: Demo.prototype.kinds.GM_NOTIFICATION,
+                src: Demo.prototype.gm_texts.construction
             }
         };
         Demo.prototype.play = function () {
@@ -553,7 +646,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
                         break;
                     case Demo.prototype.kinds.GM_NOTIFICATION:
-                        fn.notification("[00:00:00] Whisper from Alorel: send me all of your crystals.");
+                        fn.notification(scenario.src);
                         break;
                     default:
                         Toast.error("Misconfigured demo scenario: " + this.kind);
@@ -673,6 +766,16 @@ if (typeof(window.sessionStorage) === "undefined") {
                         '}.fragments{color:' +
                         $("#gem_fragments").css("color") + '}</style>');
                 },
+                "Applying house monitor": function () {
+                    const $timer = $(GM_getResourceText("html_house_timers"));
+                    $("#houseTimerInfo").addClass("avi-force-block");
+                    $("#houseTimerTable").prepend($timer);
+                    $DOM.house_monitor.status = $("#avi-house-construction");
+                    OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
+                        childList: true,
+                        characterData: true
+                    });
+                },
                 "Checking if the script has been updated": function () {
                     if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
                         $().toastmessage('showToast', {
@@ -770,5 +873,5 @@ if (typeof(window.sessionStorage) === "undefined") {
                 delete ON_LOAD[keys[i]];
             }
         })();
-    })(jQuery, window.sessionStorage, MutationObserver, buzz);
+    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer);
 }
