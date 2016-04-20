@@ -38,7 +38,7 @@
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
 
 // @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?1
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?2
 // @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?4
 // @resource    css_house_timer_remove  https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/house-timer-remove.min.css
 // @noframes
@@ -140,6 +140,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                         sound: true,
                         gm: true
                     }
+                },
+                features: {
+                    house_timer: true
                 }
             },
             save: function () {
@@ -701,6 +704,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                     const $this = $(this);
                     Settings.settings.notifications[$this.data("notification")][$this.data("type")] = $this.is(":checked");
                     Settings.save();
+                },
+                settings_feature: function () {
+                    const $this = $(this);
+                    Settings.settings.features[$this.data("feature")] = $this.is(":checked");
                 }
             },
             mouseenter: {
@@ -743,6 +750,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                     const $this = $(this);
 
                     $this.prop("checked", Settings.settings.notifications[$this.data("notification")][$this.data("type")]);
+                },
+                settings_features: function () {
+                    const $this = $(this);
+                    $this.prop("checked", Settings.settings.features[$this.data("feature")]);
                 },
                 inventory_table_ingredients: function () {
                     const $this = $(this),
@@ -789,15 +800,20 @@ if (typeof(window.sessionStorage) === "undefined") {
                         $("#gem_fragments").css("color") + '}</style>');
                 },
                 "Applying house monitor": function () {
-                    const $timer = $(GM_getResourceText("html_house_timers"));
-                    $("#houseTimerInfo").addClass("avi-force-block");
-                    $("#houseTimerTable").prepend($timer);
-                    $DOM.house_monitor.status = $("#avi-house-construction");
-                    OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
-                        childList: true,
-                        characterData: true
-                    });
-                    $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
+                    if (Settings.settings.features.house_timer) {
+                        const $timer = $(GM_getResourceText("html_house_timers"));
+                        $("#houseTimerInfo").addClass("avi-force-block");
+                        $("#houseTimerTable").prepend($timer);
+                        $DOM.house_monitor.status = $("#avi-house-construction");
+                        OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
+                            childList: true,
+                            characterData: true
+                        });
+                        $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
+                        $("body").append('<link rel="stylesheet" type="text/css" href="' + GM_getResourceText("css_house_timer_remove") + '"/>');
+                    } else {
+                        console.log("(skipped due to user settings)");
+                    }
                 },
                 "Checking if the script has been updated": function () {
                     if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
@@ -823,9 +839,15 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $("#modalContent").append($DOM.modal.script_settings);
                     fn.tabify($DOM.modal.script_settings);
                     $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
+
                     $DOM.modal.script_settings.find('[data-setting="notifications"]')
                         .each($HANDLERS.each.settings_notification)
                         .change($HANDLERS.change.settings_notification);
+
+                    $DOM.modal.script_settings.find('[data-setting="features"]')
+                        .each($HANDLERS.each.settings_features)
+                        .change($HANDLERS.change.settings_feature);
+
                     OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
                 },
                 "Registering side menu entry": function () {
@@ -851,9 +873,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                     OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
                         childList: true
                     });
-                },
-                "Applying the scripts tooltips": function () {
-                    $(".avi-tip").tooltip();
                 },
                 "Collecting tradeskill material IDs": function () {
                     const cached_ids = window.sessionStorage.getItem("TRADESKILL_MATERIAL_IDS");
@@ -896,6 +915,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                             }
                         }
                     });
+                },
+                "Applying the scripts tooltips": function () {
+                    $(".avi-tip").tooltip();
                 }
             };
             const keys = Object.keys(ON_LOAD);
