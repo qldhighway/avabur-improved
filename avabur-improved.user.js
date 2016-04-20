@@ -35,12 +35,10 @@
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?0.5
+// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/house-timers.html
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
-
-// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?2
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?4
-// @resource    css_house_timer_remove  https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/house-timer-remove.min.css
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.5
 // @noframes
 // ==/UserScript==
 
@@ -209,6 +207,40 @@ if (typeof(window.sessionStorage) === "undefined") {
             currency_tooltip: $('<img src="' + GM_getResourceURL("img_ajax_loader") + '"/>')
         };
 
+        const FUNCTION_PERSISTENT_VARS = {
+            house_update_last_msg: null
+        };
+
+        /**
+         * Interval manager
+         * @param {String} name Interval name/ID
+         * @constructor
+         */
+        const Interval = function (name) {
+            this.name = name;
+        };
+
+        Interval.prototype = {
+            _intervals: {},
+            isRunning: function () {
+                return typeof(this._intervals[this.name]) !== "undefined"
+            },
+            clear: function () {
+                if (this.isRunning()) {
+                    clearInterval(this._intervals[this.name]);
+                    delete this._intervals[this.name];
+                    return true;
+                }
+
+                return false;
+            },
+            set: function (callback, frequency) {
+                this.clear();
+                this._intervals[this.name] = setInterval(callback, frequency);
+                return this._intervals[this.name];
+            }
+        };
+
         /** Misc function container */
         const fn = {
             parseTimeStringLong: function (str) {
@@ -232,34 +264,38 @@ if (typeof(window.sessionStorage) === "undefined") {
 
                 return time;
             },
-            handle_house_status_update: function (text) {
-                const interval = new Interval("house_status"),
-                    end = function () {
-                        interval.clear();
-                        $DOM.house_monitor.status.text("Ready!").addClass("avi-highlight").append(
-                            $("<a href='javascript:;'> (refresh)</a>").click($HANDLERS.click.house_state_refresh)
-                        );
-                        if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
-                            fn.notification(Demo.prototype.gm_texts.construction);
-                        }
-                        if (Settings.settings.notifications.construction.sound && Settings.settings.notifications.all.sound) {
-                            SFX.circ_saw.play();
-                        }
-                    };
+            /** @param {Interval} interval */
+            house_status_update_end: function (interval) {
                 interval.clear();
+                $DOM.house_monitor.status.text("Ready!").addClass("avi-highlight").append(
+                    $("<a href='javascript:;'> (refresh)</a>").click($HANDLERS.click.house_state_refresh)
+                );
+                if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
+                    fn.notification(Demo.prototype.gm_texts.construction);
+                }
+                if (Settings.settings.notifications.construction.sound && Settings.settings.notifications.all.sound) {
+                    SFX.circ_saw.play();
+                }
+            },
+            handle_house_status_update: function (text) {
+                if (text !== FUNCTION_PERSISTENT_VARS.house_update_last_msg) {
+                    FUNCTION_PERSISTENT_VARS.house_update_last_msg = text;
+                    const interval = new Interval("house_status");
+                    interval.clear();
 
-                if (text.indexOf("available again") !== -1) { // Working
-                    const timer = new AloTimer(fn.parseTimeStringLong(text));
-                    interval.set(function () {
-                        if (timer.isFinished()) {
-                            end();
-                        }
-                        $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
-                    }, 1000);
-                } else if (text.indexOf("are available")) {
-                    end();
-                } else {
-                    $.post("/house.php", null, Request.prototype.callbacks.success.house_requery, "json");
+                    if (text.indexOf("available again") !== -1) { // Working
+                        const timer = new AloTimer(fn.parseTimeStringLong(text));
+                        interval.set(function () {
+                            if (timer.isFinished()) {
+                                fn.house_status_update_end(interval);
+                            }
+                            $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
+                        }, 1000);
+                    } else if (text.indexOf("are available")) {
+                        fn.house_status_update_end(interval);
+                    } else {
+                        $.post("/house.php", null, Request.prototype.callbacks.success.house_requery, "json");
+                    }
                 }
             },
             /**
@@ -433,15 +469,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                     },
                     house_requery: function (evt, r, opts) {
                         if (opts.url.indexOf("house") !== -1 && typeof(r.responseJSON.m) !== "undefined") {
-                            console.debug({
-                                response: r.responseJSON.m,
-                                opts: opts
-                            });
                             fn.handle_house_status_update(r.responseJSON.m);
                         }
                     },
                     house_state_refresh: function (r) {
-                        console.debug(r);
                         fn.handle_house_status_update(r.m);
                     }
                 },
@@ -499,31 +530,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                     method: "POST",
                     data: data
                 });
-            }
-        };
-
-        const Interval = function (name) {
-            this.name = name;
-        };
-
-        Interval.prototype = {
-            _intervals: {},
-            isRunning: function () {
-                return typeof(this._intervals[this.name]) !== "undefined"
-            },
-            clear: function () {
-                if (this.isRunning()) {
-                    clearInterval(this._intervals[this.name]);
-                    delete this._intervals[this.name];
-                    return true;
-                }
-
-                return false;
-            },
-            set: function (callback, frequency) {
-                this.clear();
-                this._intervals[this.name] = setInterval(callback, frequency);
-                return this._intervals[this.name];
             }
         };
 
@@ -708,6 +714,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 settings_feature: function () {
                     const $this = $(this);
                     Settings.settings.features[$this.data("feature")] = $this.is(":checked");
+                    Settings.save();
                 }
             },
             mouseenter: {
@@ -803,6 +810,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     if (Settings.settings.features.house_timer) {
                         const $timer = $(GM_getResourceText("html_house_timers"));
                         $("#houseTimerInfo").addClass("avi-force-block");
+                        $("#constructionNotifier, #houseTimerTable [data-typeid='Construction']").addClass("avi-force-hide");
                         $("#houseTimerTable").prepend($timer);
                         $DOM.house_monitor.status = $("#avi-house-construction");
                         OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {

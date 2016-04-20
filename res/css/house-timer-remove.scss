@@ -1,9 +1,0 @@
-#constructionNotifier {
-  display: none !important;
-}
-
-#houseTimerTable {
-  [data-typeid='Construction'] {
-    @extend #constructionNotifier;
-  }
-}
