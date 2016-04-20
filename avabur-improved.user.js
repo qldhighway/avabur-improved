@@ -73,7 +73,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else if (typeof(MutationObserver) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
-    (function ($, CACHE_STORAGE, MutationObserver, buzz, md5) {
+    (function ($, CACHE_STORAGE, MutationObserver, buzz) {
         'use strict'; //https://github.com/Alorel/avabur-improved/blob/develop/avabur-improved.user.js
 
         ////////////////////////////////////////////////////////////////////////
@@ -145,6 +145,12 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /* /(([0-9])+\s(minutes|seconds|hours))/g
          ^ tmp - will be used for future update
+         */
+
+        /*
+         timers styles:
+         left: col-xs-6 col-md-12 col-lg-5
+         right: col-xs-6 col-md-12 col-lg-7
          */
 
         /** Our persistent DOM stuff */
@@ -673,5 +679,5 @@ if (typeof(window.sessionStorage) === "undefined") {
                 delete ON_LOAD[keys[i]];
             }
         })();
-    })(jQuery, window.sessionStorage, MutationObserver, buzz, md5);
+    })(jQuery, window.sessionStorage, MutationObserver, buzz);
 }
