@@ -39,7 +39,7 @@
 
 // @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?1
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?3
 // @noframes
 // ==/UserScript==
 
@@ -228,6 +228,34 @@ if (typeof(window.sessionStorage) === "undefined") {
 
                 return time;
             },
+            handle_house_status_update: function (text) {
+                const interval = new Interval("house_status"),
+                    end = function () {
+                        interval.clear();
+                        $DOM.house_monitor.status.text("Ready!").addClass("avi-highlight");
+                        if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
+                            fn.notification(Demo.prototype.gm_texts.construction);
+                        }
+                        if (Settings.settings.notifications.construction.sound && Settings.settings.notifications.all.sound) {
+                            SFX.circ_saw.play();
+                        }
+                    };
+                interval.clear();
+
+                if (text.indexOf("available again") !== -1) { // Working
+                    const timer = new AloTimer(fn.parseTimeStringLong(text));
+                    interval.set(function () {
+                        if (timer.isFinished()) {
+                            end();
+                        }
+                        $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
+                    }, 1000);
+                } else if (text.indexOf("are available")) {
+                    end();
+                } else {
+                    $.post("/house.php", null, Request.prototype.callbacks.success.house_requery, "json");
+                }
+            },
             /**
              * Creates a floaty notification
              * @param {String} text Text to display
@@ -396,6 +424,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                         $DOM.currency_tooltip.market_low.text(fn.numberWithCommas(analysis.low));
                         $DOM.currency_tooltip.market_avg.text(fn.numberWithCommas(analysis.avg));
                         $DOM.currency_tooltip.market_high.text(fn.numberWithCommas(analysis.high));
+                    },
+                    house_requery: function (evt, r, opts) {
+                        if (opts.url.indexOf("house") !== -1 && typeof(r.responseJSON.m) !== "undefined") {
+                            console.log(r.responseJSON.m);
+                            fn.handle_house_status_update(r.responseJSON.m);
+                        }
                     }
                 },
                 /** Error callbacks */
@@ -520,32 +554,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             house_status: new MutationObserver(function (records) {
                 for (var i = 0; i < records.length; i++) {
                     if (records[i].addedNodes.length) {
-                        const interval = new Interval("house_status"),
-                            text = records[i].target.innerText.trim(),
-                            end = function () {
-                                interval.clear();
-                                $DOM.house_monitor.status.text("Ready!").addClass("avi-highlight");
-                                if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
-                                    fn.notification(Demo.prototype.gm_texts.construction);
-                                }
-                                if (Settings.settings.notifications.construction.sound && Settings.settings.notifications.all.sound) {
-                                    SFX.circ_saw.play();
-                                }
-                            };
-                        console.log(text);
-                        interval.clear();
-
-                        if (text.indexOf("available again") !== -1) { // Working
-                            const timer = new AloTimer(fn.parseTimeStringLong(text));
-                            interval.set(function () {
-                                if (timer.isFinished()) {
-                                    end();
-                                }
-                                $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
-                            }, 1000);
-                        } else {
-                            end();
-                        }
+                        fn.handle_house_status_update(records[i].target.innerText.trim());
                         break;
                     }
                 }
@@ -613,7 +622,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
         Demo.prototype.gm_texts = {
             whisper: "[00:00:00] Whisper from Alorel: send me all of your crystals.",
-            construction: "Construction has finished!"
+            construction: "Construction finished!"
         };
         Demo.prototype.scenarios = {
             "whisper-sound": {
@@ -775,6 +784,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         childList: true,
                         characterData: true
                     });
+                    $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
                 },
                 "Checking if the script has been updated": function () {
                     if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
