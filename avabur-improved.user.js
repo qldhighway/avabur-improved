@@ -4,10 +4,10 @@
 // @author         Alorel <a.molcanovas@gmail.com>
 // @homepage       https://github.com/Alorel/avabur-improved
 // @description    Some welcome additions to Avabur's UI choices
-// @include        https://avabur.com*
-// @include        http://avabur.com*
-// @include        https://www.avabur.com*
-// @include        http://www.avabur.com*
+// @include        https://avabur.com/game.php
+// @include        http://avabur.com/game.php
+// @include        https://www.avabur.com/game.php
+// @include        http://www.avabur.com/game.php
 // @version        0.4
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
@@ -35,7 +35,7 @@
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @noframes
 // ==/UserScript==
 
@@ -73,7 +73,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else if (typeof(MutationObserver) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
-    (function ($, CACHE_STORAGE, MutationObserver, buzz) {
+    (function ($, CACHE_STORAGE, MutationObserver, buzz, md5) {
         'use strict'; //https://github.com/Alorel/avabur-improved/blob/develop/avabur-improved.user.js
 
         ////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,9 @@ if (typeof(window.sessionStorage) === "undefined") {
         /** How long our AJAX cache is meant to last */
         const CACHE_TTL = {
             /** Resource tooltip market price lookups */
-            market: 1 / 3600 * 60 //30 sec
+            market: 1 / 3600 * 60, //30 sec,
+            /** Tradeskill material ID mapping */
+            tradeskill_mats: 1
         };
         /** CSS URLs to load */
         const LOAD_CSS = [
@@ -460,6 +462,8 @@ if (typeof(window.sessionStorage) === "undefined") {
             )
         };
 
+        const TRADESKILL_MATS = {};
+
         const Demo = function (kind) {
             this.kind = kind;
         };
@@ -604,14 +608,15 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             "Registering side menu entry": function () {
                 const $helpSection = $("#helpSection"),
-                    $menuLink = $('<a href="javascript:;"/>')
+                    $menuLink = $('<a href="javascript:;" class="avi-highlight"/>')
                         .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
                         .click($HANDLERS.click.script_menu);
 
-
                 $helpSection.append($menuLink);
-
                 $("#navWrapper").css("padding-top", $menuLink.height());
+                setTimeout(function () {
+                    $menuLink.removeClass("avi-highlight");
+                }, 2000);
             },
             "Registering market shortcuts": function () {
                 $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
@@ -624,6 +629,21 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             "Applying the scripts tooltips": function () {
                 $(".avi-tip").tooltip();
+            },
+            "Collecting tradeskill material IDs": function () {
+                (new Request("/market.php", 1)).post({
+                    type: "ingredient",
+                    page: 0,
+                    st: "all"
+                }).done(function (r) {
+                    const select = $("<select/>");
+                    select.html(r.filter);
+
+                    select.find(">option:not([value=all])").each(function () {
+                        const $this = $(this);
+                        TRADESKILL_MATS[$this.text().trim()] = parseInt($this.val());
+                    });
+                });
             },
             "Checking GitHub for updates": function () {
                 GM_xmlhttpRequest({
@@ -653,5 +673,5 @@ if (typeof(window.sessionStorage) === "undefined") {
                 delete ON_LOAD[keys[i]];
             }
         })();
-    })(jQuery, window.sessionStorage, MutationObserver, buzz);
+    })(jQuery, window.sessionStorage, MutationObserver, buzz, md5);
 }

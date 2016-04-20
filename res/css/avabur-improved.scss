@@ -19,6 +19,10 @@ table.avi {
   }
 }
 
+.avi-highlight {
+  animation: pulsate-inner 0.5s infinite alternate;
+}
+
 .avi-table {
   display: table;
 
