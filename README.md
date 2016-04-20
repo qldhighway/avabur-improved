@@ -21,20 +21,24 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
 	 them in colour, just like all the other resources.
  - Notifications (can be configured in the [script settings](https://github.com/Alorel/avabur-improved/blob/master/screenshots/gi-settings.png), off by default)
      - Sound and/or browser notifications on *whispers*
+     - Sound and/or browser notification when house construction finishes
  - Inventory
      - Ingredients are getting some love! Hover them to see their current market price, click them to go to the
      ingredients market tab. Unfortunately, the ingredient does not get auto-filtered. [[Screenshot](https://github.com/Alorel/avabur-improved/blob/master/screenshots/scr-fish-fin.png)]
+ - House
+     - Permanent construction timer without having to build an alarm clock
+     [[Screenshot](https://github.com/Alorel/avabur-improved/blob/master/screenshots/permanent-house-timer.png)]! This
+     feature is enabled by default and can be toggled off.
 
 ## Planned features:
 
  - Improvements on the inventory/market UI, making it much easier to sell ingredients/gear/gems
- - Market alerts - be notified when an item is above/below a threshold
+ - Market alerts - be notified when an item is above/below a threshold (most likely scrapped due to server requests)
  - Market watcher - historic graphs for price changes (stored locally on your machine)
  - Squeezing out more information in general - once more data is available we might be able to predict your win rate on new mobs etc
- - Various timers (next house upgrade, for example)
  - Fewer clicks for crafting/carving
  - [Item multisend](https://github.com/Alorel/avabur-improved/blob/develop/user-suggestions/item-multisend.txt)
- - Ingredient price lookup
+ - Ingredient price lookup (partially implemented - demo in the inventory)
 
 ## Planned features if the game devs approve:
 
