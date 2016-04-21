@@ -29,7 +29,7 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
  - House
      - Permanent construction timer without having to build an alarm clock
      [[Screenshot](https://github.com/Alorel/avabur-improved/blob/master/screenshots/permanent-house-timer.png)]! This
-     feature is enabled by default and can be toggled off.
+     feature is enabled by default and can be toggled off. After starting a new building task click "refresh" on the timer.
 
 ## Planned features:
 
