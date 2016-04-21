@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.6.2
+// @version        0.6.3
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -744,7 +744,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                             const describedBy = $this.attr("aria-describedby"),
                                 $describedBy = $("#" + describedBy);
 
-                            if (describedBy && !$describedBy.length) {
+                            if (describedBy && $describedBy.length) {
                                 const analysis = fn.analysePrice(r.l),
                                     $tds = $describedBy.find("tr[data-id=prices]>td");
 
