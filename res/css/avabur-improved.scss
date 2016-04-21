@@ -82,7 +82,15 @@ ul.avi {
   }
 }
 
-.avi-menu svg {
-  width: 24px;
-  height: 24px;
+.avi-menu {
+  svg {
+    width: 24px;
+    height: 24px;
+    border: 1px solid;
+    padding: 2px;
+  }
+
+  a {
+    display: inline-block !important;
+  }
 }

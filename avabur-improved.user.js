@@ -35,18 +35,15 @@
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?0.5
 // @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/house-timers.html
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.5
 
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?2
 // @resource    svg_sword_clash         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/svg/sword-clash.svg?6
 // @noframes
 // ==/UserScript==
 
-$.get("https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/svg/sword-clash.svg").done(function (r) {
-    $("body").css("fill", "currentColor").prepend(r);
-});
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -708,6 +705,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                 script_menu: function () {
                     $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
                     fn.openStdModal($DOM.modal.script_settings);
+                },
+                delegate_click:function(){
+                    $($(this).data("delegate-click")).click();
                 }
             },
             change: {
@@ -870,7 +870,14 @@ if (typeof(window.sessionStorage) === "undefined") {
                             .click($HANDLERS.click.script_menu);
 
                     $helpSection.append($menuLink);
-                    $("#navWrapper").css("padding-top", $menuLink.height());
+                    $("#navWrapper").css("padding-top", $menuLink.height()).find("ul")
+                        .append(
+                            $('<li class="avi-menu"/>')
+                                .append(
+                                    $("<a title='Open Battles' href='javascript:;' data-delegate-click='#loadMobList' class='avi-tip'/>")
+                                        .html(GM_getResourceText("svg_sword_clash"))
+                                )
+                        );
                 },
                 "Registering market shortcuts": function () {
                     $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
@@ -929,8 +936,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
                     });
                 },
-                "Applying the scripts tooltips": function () {
+                "Applying extra event listeners tooltips": function () {
                     $(".avi-tip").tooltip();
+                    $("[data-delegate-click]").click($HANDLERS.click.delegate_click);
                 }
             };
             const keys = Object.keys(ON_LOAD);
