@@ -42,9 +42,9 @@
 
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
 
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?2
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?2
-// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html?3
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?3
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?3
+// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html?6
 // @noframes
 // ==/UserScript==
 
@@ -274,7 +274,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             house_status_update_end: function (interval) {
                 interval.clear();
                 $DOM.house_monitor.status.addClass("avi-highlight").html(
-                    $('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline">Ready!</span>')
+                    $('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline;padding-right:5px">Ready!</span>')
                         .click($HANDLERS.click.delegate_click)
                     )
                     .append(
