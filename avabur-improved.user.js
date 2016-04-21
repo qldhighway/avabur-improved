@@ -40,7 +40,7 @@
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.5
 
-// @resource    test_svg https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/svg/sword-clash.svg
+// @resource    test_svg https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/svg/sword-clash.svg?1
 // @noframes
 // ==/UserScript==
 
