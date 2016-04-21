@@ -30,6 +30,11 @@
     }
   }
 
+  &-link {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
   &-tip {
     border-bottom: 1px dotted;
   }

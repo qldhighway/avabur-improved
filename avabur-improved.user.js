@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.6
+// @version        0.6.1
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -34,17 +34,17 @@
 // @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader.gif
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
-
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?0.6
-// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/house-timers.html
-// @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.5
 // @resource    svg_sword_clash         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/sword-clash.svg
 // @resource    svg_log                 https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/log.svg
 // @resource    svg_metal_bar           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/metal-bar.svg
 // @resource    svg_stone_block         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/stone-block.svg
 // @resource    svg_fishing             https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/fishing.svg
 
+// @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
+
+// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?2
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?2
+// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html?2
 // @noframes
 // ==/UserScript==
 
@@ -273,9 +273,13 @@ if (typeof(window.sessionStorage) === "undefined") {
             /** @param {Interval} interval */
             house_status_update_end: function (interval) {
                 interval.clear();
-                $DOM.house_monitor.status.text("Ready!").addClass("avi-highlight").append(
-                    $("<a href='javascript:;'> (refresh)</a>").click($HANDLERS.click.house_state_refresh)
-                );
+                $DOM.house_monitor.status.addClass("avi-highlight").html(
+                    $('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline">Ready!</span>')
+                        .click($HANDLERS.click.delegate_click)
+                    )
+                    .append(
+                        $("<a href='javascript:;'>(refresh)</a>").click($HANDLERS.click.house_state_refresh)
+                    );
                 if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
                     fn.notification(Demo.prototype.gm_texts.construction);
                 }
@@ -294,8 +298,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                         interval.set(function () {
                             if (timer.isFinished()) {
                                 fn.house_status_update_end(interval);
+                            } else {
+                                $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
                             }
-                            $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
                         }, 1000);
                     } else if (text.indexOf("are available")) {
                         fn.house_status_update_end(interval);
@@ -751,7 +756,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                             } else {
                                 const analysis = fn.analysePrice(r.l),
                                     $tds = $describedBy.find("tr[data-id=prices]>td");
-                                console.log(analysis);
 
                                 $tds.first().text(fn.numberWithCommas(analysis.low))
                                     .next().text(fn.numberWithCommas(analysis.avg))
@@ -819,7 +823,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     if (Settings.settings.features.house_timer) {
                         const $timer = $(GM_getResourceText("html_house_timers"));
                         $("#houseTimerInfo").addClass("avi-force-block");
-                        $("#constructionNotifier, #houseTimerTable [data-typeid='Construction']").addClass("avi-force-hide");
+                        $("body").append("<style>#constructionNotifier,#houseTimerTable [data-typeid='Construction']{display:none!important}</style>");
                         $("#houseTimerTable").prepend($timer);
                         $DOM.house_monitor.status = $("#avi-house-construction");
                         OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
