@@ -37,6 +37,9 @@ for you! Raise an issue on Github or whisper Alorel in-game if you need support 
  - Market alerts - be notified when an item is above/below a threshold (most likely scrapped due to server requests)
  - Market watcher - historic graphs for price changes (stored locally on your machine)
  - Squeezing out more information in general - once more data is available we might be able to predict your win rate on new mobs etc
+ - Market ads - want to advertise an item that just won't sell? Make an entire list and send each message with a single
+ click to the selected channel so you don't have to type them in every time. There will be a 30 minute timer per message
+ and you will be reminded when you can advertise again - let technology take care of anti-spamming for you!
  - Fewer clicks for crafting/carving
  - [Item multisend](https://github.com/Alorel/avabur-improved/blob/develop/user-suggestions/item-multisend.txt)
  - Ingredient price lookup (partially implemented - demo in the inventory)
