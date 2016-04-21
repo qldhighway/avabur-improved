@@ -83,6 +83,8 @@ ul.avi {
 }
 
 .avi-menu {
+  text-align: center;
+
   svg {
     width: 24px;
     height: 24px;
@@ -90,7 +92,12 @@ ul.avi {
     padding: 2px;
   }
 
+  > :not(:last-child) {
+    margin-right: 3px;
+  }
+
   a {
     display: inline-block !important;
+    width: auto;
   }
 }
