@@ -39,14 +39,9 @@
 // @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/house-timers.html
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.5
-
-// @resource    test_svg https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/svg/sword-clash.svg?1
 // @noframes
 // ==/UserScript==
 
-console.log(GM_getResourceText("test_svg"));
-
-$("body").css("fill", "currentColor").prepend(GM_getResourceText("test_svg"));
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
