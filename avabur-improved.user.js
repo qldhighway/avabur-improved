@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.6.1
+// @version        0.6
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -44,7 +44,7 @@
 
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/script-settings.html?2
 // @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?2
-// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html?2
+// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/html/house-timers.html?3
 // @noframes
 // ==/UserScript==
 
