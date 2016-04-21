@@ -38,6 +38,13 @@
   &-tip {
     border-bottom: 1px dotted;
   }
+
+  &-menu-shortcut {
+    width: 24px;
+    height: 24px;
+    border: 1px solid;
+    padding: 2px;
+  }
 }
 
 table.avi {
@@ -89,13 +96,6 @@ ul.avi {
 
 .avi-menu {
   text-align: center;
-
-  svg {
-    width: 24px;
-    height: 24px;
-    border: 1px solid;
-    padding: 2px;
-  }
 
   > :not(:last-child) {
     margin-right: 5px;

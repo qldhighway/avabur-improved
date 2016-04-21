@@ -9,8 +9,8 @@
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
 // @version        0.6.3
-// @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
-// @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
+// @icon           https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-16.png
+// @icon64         https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
 // @run-at         document-end
@@ -25,28 +25,19 @@
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
-// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
+// @require        https://cdn.rawgit.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.js
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
-// @require        https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/jalc-1.0.1.min.js
-// @require        https://raw.githubusercontent.com/Alorel/alo-timer/master/src/alotimer.min.js
+// @require        https://cdn.rawgit.com/Alorel/avabur-improved/master/lib/jalc-1.0.1.min.js
+// @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
 
-// @resource    css_toast               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
-// @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader.gif
-// @resource    svg_sword_clash         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/sword-clash.svg
-// @resource    svg_log                 https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/log.svg
-// @resource    svg_metal_bar           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/metal-bar.svg
-// @resource    svg_stone_block         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/stone-block.svg
-// @resource    svg_fishing             https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/fishing.svg
-
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?0.6.2
-// @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/house-timers.html?0.6.1
-// @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html?0.6.1
-// @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.6.1
+// @resource    html_house_timers       https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/html/house-timers.html
+// @resource    html_market_tooltip     https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/html/market-tooltip.html
+// @resource    html_settings_modal     https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/html/script-settings.html
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "33cdb611b4f1b4d1232aa0abbc7301bed33a4e58";
+    dev_hash = "4b8a84b9a514705e4615f5391880bfa182eadce6";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -85,16 +76,39 @@ if (typeof(window.sessionStorage) === "undefined") {
         'use strict';
         buzz.defaults.preload = "none";
 
-        const gh_url = function (author, repo, path) {
+        /**
+         * Creates a GitHub CDN URL
+         * @param {String} path Path to the file without leading slashes
+         * @param {String} [author] The author. Defaults to Alorel
+         * @param {String} [repo] The repository. Defaults to avabur-improved
+         * @returns {String} The URL
+         */
+        const gh_url = function (path, author, repo) {
+            author = author || "Alorel";
+            repo = repo || "avabur-improved";
+
             return "https://cdn.rawgit.com/" + author + "/" + repo + "/" +
                 (is_dev ? dev_hash : GM_info.script.version) + "/" + path;
         };
-        console.log(gh_url("Alorel", "avabur-improved", "res/sfx/circ_saw.wav"));
 
         const URLS = {
             sfx: {
-                circ_saw: "https://cdn.rawgit.com/Alorel/avabur-improved/develop/res/sfx/circ_saw.wav",
-                message_ding: "https://cdn.rawgit.com/Alorel/avabur-improved/develop/res/sfx/message_ding.wav"
+                circ_saw: gh_url("res/sfx/circ_saw.wav"),
+                message_ding: gh_url("res/sfx/message_ding.wav")
+            },
+            css: {
+                toast: gh_url("lib/toastmessage/jquery.toastmessage.min.css"),
+                script: gh_url("res/css/avabur-improved.min.css")
+            },
+            img: {
+                ajax_loader: gh_url("res/img/ajax-loader.gif")
+            },
+            svg: {
+                sword_clash: gh_url("res/svg/sword-clash.svg"),
+                log: gh_url("res/svg/log.svg"),
+                metal_bar: gh_url("res/svg/metal-bar.svg"),
+                stone_block: gh_url("res/svg/stone-block.svg"),
+                fishing: gh_url("res/svg/fishing.svg")
             }
         };
 
@@ -110,11 +124,6 @@ if (typeof(window.sessionStorage) === "undefined") {
             /** Tradeskill material ID mapping */
             tradeskill_mats: 1
         };
-        /** CSS URLs to load */
-        const LOAD_CSS = [
-            GM_getResourceURL("css_script"),
-            GM_getResourceURL("css_toast")
-        ];
 
         /**
          * The URL where we check for updates. This is different from @updateURL because we want it to come through
@@ -220,7 +229,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         /** AJAX spinners throughout the page */
         const $AJAX_SPINNERS = {
             /** The spinner @ the currency tooltip */
-            currency_tooltip: $('<img src="' + GM_getResourceURL("img_ajax_loader") + '"/>')
+            currency_tooltip: $('<img src="' + URLS.img.ajax_loader + '"/>')
         };
 
         const FUNCTION_PERSISTENT_VARS = {
@@ -790,9 +799,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                         title: ingredient,
                         html: true,
                         trigger: "hover",
-                        container: "#modalContent",
+                        container: "body",
+                        viewport: {"selector": "body", "padding": 0},
                         placement: "auto right",
-                        viewport: {"selector": "#modalContent", "padding": 0},
                         content: GM_getResourceText("html_market_tooltip")
                     });
 
@@ -829,9 +838,11 @@ if (typeof(window.sessionStorage) === "undefined") {
                 },
                 "Applying house monitor": function () {
                     if (Settings.settings.features.house_timer) {
-                        const $timer = $(GM_getResourceText("html_house_timers"));
+                        const $timer = $(GM_getResourceText("html_house_timers")),
+                            $body = $("body");
+
                         $("#houseTimerInfo").addClass("avi-force-block");
-                        $("body").append("<style>#constructionNotifier,#houseTimerTable [data-typeid='Construction']{display:none!important}</style>");
+                        $body.append("<style>#constructionNotifier,#houseTimerTable [data-typeid='Construction']{display:none!important}</style>");
                         $("#houseTimerTable").prepend($timer);
                         $DOM.house_monitor.status = $("#avi-house-construction");
                         OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
@@ -839,7 +850,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                             characterData: true
                         });
                         $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
-                        $("body").append('<link rel="stylesheet" type="text/css" href="' + GM_getResourceText("css_house_timer_remove") + '"/>');
                     } else {
                         console.log("(skipped due to user settings)");
                     }
@@ -891,23 +901,23 @@ if (typeof(window.sessionStorage) === "undefined") {
                             $('<li class="avi-menu"/>')
                                 .append(
                                     $("<a href='javascript:;' data-delegate-click='#loadMobList' title='Open Battles'/>")
-                                        .html(GM_getResourceText("svg_sword_clash"))
+                                        .html('<img src="' + URLS.svg.sword_clash + '" class="avi-tip" alt="Open battles"/>')
                                 )
                                 .append(
                                     $("<a href='javascript:;' data-delegate-click='#loadFishing' title='Open Fishing Dock'/>")
-                                        .html(GM_getResourceText("svg_fishing"))
+                                        .html('<img src="' + URLS.svg.fishing + '" class="avi-tip" alt="Open Fishing Dock"/>')
                                 )
                                 .append(
                                     $("<a title='Open Lumber Mill' href='javascript:;' data-delegate-click='#loadWoodcutting'/>")
-                                        .html(GM_getResourceText("svg_log"))
+                                        .html('<img src="' + URLS.svg.log + '" class="avi-tip" alt="Open Lumber Mill"/>')
                                 )
                                 .append(
                                     $("<a title='Open Mines' href='javascript:;' data-delegate-click='#loadMining'/>")
-                                        .html(GM_getResourceText("svg_metal_bar"))
+                                        .html('<img src="' + URLS.svg.metal_bar + '" class="avi-tip" alt="Open Mines"/>')
                                 )
                                 .append(
                                     $("<a title='Open Quarry' href='javascript:;' data-delegate-click='#loadStonecutting'/>")
-                                        .html(GM_getResourceText("svg_stone_block"))
+                                        .html('<img src="' + URLS.svg.stone_block + '" class="avi-tip" alt="Open Quarry"/>')
                                 )
                         );
                 },
@@ -969,7 +979,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                     });
                 },
                 "Applying extra event listeners tooltips": function () {
-                    $(".avi-tip").tooltip();
+                    $(".avi-tip").tooltip({
+                        container: "body",
+                        viewport: {"selector": "body", "padding": 0}
+                    });
                     $("[data-delegate-click]").click($HANDLERS.click.delegate_click);
                 }
             };
