@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.5
+// @version        0.6
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -35,12 +35,16 @@
 // @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
 // @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?0.6
 // @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/house-timers.html
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.5
+// @resource    svg_sword_clash         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/sword-clash.svg
+// @resource    svg_log                 https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/log.svg
+// @resource    svg_metal_bar           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/metal-bar.svg
+// @resource    svg_stone_block         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/stone-block.svg
+// @resource    svg_fishing             https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/fishing.svg
 
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?2
-// @resource    svg_sword_clash         https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/svg/sword-clash.svg?6
 // @noframes
 // ==/UserScript==
 
@@ -706,7 +710,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
                     fn.openStdModal($DOM.modal.script_settings);
                 },
-                delegate_click:function(){
+                delegate_click: function () {
                     $($(this).data("delegate-click")).click();
                 }
             },
@@ -874,8 +878,24 @@ if (typeof(window.sessionStorage) === "undefined") {
                         .append(
                             $('<li class="avi-menu"/>')
                                 .append(
-                                    $("<a title='Open Battles' href='javascript:;' data-delegate-click='#loadMobList' class='avi-tip'/>")
+                                    $("<a href='javascript:;' data-delegate-click='#loadMobList' title='Open Battles'/>")
                                         .html(GM_getResourceText("svg_sword_clash"))
+                                )
+                                .append(
+                                    $("<a href='javascript:;' data-delegate-click='#loadFishing' title='Open Fishing Dock'/>")
+                                        .html(GM_getResourceText("svg_fishing"))
+                                )
+                                .append(
+                                    $("<a title='Open Lumber Mill' href='javascript:;' data-delegate-click='#loadWoodcutting'/>")
+                                        .html(GM_getResourceText("svg_log"))
+                                )
+                                .append(
+                                    $("<a title='Open Mines' href='javascript:;' data-delegate-click='#loadMining'/>")
+                                        .html(GM_getResourceText("svg_metal_bar"))
+                                )
+                                .append(
+                                    $("<a title='Open Quarry' href='javascript:;' data-delegate-click='#loadStonecutting'/>")
+                                        .html(GM_getResourceText("svg_stone_block"))
                                 )
                         );
                 },
