@@ -37,7 +37,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "4b8a84b9a514705e4615f5391880bfa182eadce6";
+    dev_hash = "b8fb623944711ee28edaed24727e8aeac5eddbc0";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -867,11 +867,11 @@ if (typeof(window.sessionStorage) === "undefined") {
                     GM_setValue("last_ver", GM_info.script.version);
                 },
                 "Loading script CSS": function () {
-                    const $head = $("head");
+                    const $head = $("head"),
+                        keys = Object.keys(URLS.css);
 
-                    for (var i = 0; i < LOAD_CSS.length; i++) {
-                        $head.append("<link type='text/css' rel='stylesheet' href='" + LOAD_CSS[i] + "'/>");
-                        delete LOAD_CSS[i];
+                    for (var i = 0; i < keys.length; i++) {
+                        $head.append("<link type='text/css' rel='stylesheet' href='" + URLS.css[keys[i]] + "'/>");
                     }
                 },
                 "Configuring script modal": function () {
