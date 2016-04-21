@@ -32,8 +32,6 @@
 
 // @resource    css_toast               https://raw.githubusercontent.com/Alorel/avabur-improved/master/lib/toastmessage/jquery.toastmessage.min.css
 // @resource    img_ajax_loader         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/ajax-loader.gif
-// @resource    sfx_circ_saw            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/circ_saw.wav.txt
-// @resource    sfx_msg_ding            https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/sfx/message_ding.wav.txt
 // @resource    svg_sword_clash         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/sword-clash.svg
 // @resource    svg_log                 https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/log.svg
 // @resource    svg_metal_bar           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/metal-bar.svg
@@ -47,6 +45,8 @@
 // @noframes
 // ==/UserScript==
 
+const is_dev = true,
+    dev_hash = "33cdb611b4f1b4d1232aa0abbc7301bed33a4e58";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -82,7 +82,21 @@ if (typeof(window.sessionStorage) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
     (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer) {
-        'use strict'; //https://github.com/Alorel/avabur-improved/blob/develop/avabur-improved.user.js
+        'use strict';
+        buzz.defaults.preload = "none";
+
+        const gh_url = function (author, repo, path) {
+            return "https://cdn.rawgit.com/" + author + "/" + repo + "/" +
+                (is_dev ? dev_hash : GM_info.script.version) + "/" + path;
+        };
+        console.log(gh_url("Alorel", "avabur-improved", "res/sfx/circ_saw.wav"));
+
+        const URLS = {
+            sfx: {
+                circ_saw: "https://cdn.rawgit.com/Alorel/avabur-improved/develop/res/sfx/circ_saw.wav",
+                message_ding: "https://cdn.rawgit.com/Alorel/avabur-improved/develop/res/sfx/message_ding.wav"
+            }
+        };
 
         ////////////////////////////////////////////////////////////////////////
         // These are the settings - you can safely change them, but they will //
@@ -199,8 +213,8 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
 
         const SFX = {
-            circ_saw: new buzz.sound(GM_getResourceText("sfx_circ_saw")),
-            msg_ding: new buzz.sound(GM_getResourceText("sfx_msg_ding"))
+            circ_saw: new buzz.sound(URLS.sfx.circ_saw),
+            msg_ding: new buzz.sound(URLS.sfx.message_ding)
         };
 
         /** AJAX spinners throughout the page */
