@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.6.1
+// @version        0.6.2
 // @icon           https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-16.png
 // @icon64         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -40,11 +40,10 @@
 // @resource    svg_stone_block         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/stone-block.svg
 // @resource    svg_fishing             https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/fishing.svg
 
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?0.6.2
 // @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/house-timers.html?0.6.1
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html?0.6.1
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.6.1
-
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @noframes
 // ==/UserScript==
 
@@ -177,9 +176,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 market_avg: null,
                 /** The 1st page high price */
                 market_high: null
-            },
-            inventory: {
-                overflow_preventing_container: $("#mCSB_4_container")
             },
             /** Game modals */
             modal: {
@@ -627,9 +623,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                                     if ($tbody.find("th:contains(Ingredient)").length) { //Bingo!
                                         $tbody.find(">tr>[data-th=Item]").each($HANDLERS.each.inventory_table_ingredients);
                                     }
-
-                                    $DOM.inventory.overflow_preventing_container.css("height", "auto")
-                                        .css("height", $DOM.inventory.overflow_preventing_container.height() + 150);
                                     break;
                                 }
                             }
@@ -751,9 +744,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                             const describedBy = $this.attr("aria-describedby"),
                                 $describedBy = $("#" + describedBy);
 
-                            if (!describedBy || !$describedBy.length) {
-                                console.error("Failed to lookup " + ingredient + ": $describedBy not found");
-                            } else {
+                            if (describedBy && !$describedBy.length) {
                                 const analysis = fn.analysePrice(r.l),
                                     $tds = $describedBy.find("tr[data-id=prices]>td");
 
