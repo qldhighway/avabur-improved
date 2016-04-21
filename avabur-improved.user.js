@@ -40,11 +40,11 @@
 // @resource    svg_stone_block         https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/stone-block.svg
 // @resource    svg_fishing             https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/svg/fishing.svg
 
-// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/css/avabur-improved.min.css?0.6.1
 // @resource    html_house_timers       https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/house-timers.html?0.6.1
 // @resource    html_market_tooltip     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/market-tooltip.html?0.6.1
 // @resource    html_settings_modal     https://raw.githubusercontent.com/Alorel/avabur-improved/master/res/html/script-settings.html?0.6.1
 
+// @resource    css_script              https://raw.githubusercontent.com/Alorel/avabur-improved/develop/res/css/avabur-improved.min.css?1
 // @noframes
 // ==/UserScript==
 
@@ -785,6 +785,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                         title: ingredient,
                         html: true,
                         trigger: "hover",
+                        container: "#modalContent",
+                        placement: "auto right",
+                        viewport: {"selector": "#modalContent", "padding": 0},
                         content: GM_getResourceText("html_market_tooltip")
                     });
 
