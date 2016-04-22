@@ -31,8 +31,8 @@
 // @noframes
 // ==/UserScript==
 
-const is_dev = false,
-    dev_hash = "65402595b31f88bce678fb980fb9024fb855ec70";
+const is_dev = true,
+    dev_hash = "8a3b5793905d79cf23cb619d816054fe9b973262";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -236,7 +236,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
 
         const FUNCTION_PERSISTENT_VARS = {
-            house_update_last_msg: null
+            house_update_last_msg: null,
         };
 
         /**
@@ -291,6 +291,24 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }
 
                 return time;
+            },
+            check_github_for_updates: function () {
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: UPDATE_URL,
+                    onload: function (r) {
+                        const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
+                        if (fn.versionCompare(GM_info.script.version, theirVersion) < 0) {
+                            $().toastmessage('showToast', {
+                                text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
+                                'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
+                                sticky: true,
+                                position: 'top-center',
+                                type: 'notice'
+                            });
+                        }
+                    }
+                });
             },
             svg: function ($this, url) {
                 $this.html('<img src="' + URLS.img.ajax_loader + '" alt="Loading"/>');
@@ -866,7 +884,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                             $("#houseTimerInfo").addClass("avi-force-block");
                             $body.append("<style>#constructionNotifier,#houseTimerTable [data-typeid='Construction']{display:none!important}</style>");
                             $("#houseTimerTable").prepend($timer);
-                            $DOM.house_monitor.status = $("#avi-house-construction");
+                            $DOM.house_monitor.status = $("#avi-house-construction").click($HANDLERS.click.house_state_refresh);
                             OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
                                 childList: true,
                                 characterData: true
@@ -978,24 +996,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                         });
                     }
                 },
-                "Checking GitHub for updates": function () {
-                    GM_xmlhttpRequest({
-                        method: "GET",
-                        url: UPDATE_URL,
-                        onload: function (r) {
-                            const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
-                            if (fn.versionCompare(GM_info.script.version, theirVersion) < 0) {
-                                $().toastmessage('showToast', {
-                                    text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
-                                    'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
-                                    sticky: true,
-                                    position: 'top-center',
-                                    type: 'notice'
-                                });
-                            }
-                        }
-                    });
-                },
                 "Applying extra event listeners tooltips": function () {
                     $(".avi-tip").tooltip({
                         container: "body",
@@ -1010,6 +1010,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                 ON_LOAD[keys[i]]();
                 delete ON_LOAD[keys[i]];
             }
+            fn.check_github_for_updates();
+            (new Interval("gh_update")).set(fn.check_github_for_updates, 60000);
         })();
     })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer);
 }
