@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.6.4
+// @version        0.6.5
 // @icon           https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-16.png
 // @icon64         https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -19,8 +19,6 @@
 // @grant          GM_deleteValue
 // @grant          GM_notification
 // @grant          GM_listValues
-// @grant          GM_getResourceURL
-// @grant          GM_getResourceText
 // @grant          GM_xmlhttpRequest
 // @connect        githubusercontent.com
 // @connect        github.com
@@ -30,9 +28,6 @@
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/master/lib/jalc-1.0.1.min.js
 // @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
 
-// @resource    html_house_timers       https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/html/house-timers.html
-// @resource    html_market_tooltip     https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/html/market-tooltip.html
-// @resource    html_settings_modal     https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/html/script-settings.html
 // @noframes
 // ==/UserScript==
 
@@ -109,6 +104,11 @@ if (typeof(window.sessionStorage) === "undefined") {
                 metal_bar: gh_url("res/svg/metal-bar.svg"),
                 stone_block: gh_url("res/svg/stone-block.svg"),
                 fishing: gh_url("res/svg/fishing.svg")
+            },
+            html: {
+                house_timers: gh_url("res/html/house-timers.html"),
+                settings_modal: gh_url("res/html/script-settings.html"),
+                market_tooltip: gh_url("res/html/market-tooltip.html")
             }
         };
 
@@ -209,15 +209,18 @@ if (typeof(window.sessionStorage) === "undefined") {
                 /** The title for modal windows */
                 modal_title: $("#modalTitle"),
                 /** The script settings modal */
-                script_settings: $(GM_getResourceText("html_settings_modal"))
+                script_settings: null
             },
             /** Navigation items */
             nav: {
                 market: $("#viewMarket")
             },
-            house_monitor: {},
+            house_monitor: {
+                status: null
+            },
             market: {
-                navlinks: $("#marketTypeSelector").find("a")
+                navlinks: $("#marketTypeSelector").find("a"),
+                market_tooltip: null
             }
         };
 
@@ -505,7 +508,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                         $DOM.currency_tooltip.market_high.text(fn.numberWithCommas(analysis.high));
                     },
                     house_requery: function (evt, r, opts) {
-                        if (opts.url.indexOf("house") !== -1 && typeof(r.responseJSON.m) !== "undefined") {
+                        if (opts.url.indexOf("house") !== -1 &&
+                            typeof(r.responseJSON) !== "undefined" &&
+                            typeof(r.responseJSON.m) !== "undefined") {
                             fn.handle_house_status_update(r.responseJSON.m);
                         }
                     },
@@ -809,7 +814,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         container: "body",
                         viewport: {"selector": "body", "padding": 0},
                         placement: "auto right",
-                        content: GM_getResourceText("html_market_tooltip")
+                        content: $DOM.market.market_tooltip
                     });
 
                     $span.mouseenter($HANDLERS.mouseenter.inventory_table_ingredient)
@@ -821,20 +826,29 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         (function () {
             const ON_LOAD = {
-                "Registering currency tooltip scanner": function () {
-                    const $tooltipTable = $(GM_getResourceText("html_market_tooltip"));
+                "Registering market tooltip users": function () {
+                    $.get(URLS.html.market_tooltip).done(function (r) {
+                        $DOM.market.market_tooltip = r;
 
-                    $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
-                    $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
-                    $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
-                    $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
-                    $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
+                        const $tooltipTable = $(r);
 
-                    //Add our stuff to the currency tooltips
-                    $DOM.currency_tooltip.the_tooltip.append($tooltipTable);
+                        $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
+                        $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
+                        $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
+                        $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
+                        $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
 
-                    OBSERVERS.currency_tooltips.observe($DOM.currency_tooltip.the_tooltip[0], {
-                        attributes: true
+                        //Add our stuff to the currency tooltips
+                        $DOM.currency_tooltip.the_tooltip.append($tooltipTable);
+
+                        OBSERVERS.currency_tooltips.observe($DOM.currency_tooltip.the_tooltip[0], {
+                            attributes: true
+                        });
+
+                        OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
+                            childList: true,
+                            characterData: true
+                        });
                     });
                 },
                 "Fixing some game CSS": function () {
@@ -845,18 +859,20 @@ if (typeof(window.sessionStorage) === "undefined") {
                 },
                 "Applying house monitor": function () {
                     if (Settings.settings.features.house_timer) {
-                        const $timer = $(GM_getResourceText("html_house_timers")),
-                            $body = $("body");
+                        $.get(URLS.html.house_timers).done(function (r) {
+                            const $timer = $(r),
+                                $body = $("body");
 
-                        $("#houseTimerInfo").addClass("avi-force-block");
-                        $body.append("<style>#constructionNotifier,#houseTimerTable [data-typeid='Construction']{display:none!important}</style>");
-                        $("#houseTimerTable").prepend($timer);
-                        $DOM.house_monitor.status = $("#avi-house-construction");
-                        OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
-                            childList: true,
-                            characterData: true
+                            $("#houseTimerInfo").addClass("avi-force-block");
+                            $body.append("<style>#constructionNotifier,#houseTimerTable [data-typeid='Construction']{display:none!important}</style>");
+                            $("#houseTimerTable").prepend($timer);
+                            $DOM.house_monitor.status = $("#avi-house-construction");
+                            OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
+                                childList: true,
+                                characterData: true
+                            });
+                            $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
                         });
-                        $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
                     } else {
                         console.log("(skipped due to user settings)");
                     }
@@ -882,19 +898,22 @@ if (typeof(window.sessionStorage) === "undefined") {
                     }
                 },
                 "Configuring script modal": function () {
-                    $("#modalContent").append($DOM.modal.script_settings);
-                    fn.tabify($DOM.modal.script_settings);
-                    $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
+                    $.get(URLS.html.settings_modal).done(function (r) {
+                        $DOM.modal.script_settings = $(r);
+                        $("#modalContent").append($DOM.modal.script_settings);
+                        fn.tabify($DOM.modal.script_settings);
+                        $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
 
-                    $DOM.modal.script_settings.find('[data-setting="notifications"]')
-                        .each($HANDLERS.each.settings_notification)
-                        .change($HANDLERS.change.settings_notification);
+                        $DOM.modal.script_settings.find('[data-setting="notifications"]')
+                            .each($HANDLERS.each.settings_notification)
+                            .change($HANDLERS.change.settings_notification);
 
-                    $DOM.modal.script_settings.find('[data-setting="features"]')
-                        .each($HANDLERS.each.settings_features)
-                        .change($HANDLERS.change.settings_feature);
+                        $DOM.modal.script_settings.find('[data-setting="features"]')
+                            .each($HANDLERS.each.settings_features)
+                            .change($HANDLERS.change.settings_feature);
 
-                    OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
+                        OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
+                    });
                 },
                 "Registering side menu entry": function () {
                     const $helpSection = $("#helpSection"),
@@ -929,12 +948,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 "Registering market shortcuts": function () {
                     $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
                         .click($HANDLERS.click.topbar_currency);
-                },
-                "Registering Inventory table observer": function () {
-                    OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
-                        childList: true,
-                        characterData: true
-                    });
                 },
                 "Staring whisper monitor": function () {
                     OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
