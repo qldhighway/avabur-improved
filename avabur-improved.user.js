@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.6.5
+// @version        0.6.6
 // @icon           https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-16.png
 // @icon64         https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -31,8 +31,8 @@
 // @noframes
 // ==/UserScript==
 
-const is_dev = true,
-    dev_hash = "8a3b5793905d79cf23cb619d816054fe9b973262";
+const is_dev = false,
+    dev_hash = "604495cad98e0431e4d8e8ef4f0782b05ca19416";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -890,6 +890,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                                 characterData: true
                             });
                             $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
+                            $.get("/house.php")
                         });
                     } else {
                         console.log("(skipped due to user settings)");
