@@ -41,10 +41,13 @@
 
   &-menu-shortcut {
     line-height: initial !important;
-    width: 24px;
-    height: 24px;
     border: 1px solid;
     padding: 2px;
+
+    > svg {
+      width: 24px;
+      height: 24px;
+    }
   }
 }
 

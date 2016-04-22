@@ -37,7 +37,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "e29fd876ccd6481fdb41454c9675334342eea542";
+    dev_hash = "99f462bbd8c1b796196a16f5352c4abcb7247168";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
