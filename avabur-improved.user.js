@@ -37,7 +37,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "31eafe21ccf1f79f935b1fdc7162cf59e53c4f25";
+    dev_hash = "77895c1887938ff14be2cdae9342da6a8313f2f0";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -288,6 +288,13 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }
 
                 return time;
+            },
+            svg: function ($this, url) {
+                $this.html('<img src="' + URLS.img.ajax_loader + '" alt="Loading"/>');
+                $.get(url).done(function (r) {
+                    $this.html($(r).find("svg"));
+                });
+                return $this;
             },
             /** @param {Interval} interval */
             house_status_update_end: function (interval) {
@@ -896,30 +903,32 @@ if (typeof(window.sessionStorage) === "undefined") {
                             .click($HANDLERS.click.script_menu);
 
                     $helpSection.append($menuLink);
+                    const $appends = {
+                        battle: $("<a href='javascript:;' data-delegate-click='#loadMobList' class='avi-tip avi-menu-shortcut'/>")
+                    };
                     $("#navWrapper").css("padding-top", $menuLink.height()).find("ul")
                         .append(
                             $('<li class="avi-menu"/>')
+                                .append($appends.battle)
                                 .append(
-                                    $("<a href='javascript:;' data-delegate-click='#loadMobList' title='Open Battles'/>")
-                                        .html('<img src="' + URLS.svg.sword_clash + '" class="avi-tip" alt="Open battles"/>')
+                                    $("<a href='javascript:;' data-delegate-click='#loadFishing'/>")
+                                        .html('<img src="' + URLS.svg.fishing + '" class="avi-tip avi-menu-shortcut" alt="Open Fishing Dock" title="Open Fishing Dock"/>')
                                 )
                                 .append(
-                                    $("<a href='javascript:;' data-delegate-click='#loadFishing' title='Open Fishing Dock'/>")
-                                        .html('<img src="' + URLS.svg.fishing + '" class="avi-tip" alt="Open Fishing Dock"/>')
+                                    $("<a href='javascript:;' data-delegate-click='#loadWoodcutting'/>")
+                                        .html('<img title="Open Lumber Mill" src="' + URLS.svg.log + '" class="avi-tip avi-menu-shortcut" alt="Open Lumber Mill"/>')
                                 )
                                 .append(
-                                    $("<a title='Open Lumber Mill' href='javascript:;' data-delegate-click='#loadWoodcutting'/>")
-                                        .html('<img src="' + URLS.svg.log + '" class="avi-tip" alt="Open Lumber Mill"/>')
+                                    $("<a href='javascript:;' data-delegate-click='#loadMining'/>")
+                                        .html('<img title="Open Mines" src="' + URLS.svg.metal_bar + '" class="avi-tip avi-menu-shortcut" alt="Open Mines"/>')
                                 )
                                 .append(
-                                    $("<a title='Open Mines' href='javascript:;' data-delegate-click='#loadMining'/>")
-                                        .html('<img src="' + URLS.svg.metal_bar + '" class="avi-tip" alt="Open Mines"/>')
-                                )
-                                .append(
-                                    $("<a title='Open Quarry' href='javascript:;' data-delegate-click='#loadStonecutting'/>")
-                                        .html('<img src="' + URLS.svg.stone_block + '" class="avi-tip" alt="Open Quarry"/>')
+                                    $("<a href='javascript:;' data-delegate-click='#loadStonecutting'/>")
+                                        .html('<img title="Open Quarry" src="' + URLS.svg.stone_block + '" class="avi-tip avi-menu-shortcut" alt="Open Quarry"/>')
                                 )
                         );
+
+                    fn.svg($appends.battle, URLS.svg.sword_clash);
                 },
                 "Registering market shortcuts": function () {
                     $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
