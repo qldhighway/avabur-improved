@@ -8,7 +8,7 @@
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
-// @version        0.6.3
+// @version        0.6.4
 // @icon           https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-16.png
 // @icon64         https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-64.png
 // @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
@@ -36,8 +36,8 @@
 // @noframes
 // ==/UserScript==
 
-const is_dev = true,
-    dev_hash = "264c87ffdea2e20014a145278b94ecdef11fa895";
+const is_dev = false,
+    dev_hash = "65402595b31f88bce678fb980fb9024fb855ec70";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
