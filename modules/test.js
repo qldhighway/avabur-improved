@@ -1,4 +1,5 @@
 exec_module({
+    name: "test",
     dependencies: {
         fn: ["gh_url", "svg"]
     },
