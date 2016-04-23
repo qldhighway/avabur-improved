@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "9a2809f963e416b1d91ce7c44515a079eb98a381";
+    dev_hash = "cbbc3764701bc14ebe80829654280a5532279ca7";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -1023,17 +1023,30 @@ if (typeof(window.sessionStorage) === "undefined") {
             (new Interval("gh_update")).set(fn.check_github_for_updates, 60000);
 
 
+            /**
+             *
+             * @param spec
+             * @constructor
+             */
             const Module = function (spec) {
                 this.spec = spec;
                 this.name = spec.name || false;
                 this.load = spec.load || false;
                 this.dependencies = {};
                 this.unload = spec.unload || false;
+                this.ok = true;
+                this.vars = {};
+                this.handlers = spec.handlers || {};
 
                 if (!this.name) {
                     Toast.error("Unable to init an unnamed module");
+                    this.ok = false;
                 } else if (this.load === false) {
                     Toast.error("Unable to init module " + this.name + ": loader not present");
+                    this.ok = false;
+                } else if (typeof(Module.prototype.loaded[this.name]) !== "undefined") {
+                    Toast.error("Cannot load module " + this.name + " again until it is unloaded!");
+                    this.ok = false;
                 }
             };
             Module.prototype = {
@@ -1052,21 +1065,39 @@ if (typeof(window.sessionStorage) === "undefined") {
                                             this.dependencies.fn[dependencyCategory[i]] = fn[dependencyCategory[i]];
                                         } else {
                                             Toast.error("Failed to load functional dependency " + dependencyCategory[i] + " for module " + this.name + ": no match.");
+                                            this.ok = false;
                                         }
                                     }
                                     break;
+                                case "info":
+                                    this.dependencies.info = GM_info;
+                                    break;
                                 default:
-                                    Toast.error("Failed to load dependency category " + dependencyKeys[keyIndex] + " of module " + this.name + ": unknown category")
+                                    Toast.error("Failed to load dependency category " + dependencyKeys[keyIndex] + " of module " + this.name + ": unknown category");
+                                    this.ok = false;
                             }
                         }
-                    }console.log(this);
+                    }
                     return this;
+                },
+                register: function () {
+                    this.resolveDependencies();
+                    if (this.ok && this.load) {
+                        this.load($, this);
+                    }
+                    Module.prototype.loaded[this.name] = this;
+                },
+                unregister: function () {
+                    if (this.ok && this.unload) {
+                        this.unload($, this);
+                    }
+                    delete Module.prototype.loaded[this.name];
                 }
             };
 
             const exec_module = function (module) {
                 const mod = new Module(module);
-                mod.resolveDependencies();
+                mod.register();
             };
 
             $.ajax(gh_url("modules/test.js"), {
