@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "f2c2a553f8d7736590abeea848ce5405ff1695d4";
+    dev_hash = "a425a6989a803d33b99b7efffaf5477c4d5c1c08";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -1084,7 +1084,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 mod.register();
             };
 
-            $.ajax(gh_url("modules/activity-shortcuts.js"), {
+            $.ajax(gh_url("modules/activity-shortcuts.min.js"), {
                 dataType: "text"
             }).done(function (r) {
                 eval(r);
