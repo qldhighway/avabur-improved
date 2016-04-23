@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "cbbc3764701bc14ebe80829654280a5532279ca7";
+    dev_hash = "02d93e3b41ed1b1511aae39bb739aacc379990cf";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -1037,6 +1037,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                 this.ok = true;
                 this.vars = {};
                 this.handlers = spec.handlers || {};
+                this.handlerise = spec.handlerise || false;
+                this.desc = spec.desc || null;
 
                 if (!this.name) {
                     Toast.error("Unable to init an unnamed module");
@@ -1051,6 +1053,15 @@ if (typeof(window.sessionStorage) === "undefined") {
             };
             Module.prototype = {
                 loaded: {},
+                applyGlobalHandlers: function () {
+                    const $context = $(document);
+
+                    $context.find(".avi-tip:not(.avi-d)").addClass("avi-d").tooltip({
+                        container: "body",
+                        viewport: {"selector": "body", "padding": 0}
+                    });
+                    $context.find("[data-delegate-click]").click($HANDLERS.click.delegate_click);
+                },
                 resolveDependencies: function () {
                     const dependencyKeys = Object.keys(this.spec.dependencies);
                     if (dependencyKeys.length) {
@@ -1084,6 +1095,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     this.resolveDependencies();
                     if (this.ok && this.load) {
                         this.load($, this);
+                        this.applyGlobalHandlers()
                     }
                     Module.prototype.loaded[this.name] = this;
                 },
@@ -1097,13 +1109,20 @@ if (typeof(window.sessionStorage) === "undefined") {
 
             const exec_module = function (module) {
                 const mod = new Module(module);
+                console.log(Module.prototype.loaded);
                 mod.register();
+                console.log(Module.prototype.loaded);
+
+                setTimeout(function () {
+                    mod.unregister();
+                    console.log(Module.prototype.loaded);
+                }, 5000);
             };
 
-            $.ajax(gh_url("modules/test.js"), {
+            $.ajax(gh_url("modules/activity-shortcuts.js"), {
                 dataType: "text"
             }).done(function (r) {
-                eval(r)
+                eval(r);
             });
         })();
     })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer);
