@@ -1,1 +1,1 @@
-console.log(document.URL.search);
+exec_module({foo: "bar"});
