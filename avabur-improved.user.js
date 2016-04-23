@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "a425a6989a803d33b99b7efffaf5477c4d5c1c08";
+    dev_hash = "3c43637021bbbc4b7819724452b5bfb26de0a412";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -243,7 +243,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         Interval.prototype = {
             _intervals: {},
             isRunning: function () {
-                return typeof(this._intervals[this.name]) !== "undefined"
+                return typeof(this._intervals[this.name]) !== "undefined";
             },
             clear: function () {
                 if (this.isRunning()) {
@@ -1067,7 +1067,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     this.resolveDependencies();
                     if (this.ok && this.load) {
                         this.load($, this);
-                        this.applyGlobalHandlers()
+                        this.applyGlobalHandlers();
                     }
                     Module.prototype.loaded[this.name] = this;
                 },
