@@ -1,6 +1,1 @@
-(function () {
-    Module = function () {
-    };
-    
-    test("foo");
-})();
+test("foo");
