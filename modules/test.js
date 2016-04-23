@@ -1,1 +1,1 @@
-new Foo();
+console.log(document.URL.search);
