@@ -1,5 +1,11 @@
 exec_module({
-    load: function ($) {
-        console.log($("body"));
+    dependencies: {
+        fn: ["gh_url", "svg"]
+    },
+    load: function ($, deps) {
+        console.log(deps);
+    },
+    unload: function ($, deps) {
+
     }
 });
