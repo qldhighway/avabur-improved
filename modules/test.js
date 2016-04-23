@@ -1,3 +1,5 @@
 exec_module({
-    load:function(){}
+    load: function ($) {
+        console.log($("body"));
+    }
 });
