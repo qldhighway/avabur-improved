@@ -1081,14 +1081,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 
             const exec_module = function (module) {
                 const mod = new Module(module);
-                console.log(Module.prototype.loaded);
                 mod.register();
-                console.log(Module.prototype.loaded);
-
-                setTimeout(function () {
-                    mod.unregister();
-                    console.log(Module.prototype.loaded);
-                }, 5000);
             };
 
             $.ajax(gh_url("modules/activity-shortcuts.js"), {
