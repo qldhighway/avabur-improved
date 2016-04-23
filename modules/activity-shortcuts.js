@@ -5,21 +5,24 @@ exec_module({
         fn: ["gh_url", "svg"]
     },
     load: function ($, module) {
-        const $a = $("<a href='javascript:;' class='avi-tip avi-menu-shortcut'/>"),
-            $appends = {
-                'sword-clash': $a.clone().data("delegate-click", "#loadMobList").attr("title", "Open Battles"),
-                fishing: $a.clone().data("delegate-click", "#loadFishing").attr("title", "Open Fishing"),
-                log: $a.clone().data("delegate-click", "#loadWoodcutting").attr("title", "Open Woodcutting"),
-                'metal-bar': $a.clone().data("delegate-click", "#loadMining").attr("title", "Open Mining"),
-                'stone-block': $a.clone().data("delegate-click", "#loadStonecutting").attr("title", "Open Stonecutting")
-            },
-            keys = Object.keys($appends);
+        var $a = $("<a href='javascript:;' class='avi-tip avi-menu-shortcut'/>"),
+            appends = [
+                ['sword-clash', 'MobList', 'Open Battles'],
+                ['fishing', 'Fishing', 'Open Fishing'],
+                ['log', 'Woodcutting', 'Open Woodcutting'],
+                ['metal-bar', 'Mining', 'Open Mining'],
+                ['stone-block', '#loadStonecutting', 'Open Stonecutting']
+            ], a;
 
         module.vars.li = $('<li class="avi-menu"/>');
 
-        for (var i = 0; i < keys.length; i++) {
-            module.vars.li.append($appends[keys[i]]);
-            module.dependencies.fn.svg($appends[keys[i]], module.dependencies.fn.gh_url("res/svg/" + keys[i] + ".svg"));
+        for (var i = 0; i < appends.length; i++) {
+            a = $a.clone().attr({
+                "data-delegate-click": "#load" + appends[i][1],
+                'title': appends[i][2]
+            });
+            module.vars.li.append(a);
+            module.dependencies.fn.svg(a, module.dependencies.fn.gh_url("res/svg/" + appends[i][0] + ".svg"))
         }
 
         $("#navWrapper").find("ul").append(module.vars.li);
