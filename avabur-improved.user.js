@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "1d84ebd9eafeb62fa9c9f315ef4299a012ecdddf";
+    dev_hash = "9a2809f963e416b1d91ce7c44515a079eb98a381";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -395,6 +395,13 @@ if (typeof(window.sessionStorage) === "undefined") {
                 };
                 ret.avg = Math.round((parseFloat(ret.low) + parseFloat(ret.high)) / 2);
                 return ret;
+            },
+            gh_url: function (path, author, repo) {
+                author = author || "Alorel";
+                repo = repo || "avabur-improved";
+
+                return "https://cdn.rawgit.com/" + author + "/" + repo + "/" +
+                    (is_dev ? dev_hash : GM_info.script.version) + "/" + path;
             },
             /**
              * Tabifies the div
@@ -1016,15 +1023,50 @@ if (typeof(window.sessionStorage) === "undefined") {
             (new Interval("gh_update")).set(fn.check_github_for_updates, 60000);
 
 
-            const exec_module = function (module) {
-                const deps = {};
+            const Module = function (spec) {
+                this.spec = spec;
+                this.name = spec.name || false;
+                this.load = spec.load || false;
+                this.dependencies = {};
+                this.unload = spec.unload || false;
 
-                if (typeof(module.dependencies) !== "undefined") {
-                    const dependencies = Object.keys(module.dependencies);
-                    console.log(dependencies);
+                if (!this.name) {
+                    Toast.error("Unable to init an unnamed module");
+                } else if (this.load === false) {
+                    Toast.error("Unable to init module " + this.name + ": loader not present");
                 }
+            };
+            Module.prototype = {
+                loaded: {},
+                resolveDependencies: function () {
+                    const dependencyKeys = Object.keys(this.spec.dependencies);
+                    if (dependencyKeys.length) {
+                        for (var keyIndex = 0; keyIndex < dependencyKeys.length; keyIndex++) {
+                            const dependencyCategory = this.spec.dependencies[dependencyKeys[keyIndex]];
 
-                module.load($, deps);
+                            switch (dependencyKeys[keyIndex]) {
+                                case "fn":
+                                    this.dependencies.fn = {};
+                                    for (var i = 0; i < dependencyCategory.length; i++) {
+                                        if (typeof(fn[dependencyCategory[i]]) !== "undefined") {
+                                            this.dependencies.fn[dependencyCategory[i]] = fn[dependencyCategory[i]];
+                                        } else {
+                                            Toast.error("Failed to load functional dependency " + dependencyCategory[i] + " for module " + this.name + ": no match.");
+                                        }
+                                    }
+                                    break;
+                                default:
+                                    Toast.error("Failed to load dependency category " + dependencyKeys[keyIndex] + " of module " + this.name + ": unknown category")
+                            }
+                        }
+                    }console.log(this);
+                    return this;
+                }
+            };
+
+            const exec_module = function (module) {
+                const mod = new Module(module);
+                mod.resolveDependencies();
             };
 
             $.ajax(gh_url("modules/test.js"), {
