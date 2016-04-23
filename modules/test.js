@@ -1,1 +1,3 @@
-test("foo");
+exec_module({
+    load:function(){}
+});
