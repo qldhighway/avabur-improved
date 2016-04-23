@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "9b482f0438d6373cc1476cfe21f8af7277dc5254";
+    dev_hash = "ac52752a4f675e10ac053bb488e99bf8bf2bb97c";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -1019,7 +1019,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 console.log(resp);
             }
 
-            $.get(gh_url("modules/test.js"),null,function(r){
+            $.get(gh_url("modules/test.js"), null, function (r) {
                 console.log(r);
             });
         })();
