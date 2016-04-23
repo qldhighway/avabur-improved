@@ -1,6 +1,6 @@
 exec_module({
-    name: "test",
-    desc: "",
+    name: "Activity Shortcuts",
+    desc: "Registers activity shortcuts on the side menu",
     dependencies: {
         fn: ["gh_url", "svg"]
     },

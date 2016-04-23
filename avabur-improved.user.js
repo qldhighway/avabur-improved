@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "02d93e3b41ed1b1511aae39bb739aacc379990cf";
+    dev_hash = "2dfee1f726d61f0cb9f8e2eb6f826ac3d6da49db";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -96,13 +96,6 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             img: {
                 ajax_loader: gh_url("res/img/ajax-loader.gif")
-            },
-            svg: {
-                sword_clash: gh_url("res/svg/sword-clash.svg"),
-                log: gh_url("res/svg/log.svg"),
-                metal_bar: gh_url("res/svg/metal-bar.svg"),
-                stone_block: gh_url("res/svg/stone-block.svg"),
-                fishing: gh_url("res/svg/fishing.svg")
             },
             html: {
                 house_timers: gh_url("res/html/house-timers.html"),
@@ -946,31 +939,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                     const $helpSection = $("#helpSection"),
                         $menuLink = $('<a href="javascript:;"/>')
                             .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
-                            .click($HANDLERS.click.script_menu),
-                        $appends = {
-                            battle: $("<a href='javascript:;' data-delegate-click='#loadMobList' class='avi-tip avi-menu-shortcut' title='Open Battles'/>"),
-                            fishing: $("<a href='javascript:;' data-delegate-click='#loadFishing' class='avi-tip avi-menu-shortcut' title='Open Fishing'/>"),
-                            wc: $("<a href='javascript:;' data-delegate-click='#loadWoodcutting' class='avi-tip avi-menu-shortcut' title='Open Woodcutting'/>"),
-                            mine: $("<a href='javascript:;' data-delegate-click='#loadMining' class='avi-tip avi-menu-shortcut' title='Open Ironing (lol)'/>"),
-                            quarry: $("<a href='javascript:;' data-delegate-click='#loadStonecutting' class='avi-tip avi-menu-shortcut' title='Open Stoners'/>")
-                        };
+                            .click($HANDLERS.click.script_menu);
 
                     $helpSection.append($menuLink);
-                    $("#navWrapper").css("padding-top", $menuLink.height()).find("ul")
-                        .append(
-                            $('<li class="avi-menu"/>')
-                                .append($appends.battle)
-                                .append($appends.fishing)
-                                .append($appends.wc)
-                                .append($appends.mine)
-                                .append($appends.quarry)
-                        );
-
-                    fn.svg($appends.battle, URLS.svg.sword_clash);
-                    fn.svg($appends.fishing, URLS.svg.fishing);
-                    fn.svg($appends.wc, URLS.svg.log);
-                    fn.svg($appends.mine, URLS.svg.metal_bar);
-                    fn.svg($appends.quarry, URLS.svg.stone_block);
+                    $("#navWrapper").css("padding-top", $menuLink.height()).find("ul");
                 },
                 "Registering market shortcuts": function () {
                     $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
