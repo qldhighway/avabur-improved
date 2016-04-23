@@ -1,1 +1,1 @@
-exec_module({foo: "bar"});
+alert(1);
