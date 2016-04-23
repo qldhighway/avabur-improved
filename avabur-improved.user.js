@@ -69,7 +69,6 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else {
     (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer) {
         'use strict';
-        buzz.defaults.preload = "none";
 
         /**
          * Creates a GitHub CDN URL
@@ -352,7 +351,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                     } else if (text.indexOf("are available")) {
                         fn.house_status_update_end(interval);
                     } else {
-                        $.post("/house.php", null, Request.prototype.callbacks.success.house_requery, "json");
+                        setTimeout(function () {
+                            $.get("/house.php")
+                        }, 3000);
                     }
                 }
             },
