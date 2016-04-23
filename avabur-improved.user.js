@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "1ee30faa73645b3e49768efcd897f92718c506ce";
+    dev_hash = "9b482f0438d6373cc1476cfe21f8af7277dc5254";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -1015,13 +1015,12 @@ if (typeof(window.sessionStorage) === "undefined") {
             fn.check_github_for_updates();
             (new Interval("gh_update")).set(fn.check_github_for_updates, 60000);
 
-            const Foo = function () {
-                console.log("yarp");
-            };
+            function exec_module(resp) {
+                console.log(resp);
+            }
 
-            $.get(gh_url("modules/test.js")).done(function (r) {
-                var module = eval(r);
-                console.log(module);
+            $.get(gh_url("modules/test.js"),null,function(r){
+                console.log(r);
             });
         })();
     })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer);
