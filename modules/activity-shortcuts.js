@@ -23,10 +23,10 @@ exec_module({
         $("#navWrapper").find("ul").append(module.vars.li);
 
         module.dependencies.fn.svg($appends.battle, module.dependencies.fn.gh_url("res/svg/sword-clash.svg"));
-        module.dependencies.fn.svg($appends.fishing, module.dependencies.fn.gh_url("res/svg/log.svg"));
-        module.dependencies.fn.svg($appends.wc, module.dependencies.fn.gh_url("res/svg/metal-bar.svg"));
-        module.dependencies.fn.svg($appends.mine, module.dependencies.fn.gh_url("res/svg/stone-block.svg"));
-        module.dependencies.fn.svg($appends.quarry, module.dependencies.fn.gh_url("res/svg/fishing.svg"));
+        module.dependencies.fn.svg($appends.fishing, module.dependencies.fn.gh_url("res/svg/fishing.svg"));
+        module.dependencies.fn.svg($appends.wc, module.dependencies.fn.gh_url("res/svg/log.svg"));
+        module.dependencies.fn.svg($appends.mine, module.dependencies.fn.gh_url("res/svg/metal-bar.svg"));
+        module.dependencies.fn.svg($appends.quarry, module.dependencies.fn.gh_url("res/svg/stone-block.svg"));
     },
     unload: function ($, module) {
         module.vars.li.remove();
