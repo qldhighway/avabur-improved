@@ -10,15 +10,13 @@ exec_module({
             $.post("/house.php");
         }
 
-        console.log(module);
-
         module.vars = {
             notified: false,
             house_requery: function (evt, r, opts) {
+                console.debug(r);
                 if (opts.url.indexOf("house") !== -1 &&
                     typeof(r.responseJSON) !== "undefined" &&
                     typeof(r.responseJSON.m) !== "undefined") {
-
 
                     var text = r.responseJSON.m,
                         interval = new module.dependencies.classes.Interval(module.spec.name);
@@ -48,7 +46,7 @@ exec_module({
         };
 
         $(document).ajaxComplete(module.vars.house_requery);
-        refresh();
+        $.ajax("/house.php",{global:false}).done(function(r){console.error(r)});
     },
     unload: function ($, module) {
         $(document).unbind("ajaxComplete", module.vars.house_requery);
