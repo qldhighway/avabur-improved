@@ -27,6 +27,26 @@ exec_module({
                 .click($click$refresh));
         }
 
+        function handle_text(text) {
+            var interval = new module.dependencies.classes.Interval(module.spec.name);
+            interval.clear();
+
+            if (text.indexOf("available again") !== -1) { // Working
+                var timer = new module.dependencies.classes.AloTimer(module.dependencies.fn.parseTimeStringLong(text));
+                interval.set(function () {
+                    if (timer.isFinished()) {
+                        end(interval);
+                    } else {
+                        module.vars.paneSpan.removeClass("avi-highlight").text(timer.toString());
+                    }
+                }, 1000);
+            } else if (text.indexOf("are available") !== -1) { // Available
+                end(interval);
+            } else {
+                setTimeout($click$refresh, 3000); // Fuck knows - try again.
+            }
+        }
+
         module.vars = {
             paneLabel: $baseDiv.clone().addClass("col-lg-5 gold").text("Construction:"),
             paneSpan: $('<span>House unavailable</span>'),
@@ -35,24 +55,7 @@ exec_module({
                     typeof(r.responseJSON) !== "undefined" &&
                     typeof(r.responseJSON.m) !== "undefined") {
 
-                    var text = r.responseJSON.m,
-                        interval = new module.dependencies.classes.Interval(module.spec.name);
-                    interval.clear();
-
-                    if (text.indexOf("available again") !== -1) { // Working
-                        var timer = new module.dependencies.classes.AloTimer(module.dependencies.fn.parseTimeStringLong(text));
-                        interval.set(function () {
-                            if (timer.isFinished()) {
-                                end(interval);
-                            } else {
-                                module.vars.paneSpan.removeClass("avi-highlight").text(timer.toString());
-                            }
-                        }, 1000);
-                    } else if (text.indexOf("are available") !== -1) { // Available
-                        end(interval);
-                    } else {
-                        setTimeout($click$refresh, 3000); // Fuck knows - try again.
-                    }
+                    handle_text(r.responseJSON.m);
                 }
             },
             css: (new module.dependencies.classes.CssManager()).setRules({
@@ -66,7 +69,11 @@ exec_module({
         $("#houseTimerInfo").addClass("avi-force-block");
         $("#houseTimerTable").prepend(module.vars.paneLabel, module.vars.paneSpanContainer);
         $(document).ajaxComplete(module.vars.house_requery);
-        $click$refresh();
+        $.ajax("/house.php", {global: false}).done(function (r) {
+            if (typeof(r.m) !== "undefined") {
+                handle_text(r.m);
+            }
+        });
     },
     unload: function ($, module) {
         module.vars.paneLabel.remove();
