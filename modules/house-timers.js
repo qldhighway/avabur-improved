@@ -72,11 +72,14 @@ exec_module({
         $("#houseTimerInfo").addClass("avi-force-block");
         $("#houseTimerTable").prepend(module.vars.paneLabel, module.vars.paneSpanContainer);
         $(document).ajaxComplete(module.vars.house_requery);
+        $click$refresh();
     },
     unload: function ($, module) {
         module.vars.paneLabel.remove();
         module.vars.paneSpanContainer.remove();
         module.vars.css.removeFromDOM();
+        $(document).unbind("ajaxComplete", module.vars.house_requery);
         $("#houseTimerInfo").removeClass("avi-force-block");
+        (new module.dependencies.classes.Interval(module.spec.name)).clear();
     }
 });
