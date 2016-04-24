@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "563bf6988fbe65442cd7e339ca83681d4c359aef";
+    dev_hash = "9cad7de0ded5333f1b16f59849c0391292befc86";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -843,6 +843,55 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
+        /**
+         * Manages CSS rules
+         * @constructor
+         */
+        const CssManager = function () {
+            this.cssString = "";
+            this.$style = null;
+        };
+
+        CssManager.prototype = {
+            setRules: function (rules) {
+                const generated = [];
+                for (var selector in rules) {
+                    if (rules.hasOwnProperty(selector)) {
+                        const selectorRules = [];
+
+                        for (var cssProp in rules[selector]) {
+                            if (rules[selector].hasOwnProperty(cssProp)) {
+                                selectorRules.push(cssProp + ":" + rules[selector][cssProp]);
+                            }
+                        }
+
+                        if (selectorRules.length) {
+                            generated.push(selector + "{" + selectorRules.join(";") + "}");
+                        }
+                    }
+                }
+
+                if (generated.length) {
+                    this.cssString = generated.join("");
+                }
+
+                return this;
+            },
+            addToDOM: function () {
+                this.removeFromDOM();
+                this.$style = $('<style>' + this.cssString + '</style>');
+                $("head").append(this.$style);
+                return this;
+            },
+            removeFromDOM: function () {
+                if (this.$style) {
+                    this.$style.remove();
+                }
+                this.$style = null;
+                return this;
+            }
+        };
+
         (function () {
             const ON_LOAD = {
                 "Registering market tooltip users": function () {
@@ -1084,11 +1133,18 @@ if (typeof(window.sessionStorage) === "undefined") {
                 mod.register();
             };
 
-            $.ajax(gh_url("modules/activity-shortcuts.min.js"), {
-                dataType: "text"
-            }).done(function (r) {
-                eval(r);
-            });
+            const required_modules = [
+                "activity-shortcuts",
+                "house-timers"
+            ];
+
+            for (var j = 0; j < required_modules.length; j++) {
+                $.ajax(gh_url("modules/" + required_modules[i] + ".min.js"), {
+                    dataType: "text"
+                }).done(function (r) {
+                    eval(r);
+                });
+            }
         })();
     })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer);
 }
