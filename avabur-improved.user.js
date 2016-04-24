@@ -1084,6 +1084,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 this.handlers = spec.handlers || {};
                 this.handlerise = spec.handlerise || false;
                 this.desc = spec.desc || null;
+                this.settings = {};
 
                 if (!this.name) {
                     Toast.error("Unable to init an unnamed module");
@@ -1095,10 +1096,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                     Toast.error("Cannot load module " + this.name + " again until it is unloaded!");
                     this.ok = false;
                 } else {
-                    this.settings = $.extend(
-                        spec.default_settings || {},
-                        JSON.parse(GM_getValue("settings:" + this.name) || "{}")
-                    );
+                    if (typeof(spec.settings) !== "undefined") {
+                        this.settings = $.extend(
+                            spec.settings.defaults || {},
+                            JSON.parse(GM_getValue("settings:" + this.name) || "{}")
+                        );
+                    }
                 }
             };
             Module.prototype = {

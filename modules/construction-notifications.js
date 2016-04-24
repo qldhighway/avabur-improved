@@ -5,9 +5,15 @@ exec_module({
         fn: ["parseTimeStringLong", "gh_url", "notification"],
         classes: ["AloTimer", "Interval", "buzz"]
     },
-    default_settings: {
-        sound: true,
-        toast: true
+    settings: {
+        desc: {
+            Sound: "Play a sound when construction finishes",
+            toast: "Display a toast when construction finishes"
+        },
+        defaults: {
+            sound: true,
+            toast: true
+        }
     },
     load: function ($, module) {
         function refresh() {
