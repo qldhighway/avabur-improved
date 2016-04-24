@@ -70,7 +70,7 @@ exec_module({
 
         $("#houseTimerInfo").addClass("avi-force-block");
         $("#houseTimerTable").prepend(module.vars.paneLabel, module.vars.paneSpanContainer);
-        $(document).ajaxComplete();
+        $(document).ajaxComplete(module.vars.house_requery);
     },
     unload: function ($, module) {
         module.vars.paneLabel.remove();
