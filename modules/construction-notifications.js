@@ -2,8 +2,8 @@ exec_module({
     name: "Construction notifications",
     desc: "Creates toast & sound notifications when house construction finishes",
     dependencies: {
-        fn: ["parseTimeStringLong"],
-        classes: ["AloTimer", "Interval"]
+        fn: ["parseTimeStringLong", "gh_url"],
+        classes: ["AloTimer", "Interval", "buzz"]
     },
     load: function ($, module) {
         function refresh() {
@@ -35,18 +35,23 @@ exec_module({
             }
         }
 
+        module.vars.notified = false;
         module.vars = {
             notified: false,
             house_requery: function (evt, r, opts) {
-                console.debug(r);
                 if (opts.url.indexOf("house") !== -1 &&
                     typeof(r.responseJSON) !== "undefined" &&
                     typeof(r.responseJSON.m) !== "undefined") {
 
                     handle_text(r.responseJSON.m);
                 }
-            }
+            },
+            sfx: new module.dependencies.classes.buzz.sound(
+                module.dependencies.fn.gh_url("res/sfx/circ_saw.wav")
+            )
         };
+
+        module.vars.sfx.play();
 
         $(document).ajaxComplete(module.vars.house_requery);
         $.ajax("/house.php", {global: false}).done(function (r) {

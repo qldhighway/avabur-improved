@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "7873e59af9eede60ec80775a160044bb72b52b98";
+    dev_hash = "54224dc43708bd71dcc69479c9177db566340c54";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -844,6 +844,8 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
 
         const classes = {
+
+            buzz: buzz,
             /**
              * Manages CSS rules
              * @constructor
@@ -882,7 +884,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             set: function (callback, frequency) {
                 this.clear();
                 var int = setInterval(callback, frequency);
-                classes.Interval.prototype._intervals[classes.Interval.prototype.name] = int;
+                classes.Interval.prototype._intervals[this.name] = int;
 
                 return int;
             }
@@ -931,6 +933,19 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         (function () {
             const ON_LOAD = {
+                "Fixing some game CSS": function () {
+                    (new classes.CssManager("onload")).setRules({
+                        "#viewedClanDescription": {
+                            "min-height": "148px"
+                        },
+                        ".materials": {
+                            color: $("#crafting_materials").css("color")
+                        },
+                        ".fragments": {
+                            color: $("#gem_fragments").css("color")
+                        }
+                    }).addToDOM();
+                },
                 "Registering market tooltip users": function () {
                     $.get(URLS.html.market_tooltip).done(function (r) {
                         $DOM.market.market_tooltip = r;
@@ -955,33 +970,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                             characterData: true
                         });
                     });
-                },
-                "Fixing some game CSS": function () {
-                    $("head").append('<style>.materials{color:' +
-                        $("#crafting_materials").css("color") +
-                        '}.fragments{color:' +
-                        $("#gem_fragments").css("color") + '}</style>');
-                },
-                "Applying house monitor": function () {
-                    if (Settings.settings.features.house_timer) {
-                        $.get(URLS.html.house_timers).done(function (r) {
-                            const $timer = $(r),
-                                $body = $("body");
-
-                            $("#houseTimerInfo").addClass("avi-force-block");
-                            $body.append("<style>#constructionNotifier,#houseTimerTable [data-typeid='Construction']{display:none!important}</style>");
-                            $("#houseTimerTable").prepend($timer);
-                            $DOM.house_monitor.status = $("#avi-house-construction").click($HANDLERS.click.house_state_refresh);
-                            OBSERVERS.house_status.observe(document.querySelector("#house_notification"), {
-                                childList: true,
-                                characterData: true
-                            });
-                            $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
-                            $.get("/house.php")
-                        });
-                    } else {
-                        console.log("(skipped due to user settings)");
-                    }
                 },
                 "Checking if the script has been updated": function () {
                     if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
