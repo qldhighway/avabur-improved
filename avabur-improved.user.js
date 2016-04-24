@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "b16ed67a1aec4dcff8a833188f7f31032277f03b";
+    dev_hash = "a89b7069be9d69d5242ec73b6b87ccf06a62d784";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {

@@ -2,8 +2,8 @@ exec_module({
     name: "House timers",
     desc: "Shows house construction timers without the need for an alarm clock",
     dependencies: {
-        classes: ["AloTimer", "CssManager", "Interval"],
-        fn: ["parseTimeStringLong"]
+        fn: ["parseTimeStringLong"],
+        classes: ["AloTimer", "CssManager", "Interval"]
     },
     load: function ($, module) {
         var $baseDiv = $("<div class='col-xs-6 col-md-12'/>");
