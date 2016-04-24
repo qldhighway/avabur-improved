@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "9cad7de0ded5333f1b16f59849c0391292befc86";
+    dev_hash = "187059841da31b17e55fe406f68035b6c0203295";
 /** Create toast messages */
 const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
     error: function (msg) {
@@ -843,16 +843,20 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
-        /**
-         * Manages CSS rules
-         * @constructor
-         */
-        const CssManager = function () {
-            this.cssString = "";
-            this.$style = null;
+        const classes = {
+            /**
+             * Manages CSS rules
+             * @constructor
+             */
+            CssManager: function () {
+                this.cssString = "";
+                this.$style = null;
+            },
+
+            AloTimer: AloTimer
         };
 
-        CssManager.prototype = {
+        classes.CssManager.prototype = {
             setRules: function (rules) {
                 const generated = [];
                 for (var selector in rules) {
@@ -1087,12 +1091,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                     const dependencyKeys = Object.keys(this.spec.dependencies);
                     if (dependencyKeys.length) {
                         for (var keyIndex = 0; keyIndex < dependencyKeys.length; keyIndex++) {
-                            const dependencyCategory = this.spec.dependencies[dependencyKeys[keyIndex]];
+                            var dependencyCategory = this.spec.dependencies[dependencyKeys[keyIndex]], i;
 
                             switch (dependencyKeys[keyIndex]) {
                                 case "fn":
                                     this.dependencies.fn = {};
-                                    for (var i = 0; i < dependencyCategory.length; i++) {
+                                    for (i = 0; i < dependencyCategory.length; i++) {
                                         if (typeof(fn[dependencyCategory[i]]) !== "undefined") {
                                             this.dependencies.fn[dependencyCategory[i]] = fn[dependencyCategory[i]];
                                         } else {
@@ -1103,6 +1107,16 @@ if (typeof(window.sessionStorage) === "undefined") {
                                     break;
                                 case "info":
                                     this.dependencies.info = GM_info;
+                                    break;
+                                case "classes":
+                                    this.dependencies.classes = {};
+                                    for (i = 0; i < dependencyCategory.length; i++) {
+                                        if (typeof(classes[dependencyCategory[i]]) !== "undefined") {
+                                            this.dependencies.classes[dependencyCategory[i]] = classes[dependencyCategory[i]];
+                                        } else {
+                                            Toast.error("Failed to load class dependency " + dependencyCategory[i] + " for module " + this.name + ": no match");
+                                        }
+                                    }
                                     break;
                                 default:
                                     Toast.error("Failed to load dependency category " + dependencyKeys[keyIndex] + " of module " + this.name + ": unknown category");
@@ -1139,7 +1153,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             ];
 
             for (var j = 0; j < required_modules.length; j++) {
-                $.ajax(gh_url("modules/" + required_modules[i] + ".min.js"), {
+                $.ajax(gh_url("modules/" + required_modules[j] + ".min.js"), {
                     dataType: "text"
                 }).done(function (r) {
                     eval(r);
