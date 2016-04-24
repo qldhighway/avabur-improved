@@ -2,7 +2,7 @@ exec_module({
     name: "Construction notifications",
     desc: "Creates toast & sound notifications when house construction finishes",
     dependencies: {
-        fn: ["parseTimeStringLong", "gh_url"],
+        fn: ["parseTimeStringLong", "gh_url", "notification"],
         classes: ["AloTimer", "Interval", "buzz"]
     },
     load: function ($, module) {
@@ -19,19 +19,19 @@ exec_module({
                 interval.set(function () {
                     if (timer.isFinished()) {
                         interval.clear();
-                        console.debug("Construction: available (NOT direct). Notified: " + (module.vars.notified ? "Y" : "N"));
+                        module.vars.sfx.play();
+                        module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
                         module.vars.notified = true;
                     } else {
-                        console.debug("Construction: available in " + timer.toString() + ". Notified: " + (module.vars.notified ? "Y" : "N"));
                         module.vars.notified = false;
                     }
                 }, 1000);
             } else if (text.indexOf("are available") !== -1) { // Available
-                console.debug("Construction: available (direct). Notified: " + (module.vars.notified ? "Y" : "N"));
+                module.vars.sfx.play();
+                module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
                 module.vars.notified = true;
             } else {
                 setTimeout(refresh, 3000); // Fuck knows - try again.
-                console.debug("Construction: fuck knows. Notified: " + (module.vars.notified ? "Y" : "N"));
             }
         }
 
@@ -50,8 +50,6 @@ exec_module({
                 module.dependencies.fn.gh_url("res/sfx/circ_saw.wav")
             )
         };
-
-        module.vars.sfx.play();
 
         $(document).ajaxComplete(module.vars.house_requery);
         $.ajax("/house.php", {global: false}).done(function (r) {
