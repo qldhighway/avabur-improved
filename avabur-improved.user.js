@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "a71c530e8209fb32b8805eadb6cb8254efefc351";
+    dev_hash = "0dbcda15f8b0b60b36e4e95e711a75ab5467e175";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -1097,7 +1097,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 } else {
                     this.settings = $.extend(
                         spec.default_settings || {},
-                        JSON.parse(GM_getValue("settings:" + this.name) || {})
+                        JSON.parse(GM_getValue("settings:" + this.name) || "{}")
                     );
                 }
             };

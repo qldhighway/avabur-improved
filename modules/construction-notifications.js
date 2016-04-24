@@ -10,19 +10,20 @@ exec_module({
         toast: true
     },
     load: function ($, module) {
-        console.debug(module.settings);
         function refresh() {
             $.post("/house.php");
         }
 
         function notify() {
+            if (!module.vars.notified) {
+                if (module.settings.sound) {
+                    module.vars.sfx.play();
+                }
+                if (module.settings.toast) {
+                    module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
+                }
+            }
             module.vars.notified = true;
-            if (module.settings.sound) {
-                module.vars.sfx.play();
-            }
-            if (module.settings.toast) {
-                module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
-            }
         }
 
         function handle_text(text) {
