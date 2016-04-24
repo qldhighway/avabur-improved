@@ -25,6 +25,7 @@ exec_module({
                 $('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline;padding-right:5px">Ready!</span>')
             ).append($("<a href='javascript:;'>(refresh)</a>")
                 .click($click$refresh));
+            module.applyGlobalHandlers(module.vars.paneSpan);
         }
 
         function handle_text(text) {
