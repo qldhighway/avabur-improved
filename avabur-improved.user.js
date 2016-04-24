@@ -32,9 +32,9 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "187059841da31b17e55fe406f68035b6c0203295";
+    dev_hash = "6a163357401435876333510bc4e170aa9c1adea6";
 /** Create toast messages */
-const Toast = { //Tampermonkey's scoping won't let this constant be globally visible
+const Toast = {
     error: function (msg) {
         console.error(msg);
         $().toastmessage('showErrorToast', msg);
@@ -341,7 +341,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                                 $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
                             }
                         }, 1000);
-                    } else if (text.indexOf("are available")) {
+                    } else if (text.indexOf("are available") !== -1) {
                         fn.house_status_update_end(interval);
                     } else {
                         setTimeout(function () {
@@ -853,8 +853,39 @@ if (typeof(window.sessionStorage) === "undefined") {
                 this.$style = null;
             },
 
-            AloTimer: AloTimer
+            AloTimer: AloTimer,
+
+            /**
+             * Interval manager
+             * @param {String} name Interval name/ID
+             * @constructor
+             */
+            Interval: function (name) {
+                this.name = name;
+            }
         };
+
+        classes.Interval.prototype = {
+            _intervals: {},
+            isRunning: function () {
+                return typeof(this._intervals[this.name]) !== "undefined";
+            },
+            clear: function () {
+                if (this.isRunning()) {
+                    clearInterval(this._intervals[this.name]);
+                    delete this._intervals[this.name];
+                    return true;
+                }
+
+                return false;
+            },
+            set: function (callback, frequency) {
+                this.clear();
+                this._intervals[this.name] = setInterval(callback, frequency);
+                return this._intervals[this.name];
+            }
+        };
+
 
         classes.CssManager.prototype = {
             setRules: function (rules) {
@@ -1078,8 +1109,8 @@ if (typeof(window.sessionStorage) === "undefined") {
             };
             Module.prototype = {
                 loaded: {},
-                applyGlobalHandlers: function () {
-                    const $context = $(document);
+                applyGlobalHandlers: function ($context) {
+                    $context = $context || $(document);
 
                     $context.find(".avi-tip:not(.avi-d)").addClass("avi-d").tooltip({
                         container: "body",
@@ -1152,12 +1183,14 @@ if (typeof(window.sessionStorage) === "undefined") {
                 "house-timers"
             ];
 
+            const module_ajax_callback = function (r) {
+                eval(r);
+            };
+
             for (var j = 0; j < required_modules.length; j++) {
                 $.ajax(gh_url("modules/" + required_modules[j] + ".min.js"), {
                     dataType: "text"
-                }).done(function (r) {
-                    eval(r);
-                });
+                }).done(module_ajax_callback);
             }
         })();
     })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer);
