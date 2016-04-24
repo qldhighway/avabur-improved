@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "a6e056b4eb7082d7f4be0eed4e3052ba6a5dc2b9";
+    dev_hash = "a71c530e8209fb32b8805eadb6cb8254efefc351";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -98,7 +98,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 ajax_loader: gh_url("res/img/ajax-loader.gif")
             },
             html: {
-                house_timers: gh_url("res/html/house-timers.html"),
                 settings_modal: gh_url("res/html/script-settings.html"),
                 market_tooltip: gh_url("res/html/market-tooltip.html")
             }
@@ -1095,6 +1094,11 @@ if (typeof(window.sessionStorage) === "undefined") {
                 } else if (typeof(Module.prototype.loaded[this.name]) !== "undefined") {
                     Toast.error("Cannot load module " + this.name + " again until it is unloaded!");
                     this.ok = false;
+                } else {
+                    this.settings = $.extend(
+                        spec.default_settings || {},
+                        JSON.parse(GM_getValue("settings:" + this.name) || {})
+                    );
                 }
             };
             Module.prototype = {

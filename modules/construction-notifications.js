@@ -5,9 +5,24 @@ exec_module({
         fn: ["parseTimeStringLong", "gh_url", "notification"],
         classes: ["AloTimer", "Interval", "buzz"]
     },
+    default_settings: {
+        sound: true,
+        toast: true
+    },
     load: function ($, module) {
+        console.debug(module.settings);
         function refresh() {
             $.post("/house.php");
+        }
+
+        function notify() {
+            module.vars.notified = true;
+            if (module.settings.sound) {
+                module.vars.sfx.play();
+            }
+            if (module.settings.toast) {
+                module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
+            }
         }
 
         function handle_text(text) {
@@ -19,17 +34,13 @@ exec_module({
                 interval.set(function () {
                     if (timer.isFinished()) {
                         interval.clear();
-                        module.vars.sfx.play();
-                        module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
-                        module.vars.notified = true;
+                        notify();
                     } else {
                         module.vars.notified = false;
                     }
                 }, 1000);
             } else if (text.indexOf("are available") !== -1) { // Available
-                module.vars.sfx.play();
-                module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
-                module.vars.notified = true;
+                notify();
             } else {
                 setTimeout(refresh, 3000); // Fuck knows - try again.
             }
