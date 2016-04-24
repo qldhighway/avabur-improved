@@ -27,30 +27,6 @@ exec_module({
                 .click($click$refresh));
         }
 
-        /**
-         * Handle an update to the house banner text
-         * @param {String} text The text
-         */
-        function handle_house_status_update(text) {
-            var interval = new module.dependencies.classes.Interval(module.spec.name);
-            interval.clear();
-
-            if (text.indexOf("available again") !== -1) { // Working
-                var timer = new module.dependencies.classes.AloTimer(module.dependencies.fn.parseTimeStringLong(text));
-                interval.set(function () {
-                    if (timer.isFinished()) {
-                        end(interval);
-                    } else {
-                        module.vars.paneSpan.removeClass("avi-highlight").text(timer.toString());
-                    }
-                }, 1000);
-            } else if (text.indexOf("are available") !== -1) { // Available
-                end(interval);
-            } else {
-                setTimeout($click$refresh, 3000); // Fuck knows - try again.
-            }
-        }
-
         module.vars = {
             paneLabel: $baseDiv.clone().addClass("col-lg-5 gold").text("Construction:"),
             paneSpan: $('<span>House unavailable</span>'),
@@ -58,7 +34,25 @@ exec_module({
                 if (opts.url.indexOf("house") !== -1 &&
                     typeof(r.responseJSON) !== "undefined" &&
                     typeof(r.responseJSON.m) !== "undefined") {
-                    handle_house_status_update(r.responseJSON.m);
+
+                    var text = r.responseJSON.m,
+                        interval = new module.dependencies.classes.Interval(module.spec.name);
+                    interval.clear();
+
+                    if (text.indexOf("available again") !== -1) { // Working
+                        var timer = new module.dependencies.classes.AloTimer(module.dependencies.fn.parseTimeStringLong(text));
+                        interval.set(function () {
+                            if (timer.isFinished()) {
+                                end(interval);
+                            } else {
+                                module.vars.paneSpan.removeClass("avi-highlight").text(timer.toString());
+                            }
+                        }, 1000);
+                    } else if (text.indexOf("are available") !== -1) { // Available
+                        end(interval);
+                    } else {
+                        setTimeout($click$refresh, 3000); // Fuck knows - try again.
+                    }
                 }
             },
             css: (new module.dependencies.classes.CssManager()).setRules({

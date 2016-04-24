@@ -1182,7 +1182,8 @@ if (typeof(window.sessionStorage) === "undefined") {
 
             const required_modules = [
                 "activity-shortcuts",
-                "house-timers"
+                "house-timers",
+                "construction-notifications"
             ];
 
             const module_ajax_callback = function (r) {
