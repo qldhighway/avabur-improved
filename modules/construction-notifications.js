@@ -82,7 +82,7 @@ exec_module({
                     typeof(r.responseJSON) !== "undefined" &&
                     typeof(r.responseJSON.m) !== "undefined") {
 
-                    module.spec.vars.handle_text(r.responseJSON.m, module);
+                    module.spec.funcs.handle_text(r.responseJSON.m, module);
                 }
             },
             /**
@@ -97,7 +97,7 @@ exec_module({
         $(document).ajaxComplete(module.vars.house_requery);
         $.ajax("/house.php", {global: false}).done(function (r) {
             if (typeof(r.m) !== "undefined") {
-                module.spec.vars.handle_text(r.m, module);
+                module.spec.funcs.handle_text(r.m, module);
             }
         });
     },
