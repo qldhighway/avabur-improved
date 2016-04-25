@@ -61,6 +61,7 @@ exec_module({
      * @type Spec.Module.load
      */
     load: function ($, module) {
+        console.log(module);
         function refresh() {
             $.post("/house.php");
         }
