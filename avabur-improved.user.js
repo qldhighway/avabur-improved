@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "0dbcda15f8b0b60b36e4e95e711a75ab5467e175";
+    dev_hash = "c2a7d87d27a61470c04a3803f97a3483c646d68b";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -262,6 +262,11 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /** Misc function container */
         const fn = {
+            /**
+             * Parses the long variation of the time string
+             * @param {String} str The time string
+             * @returns {Number} The time in ms representing this duration
+             */
             parseTimeStringLong: function (str) {
                 var time = 0;
                 const match = str.match(/([0-9]+\s+(hours?|minutes?|seconds?))/g);
@@ -283,6 +288,9 @@ if (typeof(window.sessionStorage) === "undefined") {
 
                 return time;
             },
+            /**
+             * Checks GitHub for script updates
+             */
             check_github_for_updates: function () {
                 GM_xmlhttpRequest({
                     method: "GET",
@@ -301,6 +309,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                     }
                 });
             },
+            /**
+             * Inserts inline SVG by AJAXing its URL
+             * @param {$|jQuery} $this The element to insert the SVG into
+             * @param {String} url The URL of the SVG file
+             * @returns {$|jQuery} $el
+             */
             svg: function ($this, url) {
                 $this.html('<img src="' + URLS.img.ajax_loader + '" alt="Loading"/>');
                 $.get(url).done(function (r) {
@@ -308,7 +322,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                 });
                 return $this;
             },
-            /** @param {Interval} interval */
+            /**
+             *
+             */
             house_status_update_end: function (interval) {
                 interval.clear();
                 $DOM.house_monitor.status.addClass("avi-highlight").html(
@@ -380,6 +396,11 @@ if (typeof(window.sessionStorage) === "undefined") {
                 $document.ajaxComplete($openCategory);
                 $DOM.nav.market.click();
             },
+            /**
+             * Analyses the price array
+             * @param {Object} arr The price array from the market
+             * @returns {{low: Number, high: Number, avg:Number}}
+             */
             analysePrice: function (arr) {
                 const ret = {
                     low: arr[0].price,
@@ -388,6 +409,13 @@ if (typeof(window.sessionStorage) === "undefined") {
                 ret.avg = Math.round((parseFloat(ret.low) + parseFloat(ret.high)) / 2);
                 return ret;
             },
+            /**
+             * Turns a raw GitHub URL into a CDN one
+             * @param {String} path Path to the file
+             * @param {String} [author=Alorel] The repository admin
+             * @param {String} [repo=avabur-improved] The repository
+             * @returns {String} The created URL
+             */
             gh_url: function (path, author, repo) {
                 author = author || "Alorel";
                 repo = repo || "avabur-improved";
@@ -398,6 +426,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             /**
              * Tabifies the div
              * @param {jQuery|$|HTMLElement|*} $container The div to tabify
+             * @returns {*|jQuery|HTMLElement} $container
              */
             tabify: function ($container) {
                 const $nav = $container.find(">nav>*"),
@@ -411,15 +440,29 @@ if (typeof(window.sessionStorage) === "undefined") {
                 });
 
                 ($activeNav.length ? $activeNav : $nav).first().click();
+
+                return $container;
             },
-            /** Puts commas in large numbers */
+            /**
+             * Puts commas in large numbers
+             * @returns {String}
+             */
             numberWithCommas: function (x) {
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             },
-            /** Toggles the visibility attribute of the element */
+            /**
+             * Toggles the visibility CSS attribute of the element
+             * @param {*|jQuery|HTMLElement} $el The element
+             * @param {Boolean} shouldBeVisible Whether the element should be visible
+             */
             toggleVisibility: function ($el, shouldBeVisible) {
                 $el.css("visibility", shouldBeVisible ? "visible" : "hidden");
             },
+            /**
+             * Opens one of the standard modals
+             * @param {String|HTMLElement|jQuery|$} item The modal to open, or its selector
+             * @returns {*|jQuery|HTMLElement} The modal
+             */
             openStdModal: function (item) {
                 var $el;
                 if (item instanceof $) {
@@ -435,8 +478,14 @@ if (typeof(window.sessionStorage) === "undefined") {
                 $el.show().siblings().hide();
                 $DOM.modal.modal_background.fadeIn();
                 $DOM.modal.modal_wrapper.fadeIn();
+
+                return $el;
             },
             /**
+             * Compares the two versions
+             * @param {String} v1 The first version
+             * @param {String} v2 The second version
+             * @param {{lexicographical:Boolean,zeroExtend:Boolean}} options Options
              * @return
              * 0 if the versions are equal
              * a negative integer iff v1 &lt; v2
@@ -842,9 +891,26 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
+        /**
+         *
+         * @type {{SFX: classes.SFX, CssManager: classes.CssManager, AloTimer: AloTimer, Interval: classes.Interval}}
+         */
         const classes = {
 
-            buzz: buzz,
+            /**
+             * A bridge for the sound effects library
+             * @param {String} url SFX URL
+             * @param {Object} [opts] additional options
+             * @constructor
+             */
+            SFX: function (url, opts) {
+                /**
+                 * The actual player
+                 * @private
+                 * @type {buzz.sound}
+                 */
+                this.buzz = new buzz.sound(url, opts || {});
+            },
             /**
              * Manages CSS rules
              * @constructor
@@ -854,6 +920,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                 this.$style = null;
             },
 
+            /**
+             * An advanced timer
+             * @type {AloTimer}
+             */
             AloTimer: AloTimer,
 
             /**
@@ -862,7 +932,33 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @constructor
              */
             Interval: function (name) {
+                /**
+                 * The interval name
+                 * @type {String}
+                 */
                 this.name = name;
+            }
+        };
+        classes.SFX.prototype = {
+
+            /**
+             * Play the sound. Does nothing if the global sound switch is set to false.
+             * @returns {classes.SFX}
+             */
+            play: function () {
+                if (Settings.settings.notifications.all.sound) {
+                    this.buzz.play();
+                }
+
+                return this;
+            },
+            /**
+             * Stop playing the sound
+             * @returns {classes.SFX}
+             */
+            stop: function () {
+                this.buzz.stop();
+                return this;
             }
         };
 
@@ -1069,21 +1165,61 @@ if (typeof(window.sessionStorage) === "undefined") {
 
 
             /**
-             *
-             * @param spec
+             * Represents a module
+             * @param {Spec.Module} spec
              * @constructor
              */
             const Module = function (spec) {
+                /**
+                 * The raw module spec
+                 * @type {Spec.Module}
+                 */
                 this.spec = spec;
+                /**
+                 * Module name
+                 * @type {String|Boolean}
+                 */
                 this.name = spec.name || false;
+                /**
+                 * Load function
+                 * @type {Spec.Module.load|Boolean}
+                 */
                 this.load = spec.load || false;
+
+                /**
+                 * Module dependencies
+                 * @type {{
+                 *  fn: {},
+                 *  classes:{}
+                 * }}
+                 */
                 this.dependencies = {};
+
+                /**
+                 * Module unload function
+                 * @type {Spec.Module.unload|boolean}
+                 */
                 this.unload = spec.unload || false;
+
+                /**
+                 * Whether the settings are correct
+                 * @type {Boolean}
+                 */
                 this.ok = true;
+                /**
+                 * Module variables
+                 * @type {Spec.Module.vars}
+                 */
                 this.vars = {};
-                this.handlers = spec.handlers || {};
-                this.handlerise = spec.handlerise || false;
+                /**
+                 * Module description
+                 * @type {String|null}
+                 */
                 this.desc = spec.desc || null;
+                /**
+                 * Module settings
+                 * @type {Object}
+                 */
                 this.settings = {};
 
                 if (!this.name) {
@@ -1105,7 +1241,16 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }
             };
             Module.prototype = {
+                /**
+                 * Loaded modules
+                 * @type Object
+                 */
                 loaded: {},
+                /**
+                 * Apply the global handlers to the given context
+                 * @param {$|jQuery} [$context=$(document)] The context
+                 * @returns {Module} this
+                 */
                 applyGlobalHandlers: function ($context) {
                     $context = $context || $(document);
 
@@ -1114,7 +1259,14 @@ if (typeof(window.sessionStorage) === "undefined") {
                         viewport: {"selector": "body", "padding": 0}
                     });
                     $context.find("[data-delegate-click]").click($HANDLERS.click.delegate_click);
+
+                    return this;
                 },
+                /**
+                 * Resolve module dependencies
+                 * @returns {Module} this
+                 * @private
+                 */
                 resolveDependencies: function () {
                     const dependencyKeys = Object.keys(this.spec.dependencies);
                     if (dependencyKeys.length) {
@@ -1154,6 +1306,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                     }
                     return this;
                 },
+                /**
+                 * Registers the module
+                 * @returns {Module} this
+                 */
                 register: function () {
                     this.resolveDependencies();
                     if (this.ok && this.load) {
@@ -1161,12 +1317,20 @@ if (typeof(window.sessionStorage) === "undefined") {
                         this.applyGlobalHandlers();
                     }
                     Module.prototype.loaded[this.name] = this;
+
+                    return this;
                 },
+                /**
+                 * Unregisters the module
+                 * @returns {Module} this
+                 */
                 unregister: function () {
                     if (this.ok && this.unload) {
                         this.unload($, this);
                     }
                     delete Module.prototype.loaded[this.name];
+
+                    return this;
                 }
             };
 
