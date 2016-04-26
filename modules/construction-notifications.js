@@ -13,6 +13,14 @@ exec_module({
         defaults: {
             sound: true,
             toast: true
+        },
+        demo: {
+            sound: function (e, $, module) {
+                module.vars.sfx.play();
+            },
+            toast: function (e, $, module) {
+                module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
+            }
         }
     },
     funcs: {

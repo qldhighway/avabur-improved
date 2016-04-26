@@ -35,7 +35,7 @@ var Spec = {
         settings: {
             /**
              * Module setting descriptions
-             * @type {?Object} ModuleSettingsDesc
+             * @type {?Object}
              * @property {...String} [prop] The properties
              */
             desc: {
@@ -45,13 +45,28 @@ var Spec = {
             },
             /**
              * Module default settings
-             * @type {?Object} ModuleSettingsDefaults
+             * @type {?Object}
              * @property {...String|...Number|...Boolean} [prop] The properties
              */
             defaults: {
                 param1: "val",
                 param2: false,
                 param3: 3
+            },
+            /**
+             * Module setting demos
+             * @type {?Object}
+             * @property {...Spec.Module.settings.demo.param1} [prop] The properties
+             */
+            demo: {
+                /**
+                 * @param {Event} evt The click event fired on the demo anchor
+                 * @param {$|jQuery} $ jQuery
+                 * @param {Module} module The module
+                 */
+                param1: function (evt, $, module) {
+
+                }
             }
         },
         /**

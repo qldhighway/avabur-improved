@@ -32,8 +32,20 @@
 // @noframes
 // ==/UserScript==
 
+for (var i = 0; i < GM_listValues().length; i++) {
+    console.log(GM_listValues()[i] + ": ");
+    var val = GM_getValue(GM_listValues()[i]);
+    try {
+        console.log(JSON.parse(val));
+    } catch (e) {
+        console.log(val);
+    }
+
+    console.log("");
+}
+
 const is_dev = true,
-    dev_hash = "c1a0931388b6923d6493718764bb5fb5ae765cc0";
+    dev_hash = "db3357b2c43f210be3e387dcf15f1e77aff3ed52";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -1351,23 +1363,53 @@ if (typeof(window.sessionStorage) === "undefined") {
                 },
 
                 /**
+                 * Saves the settings to disk
+                 * @returns {Module} this
+                 */
+                saveSettings: function () {
+                    if (this.settings !== false) {
+                        GM_setValue("settings:" + this.name, JSON.stringify(this.settings));
+                    }
+                    return this;
+                },
+
+                /**
                  * Creates the settings UI for the module
                  * @returns {Module} this
                  * @private
                  */
                 createSettingsUI: function () {
-                    console.log(this.settings);
                     if (this.ok && this.settings !== false) {
                         var $select = $("#avi-module-settings-select"),
+                            dis = this,
                             $container = $("#module-settings-container"),
                             $div = $('<div data-module="' + this.name + '" style="display:none"/>'),
                             $tbody = $('<tbody/>'),
-                            has_desc = typeof(this.spec.settings.desc) === "object";
+                            has_desc = typeof(this.spec.settings.desc) === "object",
+                            has_demo = typeof(this.spec.settings.demo) === "object",
+                            $onChange = function () {
+                                var $this = $(this),
+                                    setting = $this.attr("data-mod-setting"),
+                                    type = $this.attr("type"),
+                                    val;
+
+                                switch (type) {
+                                    case "checkbox":
+                                        val = $this.is(":checked");
+                                        break;
+                                    default:
+                                        val = $this.val();
+                                }
+
+                                dis.settings[setting] = val;
+                                dis.saveSettings();
+                            };
 
                         for (var key in this.settings) {
                             if (this.settings.hasOwnProperty(key)) {
                                 var $tr = $("<tr/>"),
-                                    $valTd = null;
+                                    $valTd,
+                                    $demoTd;
 
                                 switch (typeof(this.settings[key])) {
                                     case "boolean":
@@ -1378,15 +1420,23 @@ if (typeof(window.sessionStorage) === "undefined") {
                                         continue;
                                 }
 
+                                if (has_demo && typeof(this.spec.settings.demo[key]) === "function") {
+                                    $demoTd = $('<td/>').html(
+                                        $('<a href="javascript:;">Demo</a>').click(this.spec.settings.demo[key])
+                                    );
+                                } else {
+                                    $demoTd = '<td></td>';
+                                }
+
                                 $valTd.attr({
-                                    "data-mod-setting": key,
-                                    "data-mod": this.name
-                                });
+                                    "data-mod-setting": key
+                                }).on("change keyup", $onChange);
 
                                 $tr.append(
                                     '<td>' + key + '</td>',
                                     $('<td/>').html($valTd),
-                                    '<td>' + (has_desc && typeof(this.spec.settings.desc[key]) === "string" ? this.spec.settings.desc[key] : "") + '</td>'
+                                    '<td>' + (has_desc && typeof(this.spec.settings.desc[key]) === "string" ? this.spec.settings.desc[key] : "") + '</td>',
+                                    $demoTd
                                 );
 
                                 $tbody.append($tr);
@@ -1395,7 +1445,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 
                         $div.html(
                             $('<table class="table table-condensed table-bordered avi sortable"/>').append(
-                                '<thead><tr><th>Feature</th><th>Setting</th><th>Description</th></tr></thead>',
+                                '<thead><tr><th>Feature</th><th>Setting</th><th>Description</th><th>Demo</th></tr></thead>',
                                 $tbody
                             )
                         );

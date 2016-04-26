@@ -1,13 +1,10 @@
 <div style="display:none">
     <nav class="center">
-        <a href="javascript:;" data-menu="notifications">
-            <button class="btn btn-primary">Notifications</button>
+        <a href="javascript:;" data-menu="global-settings">
+            <button class="btn btn-primary">Global settings</button>
         </a>
         <a href="javascript:;" data-menu="module-settings">
             <button class="btn btn-primary">Module settings</button>
-        </a>
-        <a href="javascript:;" data-menu="features">
-            <button class="btn btn-primary">Features</button>
         </a>
         <a href="javascript:;" data-menu="about">
             <button class="btn btn-primary">About</button>
@@ -18,88 +15,34 @@
             <select id="avi-module-settings-select" style="margin:auto;display:block"></select>
             <div id="module-settings-container" class="mt10"></div>
         </div>
-        <div data-menu="features">
-            <table class="table avi table-condensed table-bordered">
-                <thead>
-                <tr>
-                    <th colspan="2">Feature</th>
-                    <th>Description</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>
-                        <input type="checkbox" data-setting="features" data-feature="house_timer"/>
-                    </td>
-                    <td>Permanent House Timer</td>
-                    <td>
-                        <span>Shows a</span>
-                        <a target="_blank"
-                           href="https://github.com/Alorel/avabur-improved/blob/master/screenshots/permanent-house-timer.png">
-                            permanent construction timer
-                        </a>
-                        <span>
-                            without needing to build an alarm clock. Vysn said he won't forbid the feature, but it does
-                            upset him - let your conscience decide whether the feature should be used.
-                        </span>
-                        <span class="bold">Construction notifications depend on this feature being turned on.</span>
-                        <span>Requires a page refresh to apply changes.</span>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
         <div data-menu="notifications">
             <table class="table table-condensed table-bordered avi">
                 <thead>
                 <tr>
-                    <th>Notification</th>
-                    <th>Enable sound</th>
-                    <th>Enable floater</th>
+                    <th>Feature</th>
+                    <th>Setting</th>
+                    <th>Description</th>
                 </tr>
                 </thead>
                 <tbody id="avi-settings">
                 <tr>
-                    <td>
-                        <span class="bold avi-tip"
-                              title="By unticking these you will suppress all notifications of the given type">
-                            Global override
-                        </span>
-                    </td>
+                    <td>Enable sound</td>
                     <td>
                         <input type="checkbox" data-setting="notifications" data-notification="all"
                                data-type="sound"/>
                     </td>
                     <td>
+                        No sounds will play if you untick this
+                    </td>
+                </tr>
+                <tr>
+                    <td>Enable toasts</td>
+                    <td>
                         <input type="checkbox" data-setting="notifications" data-notification="all"
                                data-type="gm"/>
                     </td>
-                </tr>
-                <tr>
-                    <td>Whisper received</td>
                     <td>
-                        <input type="checkbox" data-setting="notifications" data-notification="whisper"
-                               data-type="sound"/>
-                        <a href="javascript:;" data-demo="whisper-sound" class="show">Demo</a>
-                    </td>
-                    <td>
-                        <input type="checkbox" data-setting="notifications" data-notification="whisper"
-                               data-type="gm"/>
-                        <a href="javascript:;" data-demo="whisper-gm" class="show">Demo</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Construction finished</td>
-                    <td>
-                        <input type="checkbox" data-setting="notifications" data-notification="construction"
-                               data-type="sound" class="avi-tip"
-                               title='This depends on the "Permanent House Timer" feature'/>
-                        <a href="javascript:;" data-demo="construction-sound" class="show">Demo</a>
-                    </td>
-                    <td>
-                        <input type="checkbox" data-setting="notifications" data-notification="construction"
-                               data-type="gm"/>
-                        <a href="javascript:;" data-demo="construction-gm" class="show">Demo</a>
+                        No toasts will display if you untick this
                     </td>
                 </tr>
                 </tbody>
