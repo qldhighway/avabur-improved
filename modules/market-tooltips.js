@@ -136,7 +136,7 @@ exec_module({
                 container: "body",
                 viewport: {"selector": "body", "padding": 0},
                 placement: "auto right",
-                content: $currencyTooltip
+                content: module.vars.dom.table_currency
             });
 
             $span.mouseenter($mouseEnter$inventoryIngredients)
