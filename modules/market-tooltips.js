@@ -65,7 +65,7 @@ exec_module({
             "Yellow Pollen": 120
         }
     },
-    load: function ($, module) {
+    load: function ($, module) {console.log(document.querySelector("#inventoryTable"));
         /**
          * Ajax done handler for price lookups
          * @param {Object} r
