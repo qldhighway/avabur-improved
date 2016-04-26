@@ -33,7 +33,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "85c122eabc51c2a9bb716033858cb89c946a68f0";
+    dev_hash = "3f77a50f41b71aaf4389a7ecf4a8d5ca1ab660b9";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -1186,31 +1186,31 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
                     }).addToDOM();
                 },
-                "Registering market tooltip users": function () {
-                    $.get(URLS.html.market_tooltip).done(function (r) {
-                        $DOM.market.market_tooltip = r;
-                
-                        const $tooltipTable = $(r);
-                
-                        $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
-                        $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
-                        $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
-                        $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
-                        $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
-                
-                        //Add our stuff to the currency tooltips
-                        $DOM.currency_tooltip.the_tooltip.append($tooltipTable);
-                
-                        OBSERVERS.currency_tooltips.observe($DOM.currency_tooltip.the_tooltip[0], {
-                            attributes: true
-                        });
-                
-                        OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
-                            childList: true,
-                            characterData: true
-                        });
-                    });
-                },
+                // "Registering market tooltip users": function () {
+                //     $.get(URLS.html.market_tooltip).done(function (r) {
+                //         $DOM.market.market_tooltip = r;
+                //
+                //         const $tooltipTable = $(r);
+                //
+                //         $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
+                //         $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
+                //         $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
+                //         $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
+                //         $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
+                //
+                //         //Add our stuff to the currency tooltips
+                //         $DOM.currency_tooltip.the_tooltip.append($tooltipTable);
+                //
+                //         OBSERVERS.currency_tooltips.observe($DOM.currency_tooltip.the_tooltip[0], {
+                //             attributes: true
+                //         });
+                //
+                //         OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
+                //             childList: true,
+                //             characterData: true
+                //         });
+                //     });
+                // },
                 "Checking if the script has been updated": function () {
                     if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
                         $().toastmessage('showToast', {

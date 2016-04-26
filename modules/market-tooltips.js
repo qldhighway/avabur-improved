@@ -112,7 +112,8 @@ exec_module({
                         const analysis = module.dependencies.fn.analysePrice(r.l),
                             $tds = $describedBy.find("tr[data-id=prices]>td");
 
-                        $tds.first().text(module.dependencies.fn.numberWithCommas(analysis.low))
+                        $tds
+                            .first().text(module.dependencies.fn.numberWithCommas(analysis.low))
                             .next().text(module.dependencies.fn.numberWithCommas(analysis.avg))
                             .next().text(module.dependencies.fn.numberWithCommas(analysis.high));
                     }
@@ -136,7 +137,7 @@ exec_module({
                 container: "body",
                 viewport: {"selector": "body", "padding": 0},
                 placement: "auto right",
-                content: module.vars.dom.table_currency
+                content: $(module.spec.vars.html)
             });
 
             $span.mouseenter($mouseEnter$inventoryIngredients)
