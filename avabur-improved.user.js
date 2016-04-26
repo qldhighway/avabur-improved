@@ -1082,6 +1082,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 this.name = name;
             }
         };
+
         classes.SFX.prototype = {
 
             /**
