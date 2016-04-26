@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "758e39241f447dc1f9a8418997a6459e15c77c42";
+    dev_hash = "9dfbe75350b47c01a3398a001494607512d640ad";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -824,6 +824,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                     const $this = $(this);
                     Settings.settings.features[$this.data("feature")] = $this.is(":checked");
                     Settings.save();
+                },
+                module_settings_select: function () {
+                    $("#module-settings-container").find(">[data-module='" + $(this).val() + "']").show().siblings().hide();
                 }
             },
             mouseenter: {
@@ -1101,6 +1104,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                             .each($HANDLERS.each.settings_features)
                             .change($HANDLERS.change.settings_feature);
 
+                        $("#avi-module-settings-select").change($HANDLERS.change.module_settings_select);
+
                         OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
                     });
                 },
@@ -1324,11 +1329,25 @@ if (typeof(window.sessionStorage) === "undefined") {
                         for (var key in this.settings) {
                             if (this.settings.hasOwnProperty(key)) {
                                 var $tr = $("<tr/>"),
-                                    $valTd = $("<td/>");
+                                    $valTd = null;
+
+                                switch (typeof(this.settings[key])) {
+                                    case "boolean":
+                                        $valTd = $('<input type="checkbox"' + (this.settings[key] ? "checked" : "") + '/>');
+                                        break;
+                                    default:
+                                        Toast.error("Failed to create setting UI for module " + this.name + ' variable ' + key + ': the value type ' + this.settings[key] + ' is not supported');
+                                        continue;
+                                }
+
+                                $valTd.attr({
+                                    "data-mod-setting": key,
+                                    "data-mod": this.name
+                                });
 
                                 $tr.append(
                                     '<td>' + key + '</td>',
-                                    $valTd,
+                                    $('<td/>').html($valTd),
                                     '<td>' + (has_desc && typeof(this.spec.settings.desc[key]) === "string" ? this.spec.settings.desc[key] : "") + '</td>'
                                 );
 
