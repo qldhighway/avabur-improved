@@ -20,6 +20,7 @@ exec_module({
     load: function ($, module) {
         var vars = module.spec.vars,
             $a = $("<a href='javascript:;' class='avi-tip avi-menu-shortcut'/>"),
+            $navul = $("#navWrapper").find("ul"),
             a;
 
         module.vars.li = $('<li class="avi-menu"/>');
@@ -33,7 +34,8 @@ exec_module({
             module.dependencies.fn.svg(a, module.dependencies.fn.gh_url("res/svg/" + vars.appends[i][0] + ".svg"))
         }
 
-        $("#navWrapper").find("ul").append(module.vars.li);
+        $navul.append(module.vars.li);
+        module.applyGlobalHandlers($navul);
     },
     unload: function ($, module) {
         module.vars.li.remove();
