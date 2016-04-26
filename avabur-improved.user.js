@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "93d02562d3f6935c3332353d4df63ac8fe95fdf3";
+    dev_hash = "2b918b07402419bf31f2fa73b050713039411c45";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -1318,15 +1318,21 @@ if (typeof(window.sessionStorage) === "undefined") {
                         var $select = $("#avi-module-settings-select"),
                             $container = $("#module-settings-container"),
                             $div = $('<div data-module="' + this.name + '" style="display:none"/>'),
-                            $tbody = $('<tbody/>');
+                            $tbody = $('<tbody/>'),
+                            has_desc = typeof(this.spec.settings.desc) === "object";
 
                         for (var key in this.settings) {
                             if (this.settings.hasOwnProperty(key)) {
-                                console.log({
-                                    key: key,
-                                    value: this.settings[key],
-                                    desc: this.spec.settings.desc[key]
-                                });
+                                var $tr = $("<tr/>"),
+                                    $valTd = $("<td/>");
+
+                                $tr.append(
+                                    '<td>' + key + '</td>',
+                                    $valTd,
+                                    '<td>' + (has_desc && typeof(this.spec.settings.desc[key]) === "string" ? this.spec.settings.desc[key] : "") + '</td>'
+                                );
+
+                                $tbody.append($tr);
                             }
                         }
 

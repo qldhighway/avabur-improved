@@ -30,13 +30,23 @@ exec_module({
                 }
             }
             module.vars.notified = true;
-        },
+        }
+    },
+    /**
+     * @type Spec.Module.load
+     */
+    load: function ($, module) {
+        function refresh() {
+            $.post("/house.php");
+        }
+
+
         /**
          * Handle our house info text
          * @param {!String} text The text
          * @param {!Module} module Our module
          */
-        handle_text: function (text, module) {
+        function handle_text(text, module) {
             var interval = new module.dependencies.classes.Interval(module.spec.name);
             interval.clear();
 
@@ -53,16 +63,8 @@ exec_module({
             } else if (text.indexOf("are available") !== -1) { // Available
                 module.spec.funcs.notify(module);
             } else {
-                setTimeout(refresh, 3000); // Fuck knows - try again.
+                setTimeout(refresh, 1000); // Fuck knows - try again.
             }
-        }
-    },
-    /**
-     * @type Spec.Module.load
-     */
-    load: function ($, module) {
-        function refresh() {
-            $.post("/house.php");
         }
 
         module.vars = {
@@ -82,7 +84,7 @@ exec_module({
                     typeof(r.responseJSON) !== "undefined" &&
                     typeof(r.responseJSON.m) !== "undefined") {
 
-                    module.spec.funcs.handle_text(r.responseJSON.m, module);
+                    handle_text(r.responseJSON.m, module);
                 }
             },
             /**
@@ -97,7 +99,7 @@ exec_module({
         $(document).ajaxComplete(module.vars.house_requery);
         $.ajax("/house.php", {global: false}).done(function (r) {
             if (typeof(r.m) !== "undefined") {
-                module.spec.funcs.handle_text(r.m, module);
+                handle_text(r.m, module);
             }
         });
     },
