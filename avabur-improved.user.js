@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "6ab08e459c6463ff4a79fd0b0fe61d7a1106118a";
+    dev_hash = "93d02562d3f6935c3332353d4df63ac8fe95fdf3";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -1320,11 +1320,38 @@ if (typeof(window.sessionStorage) === "undefined") {
                             $div = $('<div data-module="' + this.name + '" style="display:none"/>'),
                             $tbody = $('<tbody/>');
 
-                        
-                        
+                        for (var key in this.settings) {
+                            if (this.settings.hasOwnProperty(key)) {
+                                console.log({
+                                    key: key,
+                                    value: this.settings[key],
+                                    desc: this.spec.settings.desc[key]
+                                });
+                            }
+                        }
+
+                        $div.html($('<table/>').html($tbody));
                         $container.append($div);
                         $select.append('<option value="' + this.name + '">' + this.name + '</option>').change();
+                        this.applyGlobalHandlers($div);
                     }
+                    return this;
+                },
+                /**
+                 * Removes the settings UI
+                 * @returns {Module} this
+                 * @private
+                 */
+                removeSettingsUI: function () {
+                    var $sel = $("#avi-module-settings-select");
+                    $sel.find('>[value=""]').remove();
+
+                    $("#module-settings-container").find(">div[data-module='']").remove();
+
+                    $sel.find(">option:first").prop("selected", true);
+                    $sel.change();
+
+
                     return this;
                 },
                 /**
@@ -1346,7 +1373,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                  * @returns {Module} this
                  */
                 unregister: function () {
-                    if (this.ok && this.unload) {
+                    if (this.removeSettingsUI().ok && this.unload) {
                         this.unload($, this);
                     }
                     delete Module.prototype.loaded[this.name];

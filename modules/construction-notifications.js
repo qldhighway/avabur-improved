@@ -7,7 +7,7 @@ exec_module({
     },
     settings: {
         desc: {
-            Sound: "Play a sound when construction finishes",
+            sound: "Play a sound when construction finishes",
             toast: "Display a toast when construction finishes"
         },
         defaults: {
