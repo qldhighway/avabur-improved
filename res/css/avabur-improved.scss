@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 .avi {
   &-margin-auto {
     margin-left: auto;
@@ -108,5 +110,13 @@ ul.avi {
   a {
     display: inline-block !important;
     width: auto;
+  }
+}
+
+.sortable > thead > tr > th {
+  &:not(.sorttable_sorted), &:not(.sorttable_sorted_reverse) {
+    &::after {
+      content: "&nbsp;▾▴"
+    }
   }
 }

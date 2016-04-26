@@ -28,11 +28,12 @@
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/master/lib/jalc-1.0.1.min.js
 // @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
 
+// @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/sortable.js
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "42265233333dd9f5f65c9ec010d858b5885adaed";
+    dev_hash = "9583aa32c02230ae4b4fcc897b8a352e53e1d940";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -262,6 +263,37 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /** Misc function container */
         const fn = {
+
+            /**
+             * Sort a Select element
+             * @param {HTMLSelectElement} select The element to sort
+             * @param {Number} [startAt=0] The first item index to sort
+             */
+            sortSelect: function (select, startAt) {
+                if (typeof startAt === 'undefined') {
+                    startAt = 0;
+                }
+
+                var texts = [];
+
+                for (var i = startAt; i < select.length; i++) {
+                    texts[i] = [
+                        select.options[i].text.toUpperCase(),
+                        select.options[i].text,
+                        select.options[i].value
+                    ].join('|');
+                }
+
+                texts.sort();
+
+                texts.forEach(function (text, index) {
+                    var parts = text.split('|');
+
+                    select.options[startAt + index].text = parts[1];
+                    select.options[startAt + index].value = parts[2];
+                });
+            },
+
             /**
              * Parses the long variation of the time string
              * @param {String} str The time string
@@ -1362,7 +1394,11 @@ if (typeof(window.sessionStorage) === "undefined") {
                             )
                         );
                         $container.append($div);
-                        $select.append('<option value="' + this.name + '">' + this.name + '</option>').change();
+
+                        $select.append('<option value="' + this.name + '">' + this.name + '</option>');
+                        fn.sortSelect($select[0]);
+                        $select.find(">option:first").prop("selected", true);
+                        $select.change();
                         this.applyGlobalHandlers($div);
                     }
                     return this;
