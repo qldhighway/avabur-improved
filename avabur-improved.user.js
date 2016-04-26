@@ -33,7 +33,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "023fae4cefdf18ca6d654c60061e333563ca4330";
+    dev_hash = "c1a0931388b6923d6493718764bb5fb5ae765cc0";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -270,28 +270,30 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @param {Number} [startAt=0] The first item index to sort
              */
             sortSelect: function (select, startAt) {
-                if (typeof startAt === 'undefined') {
-                    startAt = 0;
+                if (select instanceof HTMLSelectElement) {
+                    if (typeof startAt === 'undefined') {
+                        startAt = 0;
+                    }
+
+                    var texts = [];
+
+                    for (var i = startAt; i < select.length; i++) {
+                        texts[i] = [
+                            select.options[i].text.toUpperCase(),
+                            select.options[i].text,
+                            select.options[i].value
+                        ].join('|');
+                    }
+
+                    texts.sort();
+
+                    texts.forEach(function (text, index) {
+                        var parts = text.split('|');
+
+                        select.options[startAt + index].text = parts[1];
+                        select.options[startAt + index].value = parts[2];
+                    });
                 }
-
-                var texts = [];
-
-                for (var i = startAt; i < select.length; i++) {
-                    texts[i] = [
-                        select.options[i].text.toUpperCase(),
-                        select.options[i].text,
-                        select.options[i].value
-                    ].join('|');
-                }
-
-                texts.sort();
-
-                texts.forEach(function (text, index) {
-                    var parts = text.split('|');
-
-                    select.options[startAt + index].text = parts[1];
-                    select.options[startAt + index].value = parts[2];
-                });
             },
 
             /**

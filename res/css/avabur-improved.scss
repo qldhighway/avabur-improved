@@ -117,14 +117,14 @@ table.sortable th {
   cursor: pointer;
 
   &.descend:after {
-    content: " \25B2";
+    content: " \25B4" !important;
   }
 
   &.ascend:after {
-    content: " \25BC";
+    content: " \25BE" !important;;
   }
 
   &:not(.descent):not(.ascend):after {
-    content: " \25BC\25B2"
+    content: " \25B4\25BE"
   }
 }
