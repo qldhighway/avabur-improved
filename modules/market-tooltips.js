@@ -65,7 +65,7 @@ exec_module({
             "Yellow Pollen": 120
         }
     },
-    load: function ($, module) {console.log(document.querySelector("#inventoryTable"));
+    load: function ($, module) {
         /**
          * Ajax done handler for price lookups
          * @param {Object} r
@@ -177,6 +177,7 @@ exec_module({
             inventory_table: new MutationObserver(
                 /** @param {MutationRecord[]} records */
                 function (records) {
+                    console.log(records);
                     for (var i = 0; i < records.length; i++) {
                         if (records[i].addedNodes.length) {
                             for (var n = 0; n < records[i].addedNodes.length; n++) {
