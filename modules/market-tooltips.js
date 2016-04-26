@@ -204,6 +204,12 @@ exec_module({
         module.vars.dom.high_currency = module.vars.dom.avg_currency.next();
 
         $currencyTooltip.append(module.vars.dom.table_currency);
+
+        module.vars.observers.currency_tooltips.observe($currencyTooltip[0], {attributes: true});
+        module.vars.observers.inventory_table.observe(document.querySelector("#inventoryTable"), {
+            attributes: true,
+            characterData: true
+        });
     },
     unload: function ($, module) {
         if (typeof(module.vars.dom) !== "undefined") {

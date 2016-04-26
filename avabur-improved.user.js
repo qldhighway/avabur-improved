@@ -33,7 +33,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "4ae576b713ce0f09e1faee22115603bc36c71d14";
+    dev_hash = "f35ca633b5468a6cbf240128295e068b3a47db42";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -848,7 +848,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                     fn.openStdModal($DOM.modal.script_settings);
                 },
                 delegate_click: function () {
-                    console.log(11);
                     $($(this).data("delegate-click")).click();
                 }
             },
@@ -1187,31 +1186,31 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
                     }).addToDOM();
                 },
-                "Registering market tooltip users": function () {
-                    $.get(URLS.html.market_tooltip).done(function (r) {
-                        $DOM.market.market_tooltip = r;
-
-                        const $tooltipTable = $(r);
-
-                        $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
-                        $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
-                        $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
-                        $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
-                        $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
-
-                        //Add our stuff to the currency tooltips
-                        $DOM.currency_tooltip.the_tooltip.append($tooltipTable);
-
-                        OBSERVERS.currency_tooltips.observe($DOM.currency_tooltip.the_tooltip[0], {
-                            attributes: true
-                        });
-
-                        OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
-                            childList: true,
-                            characterData: true
-                        });
-                    });
-                },
+                // "Registering market tooltip users": function () {
+                //     $.get(URLS.html.market_tooltip).done(function (r) {
+                //         $DOM.market.market_tooltip = r;
+                //
+                //         const $tooltipTable = $(r);
+                //
+                //         $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
+                //         $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
+                //         $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
+                //         $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
+                //         $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
+                //
+                //         //Add our stuff to the currency tooltips
+                //         $DOM.currency_tooltip.the_tooltip.append($tooltipTable);
+                //
+                //         OBSERVERS.currency_tooltips.observe($DOM.currency_tooltip.the_tooltip[0], {
+                //             attributes: true
+                //         });
+                //
+                //         OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
+                //             childList: true,
+                //             characterData: true
+                //         });
+                //     });
+                // },
                 "Checking if the script has been updated": function () {
                     if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
                         $().toastmessage('showToast', {
@@ -1613,6 +1612,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             const required_modules = [
                 "activity-shortcuts",
                 "house-timers",
+                "market-tooltips",
                 "construction-notifications"
             ];
 
