@@ -20,6 +20,7 @@
 // @grant          GM_notification
 // @grant          GM_listValues
 // @grant          GM_xmlhttpRequest
+// @grant          GM_openInTab
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
@@ -33,7 +34,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "ae66ca5db1fe47fcb9560b42cd02e7950973676b";
+    dev_hash = "d4e9c3cbc960a74dde600e47c67352ef4bef4a6d";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -332,13 +333,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                     onload: function (r) {
                         const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
                         if (fn.versionCompare(GM_info.script.version, theirVersion) < 0) {
-                            $().toastmessage('showToast', {
-                                text: 'A new version of ' + GM_info.script.name + ' is available! Click your ' +
-                                'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.',
-                                sticky: true,
-                                position: 'top-center',
-                                type: 'notice'
-                            });
+                            fn.notification('A new version of ' + GM_info.script.name + ' is available! Click your ' +
+                                'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.');
                         }
                     }
                 });
@@ -523,7 +519,7 @@ if (typeof(window.sessionStorage) === "undefined") {
              * Compares the two versions
              * @param {String} v1 The first version
              * @param {String} v2 The second version
-             * @param {{lexicographical:Boolean,zeroExtend:Boolean}} options Options
+             * @param {{lexicographical:Boolean,zeroExtend:Boolean}} [options] Options
              * @return
              * 0 if the versions are equal
              * a negative integer iff v1 &lt; v2
@@ -1174,53 +1170,17 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         (function () {
             const ON_LOAD = {
-                "Fixing some game CSS": function () {
-                    (new classes.CssManager("onload")).setRules({
-                        "#viewedClanDescription": {
-                            "min-height": "148px"
-                        },
-                        ".materials": {
-                            color: $("#crafting_materials").css("color")
-                        },
-                        ".fragments": {
-                            color: $("#gem_fragments").css("color")
-                        }
-                    }).addToDOM();
-                },
-                // "Registering market tooltip users": function () {
-                //     $.get(URLS.html.market_tooltip).done(function (r) {
-                //         $DOM.market.market_tooltip = r;
-                //
-                //         const $tooltipTable = $(r);
-                //
-                //         $tooltipTable.find("th[colspan]").append($AJAX_SPINNERS.currency_tooltip);
-                //         $DOM.currency_tooltip.table_row = $tooltipTable.find("tr[data-id=prices]");
-                //         $DOM.currency_tooltip.market_low = $DOM.currency_tooltip.table_row.find(">td").first();
-                //         $DOM.currency_tooltip.market_avg = $DOM.currency_tooltip.market_low.next();
-                //         $DOM.currency_tooltip.market_high = $DOM.currency_tooltip.market_avg.next();
-                //
-                //         //Add our stuff to the currency tooltips
-                //         $DOM.currency_tooltip.the_tooltip.append($tooltipTable);
-                //
-                //         OBSERVERS.currency_tooltips.observe($DOM.currency_tooltip.the_tooltip[0], {
-                //             attributes: true
-                //         });
-                //
-                //         OBSERVERS.inventory_table.observe(document.querySelector("#inventoryTable"), {
-                //             childList: true,
-                //             characterData: true
-                //         });
-                //     });
-                // },
                 "Checking if the script has been updated": function () {
                     if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
-                        $().toastmessage('showToast', {
-                            text: GM_info.script.name + " has been updated! See the changelog " +
-                            "<a href='https://github.com/Alorel/avabur-improved/releases' target='_blank'>here</a>",
-                            sticky: true,
-                            position: 'top-left',
-                            type: 'success'
-                        });
+                        fn.notification(
+                            GM_info.script.name + " has been updated! Click here for a changelog.",
+                            "Good news, everyone!", {
+                                onclick: function () {
+                                    GM_openInTab("https://github.com/Alorel/avabur-improved/releases")
+                                },
+                                timeout: 0
+                            }
+                        );
                     }
                     GM_setValue("last_ver", GM_info.script.version);
                 },

@@ -12,7 +12,11 @@ exec_module({
          * Click handler for the "(refresh)" button
          */
         function $click$refresh() {
-            $.post("/house.php");
+            $.ajax("/house.php", {global: false}).done(function (r) {
+                if (typeof(r.m) !== "undefined") {
+                    handle_text(r.m);
+                }
+            });
         }
 
         /**

@@ -45,16 +45,19 @@ exec_module({
      */
     load: function ($, module) {
         function refresh() {
-            $.post("/house.php");
+            $.ajax("/house.php", {global: false}).done(function (r) {
+                if (typeof(r.m) !== "undefined") {
+                    handle_text(r.m);
+                }
+            });
         }
 
 
         /**
          * Handle our house info text
          * @param {!String} text The text
-         * @param {!Module} module Our module
          */
-        function handle_text(text, module) {
+        function handle_text(text) {
             var interval = new module.dependencies.classes.Interval(module.spec.name);
             interval.clear();
 
@@ -92,7 +95,7 @@ exec_module({
                     typeof(r.responseJSON) !== "undefined" &&
                     typeof(r.responseJSON.m) !== "undefined") {
 
-                    handle_text(r.responseJSON.m, module);
+                    handle_text(r.responseJSON.m);
                 }
             },
             /**
@@ -105,11 +108,7 @@ exec_module({
         };
 
         $(document).ajaxComplete(module.vars.house_requery);
-        $.ajax("/house.php", {global: false}).done(function (r) {
-            if (typeof(r.m) !== "undefined") {
-                handle_text(r.m, module);
-            }
-        });
+        refresh();
     },
     /**
      * @type Spec.Module.unload
