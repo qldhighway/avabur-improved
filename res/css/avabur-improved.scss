@@ -116,7 +116,15 @@ ul.avi {
 table.sortable th {
   cursor: pointer;
 
-  &:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
-    content: " \25B4\25BE"
+  &.descend:after {
+    content: " \25B2";
+  }
+
+  &.ascend:after {
+    content: " \25BC";
+  }
+
+  &:not(.descent):not(.ascend):after {
+    content: " \25BC\25B2"
   }
 }

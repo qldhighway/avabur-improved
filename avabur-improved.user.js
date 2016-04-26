@@ -28,12 +28,12 @@
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/master/lib/jalc-1.0.1.min.js
 // @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
 
-// @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/sortable.js
+// @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "e493c3eb02f1f6a4e1c458ba857431e77de227ae";
+    dev_hash = "023fae4cefdf18ca6d654c60061e333563ca4330";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -895,7 +895,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             each: {
                 sorttable: function () {
-                    sorttable.makeSortable($(this)[0]);
+                    tsorter.create($(this)[0]);
                 },
                 settings_notification: function () {
                     const $this = $(this);
