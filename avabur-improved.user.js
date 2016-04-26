@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "2b918b07402419bf31f2fa73b050713039411c45";
+    dev_hash = "758e39241f447dc1f9a8418997a6459e15c77c42";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -1336,7 +1336,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                             }
                         }
 
-                        $div.html($('<table/>').html($tbody));
+                        $div.html(
+                            $('<table class="table table-condensed table-bordered avi"/>').append(
+                                '<thead><tr><th>Feature</th><th>Setting</th><th>Description</th></tr></thead>',
+                                $tbody
+                            )
+                        );
                         $container.append($div);
                         $select.append('<option value="' + this.name + '">' + this.name + '</option>').change();
                         this.applyGlobalHandlers($div);
