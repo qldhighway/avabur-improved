@@ -177,7 +177,6 @@ exec_module({
             inventory_table: new MutationObserver(
                 /** @param {MutationRecord[]} records */
                 function (records) {
-                    console.log(records);
                     for (var i = 0; i < records.length; i++) {
                         if (records[i].addedNodes.length) {
                             for (var n = 0; n < records[i].addedNodes.length; n++) {
@@ -209,6 +208,7 @@ exec_module({
         module.vars.observers.currency_tooltips.observe($currencyTooltip[0], {attributes: true});
         module.vars.observers.inventory_table.observe(document.querySelector("#inventoryTable"), {
             attributes: true,
+            childList: true,
             characterData: true
         });
     },
