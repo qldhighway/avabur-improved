@@ -32,20 +32,8 @@
 // @noframes
 // ==/UserScript==
 
-for (var i = 0; i < GM_listValues().length; i++) {
-    console.log(GM_listValues()[i] + ": ");
-    var val = GM_getValue(GM_listValues()[i]);
-    try {
-        console.log(JSON.parse(val));
-    } catch (e) {
-        console.log(val);
-    }
-
-    console.log("");
-}
-
 const is_dev = true,
-    dev_hash = "7cef2c1e8837495be3538fe49f985c323553a26a";
+    dev_hash = "d4f91f41a94b91c156f8bd2cf2aa89e3db0ef8d9";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
