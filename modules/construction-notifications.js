@@ -19,7 +19,7 @@ exec_module({
                 module.vars.sfx.play();
             },
             toast: function (e, $, module) {
-                module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
+                module.dependencies.fn.notification("Construction finished", module.spec.name);
             }
         }
     },
@@ -34,7 +34,7 @@ exec_module({
                     module.vars.sfx.play();
                 }
                 if (module.settings.toast) {
-                    module.dependencies.fn.notification("Construction finished", {title: module.spec.name});
+                    module.dependencies.fn.notification("Construction finished", module.spec.name);
                 }
             }
             module.vars.notified = true;

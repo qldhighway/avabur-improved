@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name           Avabur Improved
-// @namespace      org.alorel.avaburimproved
+// @name           AVI Script Engine
+// @namespace      org.alorel.aviscriptengine
 // @author         Alorel <a.molcanovas@gmail.com>
 // @homepage       https://github.com/Alorel/avabur-improved
 // @description    Some welcome additions to Avabur's UI choices
@@ -33,7 +33,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "3f77a50f41b71aaf4389a7ecf4a8d5ca1ab660b9";
+    dev_hash = "ae66ca5db1fe47fcb9560b42cd02e7950973676b";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -402,13 +402,14 @@ if (typeof(window.sessionStorage) === "undefined") {
             /**
              * Creates a floaty notification
              * @param {String} text Text to display
-             * @param {Object} [options] Overrides as shown here: https://tampermonkey.net/documentation.php#GM_notification
+             * @param {String} [title=GM_info.script.name] The notification title
+             * @param {Object} [options={}] Overrides as shown here: https://tampermonkey.net/documentation.php#GM_notification
              */
-            notification: function (text, options) {
+            notification: function (text, title, options) {
                 if (Settings.settings.notifications.all.gm) {
                     GM_notification($.extend({
                         text: text,
-                        title: GM_info.script.name,
+                        title: title || GM_info.script.name,
                         highlight: true,
                         timeout: 5
                     }, options || {}));
