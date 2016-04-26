@@ -45,7 +45,7 @@ for (var i = 0; i < GM_listValues().length; i++) {
 }
 
 const is_dev = true,
-    dev_hash = "db3357b2c43f210be3e387dcf15f1e77aff3ed52";
+    dev_hash = "7cef2c1e8837495be3538fe49f985c323553a26a";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
