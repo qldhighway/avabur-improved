@@ -33,7 +33,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "9583aa32c02230ae4b4fcc897b8a352e53e1d940";
+    dev_hash = "e493c3eb02f1f6a4e1c458ba857431e77de227ae";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -894,6 +894,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }
             },
             each: {
+                sorttable: function () {
+                    sorttable.makeSortable($(this)[0]);
+                },
                 settings_notification: function () {
                     const $this = $(this);
 
@@ -1295,7 +1298,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                         container: "body",
                         viewport: {"selector": "body", "padding": 0}
                     });
-                    $context.find("[data-delegate-click]").click($HANDLERS.click.delegate_click);
+                    $context.find("[data-delegate-click]:not(.avi-d)").addClass("avi-d").click($HANDLERS.click.delegate_click);
+                    $context.find("table.sortable:not(.avi-d)").addClass("avi-d").each($HANDLERS.each.sorttable);
 
                     return this;
                 },
@@ -1388,7 +1392,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
 
                         $div.html(
-                            $('<table class="table table-condensed table-bordered avi"/>').append(
+                            $('<table class="table table-condensed table-bordered avi sortable"/>').append(
                                 '<thead><tr><th>Feature</th><th>Setting</th><th>Description</th></tr></thead>',
                                 $tbody
                             )

@@ -113,10 +113,6 @@ ul.avi {
   }
 }
 
-.sortable > thead > tr > th {
-  &:not(.sorttable_sorted), &:not(.sorttable_sorted_reverse) {
-    &::after {
-      content: "&nbsp;▾▴"
-    }
-  }
+table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
+  content: " \25B4\25BE"
 }
