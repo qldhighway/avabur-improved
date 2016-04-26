@@ -33,7 +33,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "8a037a59168fdef2cef6e72ab77961a487195800";
+    dev_hash = "4ae576b713ce0f09e1faee22115603bc36c71d14";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -1406,7 +1406,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         container: "body",
                         viewport: {"selector": "body", "padding": 0}
                     });
-                    $context.find("[data-delegate-click]:not(.avi-d)").addClass("avi-d").click($HANDLERS.click.delegate_click);
+                    $context.find("[data-delegate-click]").unbind("click", $HANDLERS.click.delegate_click).click($HANDLERS.click.delegate_click);
                     $context.find("table.sortable:not(.avi-d)").addClass("avi-d").each($HANDLERS.each.sorttable);
 
                     return this;

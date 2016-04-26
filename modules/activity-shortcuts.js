@@ -35,7 +35,6 @@ exec_module({
         }
 
         $navul.append(module.vars.li);
-        module.applyGlobalHandlers($navul);
     },
     unload: function ($, module) {
         module.vars.li.remove();
