@@ -32,7 +32,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "4d9337bf482221af9c197d747a45f9d29ed875ce";
+    dev_hash = "6ab08e459c6463ff4a79fd0b0fe61d7a1106118a";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -1218,9 +1218,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                 this.desc = spec.desc || null;
                 /**
                  * Module settings
-                 * @type {Object}
+                 * @type {Object|Boolean}
                  */
-                this.settings = {};
+                this.settings = false;
 
                 if (!this.name) {
                     Toast.error("Unable to init an unnamed module");
@@ -1306,12 +1306,33 @@ if (typeof(window.sessionStorage) === "undefined") {
                     }
                     return this;
                 },
+
+                /**
+                 * Creates the settings UI for the module
+                 * @returns {Module} this
+                 * @private
+                 */
+                createSettingsUI: function () {
+                    console.log(this.settings);
+                    if (this.ok && this.settings !== false) {
+                        var $select = $("#avi-module-settings-select"),
+                            $container = $("#module-settings-container"),
+                            $div = $('<div data-module="' + this.name + '" style="display:none"/>'),
+                            $tbody = $('<tbody/>');
+
+                        
+                        
+                        $container.append($div);
+                        $select.append('<option value="' + this.name + '">' + this.name + '</option>').change();
+                    }
+                    return this;
+                },
                 /**
                  * Registers the module
                  * @returns {Module} this
                  */
                 register: function () {
-                    this.resolveDependencies();
+                    this.resolveDependencies().createSettingsUI();
                     if (this.ok && this.load) {
                         this.load($, this);
                         this.applyGlobalHandlers();
@@ -1334,6 +1355,10 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }
             };
 
+            /**
+             * Executes the module
+             * @param {Spec.Module} module The module manifest
+             */
             const exec_module = function (module) {
                 const mod = new Module(module);
                 mod.register();
