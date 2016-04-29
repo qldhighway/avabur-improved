@@ -34,7 +34,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "0d7e295a21deacc742485384b45da2cc8d3dd45c";
+    dev_hash = "4c7bbcb7a1b6d3d73852c4d799818cf3d6c30a65";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -352,9 +352,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 });
                 return $this;
             },
-            /**
-             *
-             */
             house_status_update_end: function (interval) {
                 interval.clear();
                 $DOM.house_monitor.status.addClass("avi-highlight").html(

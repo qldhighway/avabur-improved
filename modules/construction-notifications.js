@@ -25,6 +25,12 @@ exec_module({
     },
     funcs: {
         /**
+         * Opens up the house UI
+         */
+        click_house: function () {
+            document.getElementById("header_house").click();
+        },
+        /**
          * Send the notification
          * @param {!Module} module
          */
@@ -34,7 +40,9 @@ exec_module({
                     module.vars.sfx.play();
                 }
                 if (module.settings.toast) {
-                    module.dependencies.fn.notification("Construction finished", module.spec.name);
+                    module.dependencies.fn.notification("Construction finished", module.spec.name, {
+                        onclick: module.spec.funcs.click_house
+                    });
                 }
             }
             module.vars.notified = true;
