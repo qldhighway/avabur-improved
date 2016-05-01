@@ -19,6 +19,7 @@
 // @grant          GM_listValues
 // @grant          GM_xmlhttpRequest
 // @grant          GM_openInTab
+// @grant          GM_getResourceText
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
@@ -26,11 +27,12 @@
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
 // @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
-// @require        https://cdn.rawgit.com/Alorel/console-log-html/master/console-log-html.min.js
+// @require        https://cdn.rawgit.com/Alorel/console-log-html/1.1/console-log-html.min.js
 
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/480c655cf698c9fbaa32e75d36d522bcb4fef52b/modules/manifest.json
 // @noframes
 // ==/UserScript==

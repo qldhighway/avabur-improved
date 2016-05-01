@@ -696,10 +696,7 @@
     }
 
     //Manifest generation
-    $manifest = [
-        'version' => isset($_SERVER['argv'][1]) ? $_SERVER['argv'][1] : 'dev',
-        'modules' => []
-    ];
+    $manifest = [];
 
     echo 'Generating ' . $output_file . PHP_EOL;
 
@@ -710,11 +707,12 @@
 
         $json = CJSON::decode(substr(file_get_contents($dir . $filename), strlen($callback_fn) + 1, -2), true);
 
-        $manifest['modules'][$json['name']] = [
+        $manifest[$json['name']] = [
             'desc'       => $json['desc'],
             'url'        => 'https://cdn.rawgit.com/Alorel/avabur-improved/' . $manifest['version'] . '/modules/' .
                             $filename,
-            'unloadable' => array_key_exists('unload', $json)
+            'unloadable' => array_key_exists('unload', $json),
+            'exec'       => $raw_contents
         ];
     }
 

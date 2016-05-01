@@ -19,6 +19,7 @@
 // @grant          GM_listValues
 // @grant          GM_xmlhttpRequest
 // @grant          GM_openInTab
+// @grant          GM_getResourceText
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
@@ -26,17 +27,18 @@
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
 // @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
-// @require        https://cdn.rawgit.com/Alorel/console-log-html/master/console-log-html.min.js
+// @require        https://cdn.rawgit.com/Alorel/console-log-html/1.1/console-log-html.min.js
 
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/480c655cf698c9fbaa32e75d36d522bcb4fef52b/modules/manifest.json
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "46ed6d5f250166f2b6623e0fba72aa0b8bfd2880";
+    dev_hash = "480c655cf698c9fbaa32e75d36d522bcb4fef52b";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -103,7 +105,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 warn: "avi-txt-warn",
                 info: "avi-txt-info",
                 debug: "avi-txt-debug"
-            });
+            }, true, false);
 
             (new MutationObserver(
                 /**
@@ -121,38 +123,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 })).observe(ul[0], {childList: true});
         })();
 
-        /**
-         * Creates a GitHub CDN URL
-         * @param {String} path Path to the file without leading slashes
-         * @param {String} [author] The author. Defaults to Alorel
-         * @param {String} [repo] The repository. Defaults to avabur-improved
-         * @returns {String} The URL
-         */
-        const gh_url = function (path, author, repo) {
-            author = author || "Alorel";
-            repo = repo || "avabur-improved";
-
-            return "https://cdn.rawgit.com/" + author + "/" + repo + "/" +
-                (is_dev ? dev_hash : GM_info.script.version) + "/" + path;
-        };
-
-        const URLS = {
-            sfx: {
-                circ_saw: gh_url("res/sfx/circ_saw.wav"),
-                message_ding: gh_url("res/sfx/message_ding.wav")
-            },
-            css: {
-                toast: gh_url("lib/toastmessage/jquery.toastmessage.min.css"),
-                script: gh_url("res/css/avabur-improved.min.css")
-            },
-            img: {
-                ajax_loader: gh_url("res/img/ajax-loader.gif")
-            },
-            html: {
-                settings_modal: gh_url("res/html/script-settings.html"),
-                market_tooltip: gh_url("res/html/market-tooltip.html")
-            }
-        };
+        const MODULES = JSON.parse(GM_getResourceText("modules"));
 
         ////////////////////////////////////////////////////////////////////////
         // These are the settings - you can safely change them, but they will //
@@ -264,17 +235,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 navlinks: $("#marketTypeSelector").find("a"),
                 market_tooltip: null
             }
-        };
-
-        const SFX = {
-            circ_saw: new buzz.sound(URLS.sfx.circ_saw),
-            msg_ding: new buzz.sound(URLS.sfx.message_ding)
-        };
-
-        /** AJAX spinners throughout the page */
-        const $AJAX_SPINNERS = {
-            /** The spinner @ the currency tooltip */
-            currency_tooltip: $('<img src="' + URLS.img.ajax_loader + '"/>')
         };
 
         const FUNCTION_PERSISTENT_VARS = {
@@ -395,7 +355,7 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @returns {$|jQuery} $el
              */
             svg: function ($this, url) {
-                $this.html('<img src="' + URLS.img.ajax_loader + '" alt="Loading"/>');
+                $this.html('<img src="' + fn.gh_url("res/img/ajax-loader.gif") + '" alt="Loading"/>');
                 $.get(url).done(function (r) {
                     $this.html($(r).find("svg"));
                 });
@@ -406,10 +366,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                 $DOM.house_monitor.status.addClass("avi-highlight").html(
                     $('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline;padding-right:5px">Ready!</span>')
                         .click($HANDLERS.click.delegate_click)
-                    )
-                    .append(
-                        $("<a href='javascript:;'>(refresh)</a>").click($HANDLERS.click.house_state_refresh)
-                    );
+                ).append(
+                    $("<a href='javascript:;'>(refresh)</a>").click($HANDLERS.click.house_state_refresh)
+                );
                 if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
                     fn.notification(Demo.prototype.gm_texts.construction);
                 }
@@ -620,6 +579,28 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
+        const URLS = {
+            css: {
+                toast: fn.gh_url("lib/toastmessage/jquery.toastmessage.min.css"),
+                script: fn.gh_url("res/css/avabur-improved.min.css")
+            },
+            html: {
+                settings_modal: fn.gh_url("res/html/script-settings.html"),
+                market_tooltip: fn.gh_url("res/html/market-tooltip.html")
+            }
+        };
+
+        const SFX = {
+            circ_saw: new buzz.sound(fn.gh_url("res/sfx/circ_saw.wav")),
+            msg_ding: new buzz.sound(fn.gh_url("res/sfx/message_ding.wav"))
+        };
+
+        /** AJAX spinners throughout the page */
+        const $AJAX_SPINNERS = {
+            /** The spinner @ the currency tooltip */
+            currency_tooltip: $('<img src="' + fn.gh_url("res/img/ajax-loader.gif") + '"/>')
+        };
+
         /**
          * Represents an AJAX request to be used with cache
          * @param {String} url The URL we're calling
@@ -792,26 +773,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
                     }
                 }
-            ),
-            inventory_table: new MutationObserver(
-                /** @param {MutationRecord[]} records */
-                function (records) {
-                    for (var i = 0; i < records.length; i++) {
-                        if (records[i].addedNodes.length) {
-                            for (var n = 0; n < records[i].addedNodes.length; n++) {
-                                if (records[i].addedNodes[n] instanceof HTMLTableSectionElement) {
-                                    const $tbody = $(records[i].addedNodes[n]);
-
-                                    if ($tbody.find("th:contains(Ingredient)").length) { //Bingo!
-                                        $tbody.find(">tr>[data-th=Item]").each($HANDLERS.each.inventory_table_ingredients);
-                                    }
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
             )
         };
 
@@ -878,14 +839,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 house_state_refresh: function () {
                     $.post("/house.php", {}, Request.prototype.callbacks.success.house_state_refresh);
                 },
-                topbar_currency: function () {
-                    const type = $(this).find(">td:first").text().trim();
-                    fn.openMarket(type.substring(0, type.length - 1));
-                },
-                ingredient: function () {
-                    $DOM.modal.modal_background.click();
-                    fn.openMarket("Ingredients");
-                },
                 script_menu: function () {
                     $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
                     fn.openStdModal($DOM.modal.script_settings);
@@ -909,38 +862,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $("#module-settings-container").find(">[data-module='" + $(this).val() + "']").show().siblings().hide();
                 }
             },
-            mouseenter: {
-                inventory_table_ingredient: function () {
-                    const $this = $(this),
-                        ingredient = $this.text().trim();
-
-                    if (typeof(TRADESKILL_MATS[ingredient]) === "undefined") {
-                        Toast.error("Failed to lookup " + ingredient + ": ID not found");
-                    } else {
-                        (new Request("/market.php", CACHE_TTL.market))
-                            .post({
-                                type: "ingredient",
-                                page: 0,
-                                q: 0,
-                                ll: 0,
-                                hl: 0,
-                                st: TRADESKILL_MATS[ingredient]
-                            }).done(function (r) {
-                            const describedBy = $this.attr("aria-describedby"),
-                                $describedBy = $("#" + describedBy);
-
-                            if (describedBy && $describedBy.length) {
-                                const analysis = fn.analysePrice(r.l),
-                                    $tds = $describedBy.find("tr[data-id=prices]>td");
-
-                                $tds.first().text(fn.numberWithCommas(analysis.low))
-                                    .next().text(fn.numberWithCommas(analysis.avg))
-                                    .next().text(fn.numberWithCommas(analysis.high));
-                            }
-                        });
-                    }
-                }
-            },
             each: {
                 sorttable: function () {
                     tsorter.create($(this)[0]);
@@ -953,26 +874,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 settings_features: function () {
                     const $this = $(this);
                     $this.prop("checked", Settings.settings.features[$this.data("feature")]);
-                },
-                inventory_table_ingredients: function () {
-                    const $this = $(this),
-                        ingredient = $this.text().trim(),
-                        $span = $('<span>' + ingredient + '</span>');
-                    $this.html($span);
-
-                    $span.popover({
-                        title: ingredient,
-                        html: true,
-                        trigger: "hover",
-                        container: "body",
-                        viewport: {"selector": "body", "padding": 0},
-                        placement: "auto right",
-                        content: $DOM.market.market_tooltip
-                    });
-
-                    $span.mouseenter($HANDLERS.mouseenter.inventory_table_ingredient)
-                        .css("cursor", "pointer")
-                        .click($HANDLERS.click.ingredient);
                 }
             }
         };
@@ -1266,10 +1167,6 @@ if (typeof(window.sessionStorage) === "undefined") {
 
                     $helpSection.append($menuLink);
                     $("#navWrapper").css("padding-top", $menuLink.height()).find("ul");
-                },
-                "Registering market shortcuts": function () {
-                    $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))").css("cursor", "pointer")
-                        .click($HANDLERS.click.topbar_currency);
                 },
                 "Staring whisper monitor": function () {
                     OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
@@ -1628,7 +1525,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             };
 
             for (var j = 0; j < required_modules.length; j++) {
-                $.ajax(gh_url("modules/" + required_modules[j] + ".min.js"), {
+                $.ajax(fn.gh_url("modules/" + required_modules[j] + ".min.js"), {
                     dataType: "text"
                 }).done(module_ajax_callback);
             }

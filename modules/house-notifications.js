@@ -1,24 +1,24 @@
 exec_module({
-    name: "Construction notifications",
-    desc: "Creates toast & sound notifications when house construction finishes",
+    name: "House notifications",
+    desc: "Creates toast & sound notifications when house construction and/or Harvestron finish",
     dependencies: {
         fn: ["parseTimeStringLong", "gh_url", "notification"],
         classes: ["AloTimer", "Interval", "SFX"]
     },
     settings: {
         desc: {
-            sound: "Play a sound when construction finishes",
-            toast: "Display a toast when construction finishes"
+            "Construction sound": "Play a sound when construction finishes",
+            "Construction toast": "Display a toast when construction finishes"
         },
         defaults: {
-            sound: true,
-            toast: true
+            "Construction sound": true,
+            "Construction toast": true
         },
         demo: {
-            sound: function (e, $, module) {
+            "Construction sound": function (e, $, module) {
                 module.vars.sfx.play();
             },
-            toast: function (e, $, module) {
+            "Construction toast": function (e, $, module) {
                 module.dependencies.fn.notification("Construction finished", module.spec.name);
             }
         }
@@ -36,10 +36,10 @@ exec_module({
          */
         notify: function (module) {
             if (!module.vars.notified) {
-                if (module.settings.sound) {
+                if (module.settings["Construction sound"]) {
                     module.vars.sfx.play();
                 }
-                if (module.settings.toast) {
+                if (module.settings["Construction toast"]) {
                     module.dependencies.fn.notification("Construction finished", module.spec.name, {
                         onclick: module.spec.funcs.click_house
                     });
