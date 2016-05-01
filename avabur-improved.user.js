@@ -36,7 +36,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "70b44678256fd98a9c7626835166f58e0ffa8798";
+    dev_hash = "46ed6d5f250166f2b6623e0fba72aa0b8bfd2880";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -71,20 +71,21 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else if (typeof(MutationObserver) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
-    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console) {
+    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML) {
         'use strict';
 
-        //Register logger
+        //Register log monitor
         (function () {
-            const blog = $('<span class="badge">0</span>'),
-                bdebug = $('<span class="badge avi-txt-debug">0</span>'),
-                binfo = $('<span class="badge avi-txt-info">0</span>'),
-                bwarn = $('<span class="badge avi-txt-warn">0</span>'),
-                berror = $('<span class="badge avi-txt-error">0</span>'),
-                ul = $("<ul class='avi' style='width:500px;overflow-y:auto'/>"),
+            const levels = {
+                    log: $('<span class="badge">0</span>')[0],
+                    debug: $('<span class="badge avi-txt-debug">0</span>')[0],
+                    info: $('<span class="badge avi-txt-info">0</span>')[0],
+                    warn: $('<span class="badge avi-txt-warn">0</span>')[0],
+                    error: $('<span class="badge avi-txt-error">0</span>')[0]
+                }, ul = $("<ul class='avi' style='width:500px;overflow-y:auto;max-height:250px'/>"),
                 container = $("<div/>").append(ul),
                 btn = $('<button class="btn btn-default avi-log-btn">Log</button>')
-                    .append(blog, bdebug, binfo, bwarn, berror)
+                    .append(levels.log, levels.debug, levels.info, levels.warn, levels.error)
                     .popover({
                         title: "Console log",
                         html: true,
@@ -103,6 +104,21 @@ if (typeof(window.sessionStorage) === "undefined") {
                 info: "avi-txt-info",
                 debug: "avi-txt-debug"
             });
+
+            (new MutationObserver(
+                /**
+                 * @param {MutationRecord[]} records
+                 */
+                function (records) {
+                    for (var r = 0; r < records.length; r++) {
+                        if (records[r].addedNodes.length) {
+                            for (var n = 0; n < records[r].addedNodes.length; n++) {
+                                const badge = levels[$(records[r].addedNodes[n]).attr("data-level")];
+                                badge.innerText = parseInt(badge.innerText) + 1;
+                            }
+                        }
+                    }
+                })).observe(ul[0], {childList: true});
         })();
 
         /**
@@ -1617,5 +1633,5 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }).done(module_ajax_callback);
             }
         })();
-    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML, window.console);
+    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML);
 }
