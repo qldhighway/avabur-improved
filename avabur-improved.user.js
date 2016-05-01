@@ -11,8 +11,6 @@
 // @version        0.6.7
 // @icon           https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-16.png
 // @icon64         https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-64.png
-// @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
-// @updateURL      https://github.com/Alorel/avabur-improved/raw/develop/avabur-improved.meta.js
 // @run-at         document-end
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -31,6 +29,9 @@
 // @require        https://cdn.rawgit.com/Alorel/console-log-html/master/console-log-html.min.js
 
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
+// @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
+// @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
+
 // @noframes
 // ==/UserScript==
 
@@ -70,8 +71,21 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else if (typeof(MutationObserver) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
-    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer) {
+    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML) {
         'use strict';
+
+        //Register logger
+        (function () {
+            const blog = $('<span class="badge">0</span>'),
+                bdebug = $('<span class="badge avi-txt-debug">0</span>'),
+                binfo = $('<span class="badge avi-txt-info">0</span>'),
+                bwarn = $('<span class="badge avi-txt-warn">0</span>'),
+                berror = $('<span class="badge avi-txt-error">0</span>'),
+                btn = $('<button class="btn btn-default avi-log-btn">Log </button>')
+                    .append(blog, bdebug, binfo, bwarn, berror);
+
+            $("body").append(btn);
+        })();
 
         /**
          * Creates a GitHub CDN URL
@@ -1585,5 +1599,5 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }).done(module_ajax_callback);
             }
         })();
-    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer);
+    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML);
 }

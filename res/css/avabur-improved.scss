@@ -140,3 +140,30 @@ table.sortable th {
 .fragments {
   color: #BB51D4;
 }
+
+.avi-log-btn {
+  padding: 2px;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+
+  .badge {
+    padding: 3px 3px;
+  }
+}
+
+.avi-txt-debug {
+  color: #0AD !important;
+}
+
+.avi-txt-info {
+  color: #00B000 !important;
+}
+
+.avi-txt-warn {
+  color: #EEE600 !important;
+}
+
+.avi-txt-error {
+  color: #C81423 !important;
+}

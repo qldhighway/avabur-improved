@@ -11,8 +11,6 @@
 // @version        0.6.7
 // @icon           https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-16.png
 // @icon64         https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-64.png
-// @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
-// @updateURL      https://github.com/Alorel/avabur-improved/raw/develop/avabur-improved.meta.js
 // @run-at         document-end
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -31,5 +29,8 @@
 // @require        https://cdn.rawgit.com/Alorel/console-log-html/master/console-log-html.min.js
 
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
+// @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
+// @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
+
 // @noframes
 // ==/UserScript==
