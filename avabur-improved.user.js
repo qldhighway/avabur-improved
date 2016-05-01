@@ -28,13 +28,14 @@
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
 // @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
+// @require        https://cdn.rawgit.com/Alorel/console-log-html/master/console-log-html.min.js
 
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "4c7bbcb7a1b6d3d73852c4d799818cf3d6c30a65";
+    dev_hash = "5ca9aaf7153947ca00a49dd23969c1b0974ca63c";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -244,11 +245,11 @@ if (typeof(window.sessionStorage) === "undefined") {
         Interval.prototype = {
             _intervals: {},
             isRunning: function () {
-                return typeof(this._intervals[this.name]) !== "undefined";
+                return typeof(Interval.prototype._intervals[this.name]) !== "undefined";
             },
             clear: function () {
                 if (this.isRunning()) {
-                    clearInterval(this._intervals[this.name]);
+                    clearInterval(Interval.prototype._intervals[this.name]);
                     delete this._intervals[this.name];
                     return true;
                 }
@@ -257,8 +258,8 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             set: function (callback, frequency) {
                 this.clear();
-                this._intervals[this.name] = setInterval(callback, frequency);
-                return this._intervals[this.name];
+                Interval.prototype._intervals[this.name] = setInterval(callback, frequency);
+                return Interval.prototype._intervals[this.name];
             }
         };
 
@@ -404,7 +405,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         text: text,
                         title: title || GM_info.script.name,
                         highlight: true,
-                        timeout: 5
+                        timeout: 5000
                     }, options || {}));
                 }
             },
