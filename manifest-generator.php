@@ -709,8 +709,6 @@
 
         $manifest[$json['name']] = [
             'desc'       => $json['desc'],
-            'url'        => 'https://cdn.rawgit.com/Alorel/avabur-improved/' . $manifest['version'] . '/modules/' .
-                            $filename,
             'unloadable' => array_key_exists('unload', $json),
             'exec'       => $raw_contents
         ];

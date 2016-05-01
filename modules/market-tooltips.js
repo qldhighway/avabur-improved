@@ -150,52 +150,63 @@ exec_module({
             $modalBackground = $("#modalBackground"),
             $allTDs;
 
-        module.vars.dom = {};
-        module.vars.observers = {
-            currency_tooltips: new MutationObserver(
-                function (records) {
-                    if (records.length && $colourReference.is(":visible")) {
-                        const cssClass = $colourReference.attr("class"),
-                            marketID = cssClass.replace("crystals", "premium")
-                                .replace("materials", "weapon_scraps")
-                                .replace("fragments", "gem_fragments");
-
-                        module.vars.dom.row_currency.attr("class", cssClass);
-
-                        if (cssClass === "gold") {
-                            $allTDs.text("N/A");
-                        } else {
-                            $allTDs.text(" ");
-
-                            (new module.dependencies.classes.Request("/market.php", module.spec.vars.CACHE_TTL)).post({
-                                type: "currency",
-                                page: 0,
-                                st: marketID
-                            }).done($done$currencyTooltip);
-                        }
-                    }
-                }),
-            inventory_table: new MutationObserver(
-                /** @param {MutationRecord[]} records */
-                function (records) {
-                    for (var i = 0; i < records.length; i++) {
-                        if (records[i].addedNodes.length) {
-                            for (var n = 0; n < records[i].addedNodes.length; n++) {
-                                if (records[i].addedNodes[n] instanceof HTMLTableSectionElement) {
-                                    const $tbody = $(records[i].addedNodes[n]);
-
-                                    if ($tbody.find("th:contains(Ingredient)").length) { //Bingo!
-                                        $tbody.find(">tr>[data-th=Item]").each($each$inventoryTable);
-                                    }
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
+        module.vars = {
+            dom: {},
+            clickies: $("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))"),
+            click: {
+                currency: function () {
+                    const type = $(this).find(">td:first").text().trim();
+                    module.dependencies.fn.openMarket(type.substring(0, type.length - 1));
                 }
-            )
+            },
+            observers: {
+                currency_tooltips: new MutationObserver(
+                    function (records) {
+                        if (records.length && $colourReference.is(":visible")) {
+                            const cssClass = $colourReference.attr("class"),
+                                marketID = cssClass.replace("crystals", "premium")
+                                    .replace("materials", "weapon_scraps")
+                                    .replace("fragments", "gem_fragments");
+
+                            module.vars.dom.row_currency.attr("class", cssClass);
+
+                            if (cssClass === "gold") {
+                                $allTDs.text("N/A");
+                            } else {
+                                $allTDs.text(" ");
+
+                                (new module.dependencies.classes.Request("/market.php", module.spec.vars.CACHE_TTL)).post({
+                                    type: "currency",
+                                    page: 0,
+                                    st: marketID
+                                }).done($done$currencyTooltip);
+                            }
+                        }
+                    }),
+                inventory_table: new MutationObserver(
+                    /** @param {MutationRecord[]} records */
+                    function (records) {
+                        for (var i = 0; i < records.length; i++) {
+                            if (records[i].addedNodes.length) {
+                                for (var n = 0; n < records[i].addedNodes.length; n++) {
+                                    if (records[i].addedNodes[n] instanceof HTMLTableSectionElement) {
+                                        const $tbody = $(records[i].addedNodes[n]);
+
+                                        if ($tbody.find("th:contains(Ingredient)").length) { //Bingo!
+                                            $tbody.find(">tr>[data-th=Item]").each($each$inventoryTable);
+                                        }
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                )
+            }
         };
+
+        module.vars.clickies.css("cursor", "pointer").click(module.vars.click.currency);
 
         module.vars.dom.table_currency = $(module.spec.vars.html);
         module.vars.dom.row_currency = module.vars.dom.table_currency.find("tr[data-id=prices]");
@@ -214,6 +225,7 @@ exec_module({
         });
     },
     unload: function ($, module) {
+        module.vars.clickies.css("cursor", "initial").unbind("click", module.vars.click.currency);
         if (typeof(module.vars.dom) !== "undefined") {
             for (var i in module.vars.dom) {
                 if (module.vars.dom.hasOwnProperty(i)) {

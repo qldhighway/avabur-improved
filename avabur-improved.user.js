@@ -33,12 +33,12 @@
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/480c655cf698c9fbaa32e75d36d522bcb4fef52b/modules/manifest.json
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/fe208983beb839af6dc63d5d1afbda4f00d084e6/modules/manifest.json
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "480c655cf698c9fbaa32e75d36d522bcb4fef52b";
+    dev_hash = "fe208983beb839af6dc63d5d1afbda4f00d084e6";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -239,6 +239,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         const FUNCTION_PERSISTENT_VARS = {
             house_update_last_msg: null,
+            market_was_opened: false
         };
 
         /**
@@ -1517,7 +1518,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 "activity-shortcuts",
                 "house-timers",
                 "market-tooltips",
-                "construction-notifications"
+                "house-notifications"
             ];
 
             const module_ajax_callback = function (r) {
