@@ -35,6 +35,8 @@ exec_module({
         }
 
         $navul.append(module.vars.li);
+
+        console.warn("Activity shortcuts loaded");
     },
     unload: function ($, module) {
         module.vars.li.remove();

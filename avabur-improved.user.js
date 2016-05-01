@@ -36,7 +36,7 @@
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "5ca9aaf7153947ca00a49dd23969c1b0974ca63c";
+    dev_hash = "70b44678256fd98a9c7626835166f58e0ffa8798";
 /** Create toast messages */
 const Toast = {
     error: function (msg) {
@@ -71,7 +71,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else if (typeof(MutationObserver) === "undefined") {
     Toast.incompatibility("MutationObserver");
 } else {
-    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML) {
+    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console) {
         'use strict';
 
         //Register logger
@@ -81,10 +81,28 @@ if (typeof(window.sessionStorage) === "undefined") {
                 binfo = $('<span class="badge avi-txt-info">0</span>'),
                 bwarn = $('<span class="badge avi-txt-warn">0</span>'),
                 berror = $('<span class="badge avi-txt-error">0</span>'),
-                btn = $('<button class="btn btn-default avi-log-btn">Log </button>')
-                    .append(blog, bdebug, binfo, bwarn, berror);
+                ul = $("<ul class='avi' style='width:500px;overflow-y:auto'/>"),
+                container = $("<div/>").append(ul),
+                btn = $('<button class="btn btn-default avi-log-btn">Log</button>')
+                    .append(blog, bdebug, binfo, bwarn, berror)
+                    .popover({
+                        title: "Console log",
+                        html: true,
+                        trigger: "click",
+                        container: "body",
+                        viewport: {"selector": "body", "padding": 0},
+                        placement: "auto top",
+                        content: container
+                    });
+
 
             $("body").append(btn);
+            ConsoleLogHTML.connect(ul, {
+                error: "avi-txt-error",
+                warn: "avi-txt-warn",
+                info: "avi-txt-info",
+                debug: "avi-txt-debug"
+            });
         })();
 
         /**
@@ -1599,5 +1617,5 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }).done(module_ajax_callback);
             }
         })();
-    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML);
+    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML, window.console);
 }
