@@ -11,7 +11,7 @@ exec_module({
          * How long the market data will live in cache (in hours)
          * @type Number
          */
-        CACHE_TTL: 1 / 3600 * 60, //60 sec,
+        CACHE_TTL: 1 / 3600 * 60, //60 sec
         /**
          * Our tooltip HTML
          * @type String
