@@ -1,6 +1,7 @@
 exec_module({
     name: "House notifications",
     desc: "Creates toast & sound notifications when house construction and/or Harvestron finish",
+    id: "HOUSE_NOTIFICATIONS",
     dependencies: {
         fn: ["parseTimeStringLong", "gh_url", "notification"],
         classes: ["AloTimer", "Interval", "SFX"]
@@ -36,6 +37,7 @@ exec_module({
          */
         notify: function (module) {
             if (!module.vars.notified) {
+                console.info("Construction finished");
                 if (module.settings["Construction sound"]) {
                     module.vars.sfx.play();
                 }
@@ -59,7 +61,6 @@ exec_module({
                 }
             });
         }
-
 
         /**
          * Handle our house info text

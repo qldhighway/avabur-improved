@@ -1,6 +1,7 @@
 exec_module({
     name: "Market tooltips",
     desc: "Performs a market price lookup when you hover a supported item",
+    id: "MARKET_TOOLTIPS",
     dependencies: {
         fn: ["analysePrice", "numberWithCommas", "openMarket"],
         classes: ["Request"]
@@ -16,54 +17,6 @@ exec_module({
          * @type String
          */
         html: '<table class="avi" style="margin:auto"><thead><tr><th colspan="3">Current market price (1st page)</th></tr><tr><th>Low</th><th>Average</th><th>High</th></tr></thead><tbody><tr data-id="prices"><td></td><td></td><td></td></tr></tbody></table>',
-        /**
-         * A mapping of tradeskill ingredient names to their IDs
-         */
-        tradeskill_mats: {
-            "Aberration Mind Source": 0,
-            "Animal Eye": 10,
-            "Animal Tongue": 11,
-            "Animal Tooth": 12,
-            "Animal Wing": 13,
-            "Beast Fur": 20,
-            "Beast Limb": 21,
-            "Beast Tooth": 22,
-            "Beast Wing": 23,
-            "Bird Nest": 122,
-            "Chunk of Coal": 130,
-            "Chunk of Graphite": 132,
-            "Construct Power": 30,
-            "Copper Ore": 133,
-            "Dragon Eye": 40,
-            "Dragon Scale": 41,
-            "Dragon Tail": 42,
-            "Elemental Energy": 50,
-            "Fish Fin": 112,
-            "Golden Apple": 121,
-            "Honeycomb": 123,
-            "Humanoid Bone": 60,
-            "Humanoid Flesh": 61,
-            "Humanoid Limb": 62,
-            "Lucky Coin": 141,
-            "Magical Stone": 140,
-            "Octopus Ink": 110,
-            "Ooze Gel": 70,
-            "Plant Branch": 80,
-            "Plant Leaf": 81,
-            "Plant Root": 82,
-            "Plant Vine": 83,
-            "Protection Stone": 142,
-            "Rainbow Shard": 131,
-            "Rune Stone": 143,
-            "Serpent Eye": 90,
-            "Serpent Tail": 91,
-            "Serpent Tongue": 92,
-            "Squid Tentacle": 113,
-            "Turtle Shell": 111,
-            "Vermin Eye": 100,
-            "Vermin Tooth": 101,
-            "Yellow Pollen": 120
-        }
     },
     load: function ($, module) {
         /**
@@ -94,7 +47,7 @@ exec_module({
                 ingredient = $this.text().trim();
 
             if (typeof(module.spec.vars.tradeskill_mats[ingredient]) === "undefined") {
-                Toast.error("Failed to lookup " + ingredient + ": ID not found");
+                fn.notification("Failed to lookup " + ingredient + ": ID not found");
             } else {
                 (new module.dependencies.classes.Request("/market.php", module.spec.vars.CACHE_TTL))
                     .post({

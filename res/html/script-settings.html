@@ -1,5 +1,8 @@
 <div style="display:none">
     <nav class="center">
+        <a href="javascript:;" data-menu="modules">
+            <button class="btn btn-primary">Modules</button>
+        </a>
         <a href="javascript:;" data-menu="global-settings">
             <button class="btn btn-primary">Global settings</button>
         </a>
@@ -11,6 +14,22 @@
         </a>
     </nav>
     <div class="mt10">
+        <div data-menu="modules">
+            <table class="table table-condensed table-bordered avi">
+                <thead>
+                <th>Name</th>
+                <th>Description</th>
+                <th>
+                    <span>Unloadable</span>
+                    <sup title="An unloadable module can be turned off at runtime without having to refresh the page"
+                         class="avi-tip">?</sup>
+                </th>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
         <div data-menu="module-settings">
             <select id="avi-module-settings-select" style="margin:auto;display:block"></select>
             <div id="module-settings-container" class="mt10"></div>

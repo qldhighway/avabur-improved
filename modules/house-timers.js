@@ -1,6 +1,7 @@
 exec_module({
     name: "House timers",
     desc: "Shows house construction timers without the need for an alarm clock",
+    id: "HOUSE_TIMERS",
     dependencies: {
         fn: ["parseTimeStringLong"],
         classes: ["AloTimer", "CssManager", "Interval"]

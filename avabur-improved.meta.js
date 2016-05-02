@@ -23,16 +23,15 @@
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
-// @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/toastmessage/jquery.toastmessage.min.js
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
-// @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
+// @require        https://cdn.rawgit.com/Alorel/alo-timer/1.1/src/alotimer.min.js
 // @require        https://cdn.rawgit.com/Alorel/console-log-html/1.1/console-log-html.min.js
 
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/fe208983beb839af6dc63d5d1afbda4f00d084e6/modules/manifest.json
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/ab45a1b80726350f11304211f5dde795531935ee/modules/manifest.json
 // @noframes
 // ==/UserScript==

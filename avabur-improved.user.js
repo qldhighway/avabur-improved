@@ -23,55 +23,28 @@
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
-// @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/toastmessage/jquery.toastmessage.min.js
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
-// @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
+// @require        https://cdn.rawgit.com/Alorel/alo-timer/1.1/src/alotimer.min.js
 // @require        https://cdn.rawgit.com/Alorel/console-log-html/1.1/console-log-html.min.js
 
 // @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/fe208983beb839af6dc63d5d1afbda4f00d084e6/modules/manifest.json
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/ab45a1b80726350f11304211f5dde795531935ee/modules/manifest.json
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "fe208983beb839af6dc63d5d1afbda4f00d084e6";
+    dev_hash = "ab45a1b80726350f11304211f5dde795531935ee";
 /** Create toast messages */
-const Toast = {
-    error: function (msg) {
-        console.error(msg);
-        $().toastmessage('showErrorToast', msg);
-    },
-    notice: function (msg) {
-        $().toastmessage('showNoticeToast', msg);
-    },
-    success: function (msg) {
-        $().toastmessage('showSuccessToast', msg);
-    },
-    warn: function (msg) {
-        console.warn(msg);
-        $().toastmessage('showWarningToast', msg);
-    },
-    incompatibility: function (what) {
-        $().toastmessage('showToast', {
-            text: "Your browser does not support " + what +
-            ". Please <a href='https://www.google.co.uk/chrome/browser/desktop/' target='_blank'>" +
-            "Download the latest version of Google Chrome</a>",
-            sticky: true,
-            position: 'top-center',
-            type: 'error'
-        });
-    }
-};
 
 //Check if the user can even support the bot
 if (typeof(window.sessionStorage) === "undefined") {
-    Toast.incompatibility("Session storage");
+    alert("Your browser does not support session storage. Please download the latest version of Google Chrome.");
 } else if (typeof(MutationObserver) === "undefined") {
-    Toast.incompatibility("MutationObserver");
+    alert("Your browser does not support Mutation Observers. Please download the latest version of Google Chrome.");
 } else {
     (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML) {
         'use strict';
@@ -89,7 +62,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 btn = $('<button class="btn btn-default avi-log-btn">Log</button>')
                     .append(levels.log, levels.debug, levels.info, levels.warn, levels.error)
                     .popover({
-                        title: "Console log",
+                        title: GM_info.script.name + " log",
                         html: true,
                         trigger: "click",
                         container: "body",
@@ -124,19 +97,6 @@ if (typeof(window.sessionStorage) === "undefined") {
         })();
 
         const MODULES = JSON.parse(GM_getResourceText("modules"));
-
-        ////////////////////////////////////////////////////////////////////////
-        // These are the settings - you can safely change them, but they will //
-        // be overwritten during script updates                               //
-        ////////////////////////////////////////////////////////////////////////
-
-        /** How long our AJAX cache is meant to last */
-        const CACHE_TTL = {
-            /** Resource tooltip market price lookups */
-            market: 1 / 3600 * 60, //60 sec,
-            /** Tradeskill material ID mapping */
-            tradeskill_mats: 1
-        };
 
         /**
          * The URL where we check for updates. This is different from @updateURL because we want it to come through
@@ -200,19 +160,6 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /** Our persistent DOM stuff */
         const $DOM = {
-            currency_tooltip: {
-                the_tooltip: $("#currencyTooltip"),
-                /** The HTML element which will be used for currency tooltip colour references */
-                colour_reference: $("#currencyTooltipMarketable"),
-                /** Thr row we will be colouring */
-                table_row: null,
-                /** The 1st page low price */
-                market_low: null,
-                /** The 1st page avg price */
-                market_avg: null,
-                /** The 1st page high price */
-                market_high: null
-            },
             /** Game modals */
             modal: {
                 /** The outer wrapper */
@@ -224,51 +171,62 @@ if (typeof(window.sessionStorage) === "undefined") {
                 /** The script settings modal */
                 script_settings: null
             },
-            /** Navigation items */
-            nav: {
-                market: $("#viewMarket")
-            },
-            house_monitor: {
-                status: null
-            },
+            /** Market DOM */
             market: {
-                navlinks: $("#marketTypeSelector").find("a"),
-                market_tooltip: null
+                /** The market tabs */
+                navlinks: $("#marketTypeSelector").find("a")
             }
         };
 
-        const FUNCTION_PERSISTENT_VARS = {
-            house_update_last_msg: null,
-            market_was_opened: false
-        };
-
-        /**
-         * Interval manager
-         * @param {String} name Interval name/ID
-         * @constructor
-         */
-        const Interval = function (name) {
-            this.name = name;
-        };
-
-        Interval.prototype = {
-            _intervals: {},
-            isRunning: function () {
-                return typeof(Interval.prototype._intervals[this.name]) !== "undefined";
-            },
-            clear: function () {
-                if (this.isRunning()) {
-                    clearInterval(Interval.prototype._intervals[this.name]);
-                    delete this._intervals[this.name];
-                    return true;
-                }
-
-                return false;
-            },
-            set: function (callback, frequency) {
-                this.clear();
-                Interval.prototype._intervals[this.name] = setInterval(callback, frequency);
-                return Interval.prototype._intervals[this.name];
+        /** Misc variables */
+        const VARS = {
+            /** Whether the market was opened */
+            market_was_opened: false,
+            /** A mapping of tradeskill ingredient names to their IDs */
+            tradeskill_mats: {
+                "Aberration Mind Source": 0,
+                "Animal Eye": 10,
+                "Animal Tongue": 11,
+                "Animal Tooth": 12,
+                "Animal Wing": 13,
+                "Beast Fur": 20,
+                "Beast Limb": 21,
+                "Beast Tooth": 22,
+                "Beast Wing": 23,
+                "Bird Nest": 122,
+                "Chunk of Coal": 130,
+                "Chunk of Graphite": 132,
+                "Construct Power": 30,
+                "Copper Ore": 133,
+                "Dragon Eye": 40,
+                "Dragon Scale": 41,
+                "Dragon Tail": 42,
+                "Elemental Energy": 50,
+                "Fish Fin": 112,
+                "Golden Apple": 121,
+                "Honeycomb": 123,
+                "Humanoid Bone": 60,
+                "Humanoid Flesh": 61,
+                "Humanoid Limb": 62,
+                "Lucky Coin": 141,
+                "Magical Stone": 140,
+                "Octopus Ink": 110,
+                "Ooze Gel": 70,
+                "Plant Branch": 80,
+                "Plant Leaf": 81,
+                "Plant Root": 82,
+                "Plant Vine": 83,
+                "Protection Stone": 142,
+                "Rainbow Shard": 131,
+                "Rune Stone": 143,
+                "Serpent Eye": 90,
+                "Serpent Tail": 91,
+                "Serpent Tongue": 92,
+                "Squid Tentacle": 113,
+                "Turtle Shell": 111,
+                "Vermin Eye": 100,
+                "Vermin Tooth": 101,
+                "Yellow Pollen": 120
             }
         };
 
@@ -362,45 +320,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                 });
                 return $this;
             },
-            house_status_update_end: function (interval) {
-                interval.clear();
-                $DOM.house_monitor.status.addClass("avi-highlight").html(
-                    $('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline;padding-right:5px">Ready!</span>')
-                        .click($HANDLERS.click.delegate_click)
-                ).append(
-                    $("<a href='javascript:;'>(refresh)</a>").click($HANDLERS.click.house_state_refresh)
-                );
-                if (Settings.settings.notifications.construction.gm && Settings.settings.notifications.all.gm) {
-                    fn.notification(Demo.prototype.gm_texts.construction);
-                }
-                if (Settings.settings.notifications.construction.sound && Settings.settings.notifications.all.sound) {
-                    SFX.circ_saw.play();
-                }
-            },
-            handle_house_status_update: function (text) {
-                if (text !== FUNCTION_PERSISTENT_VARS.house_update_last_msg) {
-                    FUNCTION_PERSISTENT_VARS.house_update_last_msg = text;
-                    const interval = new Interval("house_status");
-                    interval.clear();
-
-                    if (text.indexOf("available again") !== -1) { // Working
-                        const timer = new AloTimer(fn.parseTimeStringLong(text));
-                        interval.set(function () {
-                            if (timer.isFinished()) {
-                                fn.house_status_update_end(interval);
-                            } else {
-                                $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
-                            }
-                        }, 1000);
-                    } else if (text.indexOf("are available") !== -1) {
-                        fn.house_status_update_end(interval);
-                    } else {
-                        setTimeout(function () {
-                            $.get("/house.php")
-                        }, 3000);
-                    }
-                }
-            },
             /**
              * Creates a floaty notification
              * @param {String} text Text to display
@@ -422,18 +341,27 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @param {String} type The top category name
              */
             openMarket: function (type) {
-                const $document = $(document);
-
-                const $openCategory = function (evt, xhr, opts) {
-                    if (opts.url === "market.php") {
-                        $document.unbind("ajaxComplete", $openCategory);
-                        $DOM.market.navlinks.removeClass("active")
-                            .filter("a:contains('" + type + "')").addClass("active").click();
-                    }
+                const doOpen = function () {
+                    $DOM.market.navlinks.removeClass("active")
+                        .filter("a:contains('" + type + "')").addClass("active").click();
                 };
+                if (VARS.market_was_opened) {
+                    fn.openStdModal("#marketWrapper");
+                    doOpen();
+                } else {
+                    const $document = $(document);
 
-                $document.ajaxComplete($openCategory);
-                $DOM.nav.market.click();
+                    const $openCategory = function (evt, xhr, opts) {
+                        if (opts.url === "market.php") {
+                            $document.unbind("ajaxComplete", $openCategory);
+                            VARS.market_was_opened = true;
+                            doOpen();
+                        }
+                    };
+
+                    $document.ajaxComplete($openCategory);
+                    $("#viewMarket").click();
+                }
             },
             /**
              * Analyses the price array
@@ -580,160 +508,13 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
-        const URLS = {
-            css: {
-                toast: fn.gh_url("lib/toastmessage/jquery.toastmessage.min.css"),
-                script: fn.gh_url("res/css/avabur-improved.min.css")
-            },
-            html: {
-                settings_modal: fn.gh_url("res/html/script-settings.html"),
-                market_tooltip: fn.gh_url("res/html/market-tooltip.html")
-            }
-        };
-
         const SFX = {
             circ_saw: new buzz.sound(fn.gh_url("res/sfx/circ_saw.wav")),
             msg_ding: new buzz.sound(fn.gh_url("res/sfx/message_ding.wav"))
         };
 
-        /** AJAX spinners throughout the page */
-        const $AJAX_SPINNERS = {
-            /** The spinner @ the currency tooltip */
-            currency_tooltip: $('<img src="' + fn.gh_url("res/img/ajax-loader.gif") + '"/>')
-        };
-
-        /**
-         * Represents an AJAX request to be used with cache
-         * @param {String} url The URL we're calling
-         * @param {Boolean|Number} cacheTime Cache time in hours or false if the request should not be cached
-         * @param {Function} [errorCallback]  A custom error callback
-         * @constructor
-         */
-        const Request = function (url, cacheTime, errorCallback) {
-            /** The URL we're calling */
-            this.url = url;
-            /** OnError callback */
-            this.errorCallback = errorCallback || Request.prototype.callbacks.error.generic;
-
-            /**
-             * How long the request should be cached for
-             * @type {Boolean|Number}
-             */
-            this.cacheTime = cacheTime || false;
-        };
-
-        Request.prototype = {
-            /** Ajax callbacks container */
-            callbacks: {
-                /** Successful AJAX callbacks */
-                success: {
-                    /** Successful callback for the currency tooltip market info lookup */
-                    currency_tooltip: function (r) {
-                        const analysis = fn.analysePrice(r.l);
-
-                        fn.toggleVisibility($AJAX_SPINNERS.currency_tooltip, false);
-                        $DOM.currency_tooltip.market_low.text(fn.numberWithCommas(analysis.low));
-                        $DOM.currency_tooltip.market_avg.text(fn.numberWithCommas(analysis.avg));
-                        $DOM.currency_tooltip.market_high.text(fn.numberWithCommas(analysis.high));
-                    },
-                    house_requery: function (evt, r, opts) {
-                        if (opts.url.indexOf("house") !== -1 &&
-                            typeof(r.responseJSON) !== "undefined" &&
-                            typeof(r.responseJSON.m) !== "undefined") {
-                            fn.handle_house_status_update(r.responseJSON.m);
-                        }
-                    },
-                    house_state_refresh: function (r) {
-                        fn.handle_house_status_update(r.m);
-                    }
-                },
-                /** Error callbacks */
-                error: {
-                    /** Generic error callback */
-                    generic: function (xhr, textStatus, errorThrown) {
-                        Toast.error("[" + textStatus + "] " + xhr.responseText);
-                        console.error({
-                            xhr: xhr,
-                            textStatus: textStatus,
-                            errorThrown: errorThrown
-                        });
-                    }
-                }
-            },
-
-            /**
-             * Make a GET request
-             * @returns {*|jqXHR|XMLHTTPRequest|jQuery|$}
-             */
-            get: function () {
-                return this._generic({
-                    method: "GET"
-                });
-            },
-
-            /**
-             * To be called internally to start the request
-             * @param {Object} generated params generated by the get/post methods
-             * @returns {jqXHR|XMLHTTPRequest|jQuery|$}
-             * @private
-             */
-            _generic: function (generated) {
-                const methodArgs = $.extend({
-                    url: this.url,
-                    error: this.errorCallback
-                }, generated || {});
-
-                if (this.cacheTime !== false && !isNaN(this.cacheTime)) {
-                    methodArgs.cacheTTL = this.cacheTime;
-                    methodArgs.localCache = CACHE_STORAGE;
-                }
-
-                return $.ajax(this.url, methodArgs);
-            },
-
-            /**
-             * Make a POST request
-             * @param {Object} data Post params
-             * @returns {*|jqXHR|XMLHTTPRequest|jQuery|$}
-             */
-            post: function (data) {
-                return this._generic({
-                    method: "POST",
-                    data: data
-                });
-            }
-        };
-
         /** Collection of mutation observers the script uses */
         const OBSERVERS = {
-            /** Mutation observer for the currency page tooltip */
-            currency_tooltips: new MutationObserver(
-                /** @param {MutationRecord[]} records */
-                function (records) {
-                    if (records.length && $DOM.currency_tooltip.colour_reference.is(":visible")) {
-                        const cssClass = $DOM.currency_tooltip.colour_reference.attr("class"),
-                            marketID = cssClass.replace("crystals", "premium")
-                                .replace("materials", "weapon_scraps")
-                                .replace("fragments", "gem_fragments"),
-                            $allTDs = $DOM.currency_tooltip.table_row.find(">td");
-
-                        $DOM.currency_tooltip.table_row.attr("class", cssClass);
-
-                        if (cssClass === "gold") {
-                            $allTDs.text("N/A");
-                            fn.toggleVisibility($AJAX_SPINNERS.currency_tooltip, false);
-                        } else {
-                            $allTDs.text(" ");
-                            fn.toggleVisibility($AJAX_SPINNERS.currency_tooltip, true);
-
-                            (new Request("/market.php", CACHE_TTL.market)).post({
-                                type: "currency",
-                                page: 0,
-                                st: marketID
-                            }).done(Request.prototype.callbacks.success.currency_tooltip);
-                        }
-                    }
-                }),
             /** Makes sure the script settings modal doesn't get nasty with the other game modals */
             script_settings: new MutationObserver(function () {
                     if (!$DOM.modal.script_settings.is(":visible")) {
@@ -741,14 +522,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                     }
                 }
             ),
-            house_status: new MutationObserver(function (records) {
-                for (var i = 0; i < records.length; i++) {
-                    if (records[i].addedNodes.length) {
-                        fn.handle_house_status_update(records[i].target.innerText.trim());
-                        break;
-                    }
-                }
-            }),
             chat_whispers: new MutationObserver(
                 /** @param {MutationRecord[]} records */
                 function (records) {
@@ -777,69 +550,8 @@ if (typeof(window.sessionStorage) === "undefined") {
             )
         };
 
-        var TRADESKILL_MATS = {};
-
-        const Demo = function (kind) {
-            this.kind = kind;
-        };
-
-        Demo.prototype.kinds = {
-            SOUND: 1,
-            GM_NOTIFICATION: 2
-        };
-        Demo.prototype.gm_texts = {
-            whisper: "[00:00:00] Whisper from Alorel: send me all of your crystals.",
-            construction: "Construction finished!"
-        };
-        Demo.prototype.scenarios = {
-            "whisper-sound": {
-                kind: Demo.prototype.kinds.SOUND,
-                src: SFX.msg_ding
-            },
-            "whisper-gm": {
-                kind: Demo.prototype.kinds.GM_NOTIFICATION,
-                src: Demo.prototype.gm_texts.whisper
-            },
-            "construction-sound": {
-                kind: Demo.prototype.kinds.SOUND,
-                src: SFX.circ_saw
-            },
-            "construction-gm": {
-                kind: Demo.prototype.kinds.GM_NOTIFICATION,
-                src: Demo.prototype.gm_texts.construction
-            }
-        };
-        Demo.prototype.play = function () {
-            if (typeof(this.scenarios[this.kind]) !== "undefined") {
-                const scenario = this.scenarios[this.kind];
-
-                switch (scenario.kind) {
-                    case Demo.prototype.kinds.SOUND:
-                        if (!buzz.isWAVSupported()) {
-                            Toast.incompatibility("WAV sounds");
-                        } else {
-                            scenario.src.play();
-                        }
-                        break;
-                    case Demo.prototype.kinds.GM_NOTIFICATION:
-                        fn.notification(scenario.src);
-                        break;
-                    default:
-                        Toast.error("Misconfigured demo scenario: " + this.kind);
-                }
-            } else {
-                Toast.error("Invalid demo scenario picked: " + this.kind);
-            }
-        };
-
         const $HANDLERS = {
             click: {
-                demo: function () {
-                    (new Demo($(this).attr("data-demo"))).play();
-                },
-                house_state_refresh: function () {
-                    $.post("/house.php", {}, Request.prototype.callbacks.success.house_state_refresh);
-                },
                 script_menu: function () {
                     $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
                     fn.openStdModal($DOM.modal.script_settings);
@@ -924,7 +636,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 /** The URL we're calling */
                 this.url = url;
                 /** OnError callback */
-                this.errorCallback = errorCallback || Request.prototype.callbacks.error.generic;
+                this.errorCallback = errorCallback || classes.Request.prototype.callbacks.error.generic;
 
                 /**
                  * How long the request should be cached for
@@ -950,33 +662,11 @@ if (typeof(window.sessionStorage) === "undefined") {
         classes.Request.prototype = {
             /** Ajax callbacks container */
             callbacks: {
-                /** Successful AJAX callbacks */
-                success: {
-                    /** Successful callback for the currency tooltip market info lookup */
-                    currency_tooltip: function (r) {
-                        const analysis = fn.analysePrice(r.l);
-
-                        fn.toggleVisibility($AJAX_SPINNERS.currency_tooltip, false);
-                        $DOM.currency_tooltip.market_low.text(fn.numberWithCommas(analysis.low));
-                        $DOM.currency_tooltip.market_avg.text(fn.numberWithCommas(analysis.avg));
-                        $DOM.currency_tooltip.market_high.text(fn.numberWithCommas(analysis.high));
-                    },
-                    house_requery: function (evt, r, opts) {
-                        if (opts.url.indexOf("house") !== -1 &&
-                            typeof(r.responseJSON) !== "undefined" &&
-                            typeof(r.responseJSON.m) !== "undefined") {
-                            fn.handle_house_status_update(r.responseJSON.m);
-                        }
-                    },
-                    house_state_refresh: function (r) {
-                        fn.handle_house_status_update(r.m);
-                    }
-                },
                 /** Error callbacks */
                 error: {
                     /** Generic error callback */
                     generic: function (xhr, textStatus, errorThrown) {
-                        Toast.error("[" + textStatus + "] " + xhr.responseText);
+                        fn.notification("[" + textStatus + "] " + xhr.responseText);
                         console.error({
                             xhr: xhr,
                             textStatus: textStatus,
@@ -1118,34 +808,18 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         (function () {
             const ON_LOAD = {
-                "Checking if the script has been updated": function () {
-                    if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
-                        fn.notification(
-                            GM_info.script.name + " has been updated! Click here for a changelog.",
-                            "Good news, everyone!", {
-                                onclick: function () {
-                                    GM_openInTab("https://github.com/Alorel/avabur-improved/releases")
-                                },
-                                timeout: 0
-                            }
-                        );
-                    }
-                    GM_setValue("last_ver", GM_info.script.version);
-                },
                 "Loading script CSS": function () {
-                    const $head = $("head"),
-                        keys = Object.keys(URLS.css);
+                    const urls = [fn.gh_url("res/css/avabur-improved.min.css")], $head = $("head");
 
-                    for (var i = 0; i < keys.length; i++) {
-                        $head.append("<link type='text/css' rel='stylesheet' href='" + URLS.css[keys[i]] + "'/>");
+                    for (var i = 0; i < urls.length; i++) {
+                        $head.append("<link type='text/css' rel='stylesheet' href='" + urls[i] + "'/>");
                     }
                 },
                 "Configuring script modal": function () {
-                    $.get(URLS.html.settings_modal).done(function (r) {
+                    $.get(fn.gh_url("res/html/script-settings.html")).done(function (r) {
                         $DOM.modal.script_settings = $(r);
                         $("#modalContent").append($DOM.modal.script_settings);
                         fn.tabify($DOM.modal.script_settings);
-                        $DOM.modal.script_settings.find("[data-demo]").click($HANDLERS.click.demo);
 
                         $DOM.modal.script_settings.find('[data-setting="notifications"]')
                             .each($HANDLERS.each.settings_notification)
@@ -1173,47 +847,16 @@ if (typeof(window.sessionStorage) === "undefined") {
                     OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
                         childList: true
                     });
-                },
-                "Collecting tradeskill material IDs": function () {
-                    const cached_ids = window.sessionStorage.getItem("TRADESKILL_MATERIAL_IDS");
-                    if (cached_ids) {
-                        TRADESKILL_MATS = JSON.parse(cached_ids);
-                    } else {
-                        $.post("/market.php", {
-                            type: "ingredient",
-                            page: 0,
-                            st: "all"
-                        }, function (r) {
-                            const select = $("<select/>"),
-                                mats = {};
-                            select.html(r.filter);
-
-                            select.find(">option:not([value=all])").each(function () {
-                                const $this = $(this);
-                                mats[$this.text().trim()] = parseInt($this.val());
-                            });
-
-                            window.sessionStorage.setItem("TRADESKILL_MATERIAL_IDS", JSON.stringify(mats));
-                            TRADESKILL_MATS = mats;
-                        });
-                    }
-                },
-                "Applying extra event listeners tooltips": function () {
-                    $(".avi-tip").tooltip({
-                        container: "body",
-                        viewport: {"selector": "body", "padding": 0}
-                    });
-                    $("[data-delegate-click]").click($HANDLERS.click.delegate_click);
                 }
             };
             const keys = Object.keys(ON_LOAD);
             for (var i = 0; i < keys.length; i++) {
-                console.log("[" + GM_info.script.name + "] " + keys[i]);
+                console.debug(keys[i]);
                 ON_LOAD[keys[i]]();
                 delete ON_LOAD[keys[i]];
             }
             fn.check_github_for_updates();
-            (new Interval("gh_update")).set(fn.check_github_for_updates, 60000);
+            (new classes.Interval("gh_update")).set(fn.check_github_for_updates, 60000);
 
 
             /**
@@ -1234,7 +877,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 this.name = spec.name || false;
                 /**
                  * Load function
-                 * @type {Spec.Module.load|Boolean}
+                 * @type {Function}
                  */
                 this.load = spec.load || false;
 
@@ -1249,9 +892,15 @@ if (typeof(window.sessionStorage) === "undefined") {
 
                 /**
                  * Module unload function
-                 * @type {Spec.Module.unload|boolean}
+                 * @type {Function}
                  */
                 this.unload = spec.unload || false;
+
+                /**
+                 * The module ID
+                 * @type {string}
+                 */
+                this.id = spec.id || null;
 
                 /**
                  * Whether the settings are correct
@@ -1275,13 +924,14 @@ if (typeof(window.sessionStorage) === "undefined") {
                 this.settings = false;
 
                 if (!this.name) {
-                    Toast.error("Unable to init an unnamed module");
+                    console.error("Unable to init an unnamed module");
                     this.ok = false;
                 } else if (this.load === false) {
-                    Toast.error("Unable to init module " + this.name + ": loader not present");
+                    console.error("Unable to init module " + this.name + ": loader not present");
                     this.ok = false;
                 } else if (typeof(Module.prototype.loaded[this.name]) !== "undefined") {
-                    Toast.error("Cannot load module " + this.name + " again until it is unloaded!");
+                    fn.notification("Cannot load module " + this.name + " again until it is unloaded!");
+                    console.warn("Cannot load module " + this.name + " again until it is unloaded!");
                     this.ok = false;
                 } else {
                     if (typeof(spec.settings) !== "undefined") {
@@ -1333,7 +983,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                                         if (typeof(fn[dependencyCategory[i]]) !== "undefined") {
                                             this.dependencies.fn[dependencyCategory[i]] = fn[dependencyCategory[i]];
                                         } else {
-                                            Toast.error("Failed to load functional dependency " + dependencyCategory[i] + " for module " + this.name + ": no match.");
+                                            console.error("Failed to load functional dependency " + dependencyCategory[i] + " for module " + this.name + ": no match.");
                                             this.ok = false;
                                         }
                                     }
@@ -1347,12 +997,24 @@ if (typeof(window.sessionStorage) === "undefined") {
                                         if (typeof(classes[dependencyCategory[i]]) !== "undefined") {
                                             this.dependencies.classes[dependencyCategory[i]] = classes[dependencyCategory[i]];
                                         } else {
-                                            Toast.error("Failed to load class dependency " + dependencyCategory[i] + " for module " + this.name + ": no match");
+                                            console.error("Failed to load class dependency " + dependencyCategory[i] + " for module " + this.name + ": no match");
+                                            this.ok = false;
+                                        }
+                                    }
+                                    break;
+                                case "vars":
+                                    this.dependencies.vars = {};
+                                    for (i = 0; i < dependencyCategory.length; i++) {
+                                        if (typeof(classes[dependencyCategory[i]]) !== "undefined") {
+                                            this.dependencies.vars[dependencyCategory[i]] = VARS[dependencyCategory[i]];
+                                        } else {
+                                            console.error("Failed to load variable dependency " + dependencyCategory[i] + " for module " + this.name + ": no match");
+                                            this.ok = false;
                                         }
                                     }
                                     break;
                                 default:
-                                    Toast.error("Failed to load dependency category " + dependencyKeys[keyIndex] + " of module " + this.name + ": unknown category");
+                                    console.error("Failed to load dependency category " + dependencyKeys[keyIndex] + " of module " + this.name + ": unknown category");
                                     this.ok = false;
                             }
                         }
@@ -1414,7 +1076,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                                         $valTd = $('<input type="checkbox"' + (this.settings[key] ? "checked" : "") + '/>');
                                         break;
                                     default:
-                                        Toast.error("Failed to create setting UI for module " + this.name + ' variable ' + key + ': the value type ' + this.settings[key] + ' is not supported');
+                                        console.error("Failed to create setting UI for module " + this.name +
+                                            ' variable ' + key + ': the value type ' + this.settings[key] + ' is not supported');
                                         continue;
                                 }
 
@@ -1482,12 +1145,16 @@ if (typeof(window.sessionStorage) === "undefined") {
                  * @returns {Module} this
                  */
                 register: function () {
-                    this.resolveDependencies().createSettingsUI();
-                    if (this.ok && this.load) {
-                        this.load($, this);
-                        this.applyGlobalHandlers();
+                    if (!this.id || Object.keys(Module.prototype.loaded).indexOf(this.id) !== -1) {
+                        console.error("Cannot load module " + this.name + ': ID collision (' + this.id + ')')
+                    } else {
+                        this.resolveDependencies().createSettingsUI();
+                        if (this.ok && this.load) {
+                            this.load($, this);
+                            this.applyGlobalHandlers();
+                        }
+                        Module.prototype.loaded[this.id] = this;
                     }
-                    Module.prototype.loaded[this.name] = this;
 
                     return this;
                 },
@@ -1499,11 +1166,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                     if (this.removeSettingsUI().ok && this.unload) {
                         this.unload($, this);
                     }
-                    delete Module.prototype.loaded[this.name];
+                    delete Module.prototype.loaded[this.id];
 
                     return this;
                 }
             };
+            Module.prototype.applyGlobalHandlers();
 
             /**
              * Executes the module

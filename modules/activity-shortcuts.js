@@ -1,6 +1,7 @@
 exec_module({
     name: "Activity Shortcuts",
     desc: "Registers activity shortcuts on the side menu",
+    id: "ACTIVITY_SHORTCUTS",
     dependencies: {
         fn: ["gh_url", "svg"]
     },
@@ -35,8 +36,6 @@ exec_module({
         }
 
         $navul.append(module.vars.li);
-
-        console.warn("Activity shortcuts loaded");
     },
     unload: function ($, module) {
         module.vars.li.remove();
