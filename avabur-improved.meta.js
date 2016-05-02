@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           AVI Script Engine
+// @name           AvI Script Engine
 // @namespace      org.alorel.aviscriptengine
 // @author         Alorel <a.molcanovas@gmail.com>
 // @homepage       https://github.com/Alorel/avabur-improved
@@ -32,6 +32,6 @@
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/ab45a1b80726350f11304211f5dde795531935ee/modules/manifest.json
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/d7584e6f7d19576cade270565e07bb4836cdfb9c/modules/manifest.json
 // @noframes
 // ==/UserScript==

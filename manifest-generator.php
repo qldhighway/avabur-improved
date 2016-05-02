@@ -2,6 +2,8 @@
 
     $start = microtime(true);
 
+    sleep(2);
+
     // Setup
     $dir = __DIR__ . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR;
     $output_file = 'manifest.json';

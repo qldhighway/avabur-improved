@@ -10,6 +10,10 @@
     animation: pulsate-inner 0.5s infinite alternate;
   }
 
+  &.-flash-once {
+    animation: pulsate-inner 0.15s 2 alternate;
+  }
+
   &-force {
     &-hide {
       display: none !important;

@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           AVI Script Engine
+// @name           AvI Script Engine
 // @namespace      org.alorel.aviscriptengine
 // @author         Alorel <a.molcanovas@gmail.com>
 // @homepage       https://github.com/Alorel/avabur-improved
@@ -32,12 +32,12 @@
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/ab45a1b80726350f11304211f5dde795531935ee/modules/manifest.json
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/d7584e6f7d19576cade270565e07bb4836cdfb9c/modules/manifest.json
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "ab45a1b80726350f11304211f5dde795531935ee";
+    dev_hash = "d7584e6f7d19576cade270565e07bb4836cdfb9c";
 /** Create toast messages */
 
 //Check if the user can even support the bot
@@ -52,11 +52,11 @@ if (typeof(window.sessionStorage) === "undefined") {
         //Register log monitor
         (function () {
             const levels = {
-                    log: $('<span class="badge">0</span>')[0],
-                    debug: $('<span class="badge avi-txt-debug">0</span>')[0],
-                    info: $('<span class="badge avi-txt-info">0</span>')[0],
-                    warn: $('<span class="badge avi-txt-warn">0</span>')[0],
-                    error: $('<span class="badge avi-txt-error">0</span>')[0]
+                    log: $('<span class="badge">0</span>'),
+                    debug: $('<span class="badge avi-txt-debug">0</span>'),
+                    info: $('<span class="badge avi-txt-info">0</span>'),
+                    warn: $('<span class="badge avi-txt-warn">0</span>'),
+                    error: $('<span class="badge avi-txt-error">0</span>')
                 }, ul = $("<ul class='avi' style='width:500px;overflow-y:auto;max-height:250px'/>"),
                 container = $("<div/>").append(ul),
                 btn = $('<button class="btn btn-default avi-log-btn">Log</button>')
@@ -89,7 +89,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                         if (records[r].addedNodes.length) {
                             for (var n = 0; n < records[r].addedNodes.length; n++) {
                                 const badge = levels[$(records[r].addedNodes[n]).attr("data-level")];
-                                badge.innerText = parseInt(badge.innerText) + 1;
+                                badge.text(parseInt(badge.text()) + 1)
+                                    .removeClass("avi-flash-once")
+                                    .addClass("avi-flash-once");
                             }
                         }
                     }
@@ -843,7 +845,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $helpSection.append($menuLink);
                     $("#navWrapper").css("padding-top", $menuLink.height()).find("ul");
                 },
-                "Staring whisper monitor": function () {
+                "Starting whisper monitor": function () {
                     OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
                         childList: true
                     });
@@ -1137,7 +1139,6 @@ if (typeof(window.sessionStorage) === "undefined") {
                     $sel.find(">option:first").prop("selected", true);
                     $sel.change();
 
-
                     return this;
                 },
                 /**
@@ -1148,12 +1149,15 @@ if (typeof(window.sessionStorage) === "undefined") {
                     if (!this.id || Object.keys(Module.prototype.loaded).indexOf(this.id) !== -1) {
                         console.error("Cannot load module " + this.name + ': ID collision (' + this.id + ')')
                     } else {
-                        this.resolveDependencies().createSettingsUI();
+                        this.resolveDependencies();
                         if (this.ok && this.load) {
                             this.load($, this);
-                            this.applyGlobalHandlers();
+                            this.createSettingsUI().applyGlobalHandlers();
+                            Module.prototype.loaded[this.id] = this;
+                            console.debug("Loaded module " + this.name);
+                        } else {
+                            console.error("Failed to load module " + this.name);
                         }
-                        Module.prototype.loaded[this.id] = this;
                     }
 
                     return this;
@@ -1163,10 +1167,14 @@ if (typeof(window.sessionStorage) === "undefined") {
                  * @returns {Module} this
                  */
                 unregister: function () {
-                    if (this.removeSettingsUI().ok && this.unload) {
-                        this.unload($, this);
-                    }
+                    this.removeSettingsUI();
                     delete Module.prototype.loaded[this.id];
+                    console.debug("Module " + this.name + " unloaded");
+                    if (this.unload) {
+                        this.unload($, this);
+                    } else {
+                        fn.notification("Module " + this.name + " unloaded. Due to this module's specifics you'll need to reload the page to see the effects.");
+                    }
 
                     return this;
                 }
