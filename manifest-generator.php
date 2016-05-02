@@ -2,7 +2,9 @@
 
     $start = microtime(true);
 
-    sleep(2);
+    if (stripos($_SERVER['argv'][1], '.user.js') === false) {
+        sleep(2);
+    }
 
     // Setup
     $dir = __DIR__ . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR;

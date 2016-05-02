@@ -32,12 +32,12 @@
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/d7584e6f7d19576cade270565e07bb4836cdfb9c/modules/manifest.json
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/5dca76dc82ee38a1ca80c4a786177d9c85742520/modules/manifest.json
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "d7584e6f7d19576cade270565e07bb4836cdfb9c";
+    dev_hash = "5dca76dc82ee38a1ca80c4a786177d9c85742520";
 /** Create toast messages */
 
 //Check if the user can even support the bot
