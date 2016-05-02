@@ -32,12 +32,12 @@
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/5dca76dc82ee38a1ca80c4a786177d9c85742520/modules/manifest.json
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/79733f25ed9e378b17d9f8a5718e616e91c35917/modules/manifest.json
 // @noframes
 // ==/UserScript==
 
 const is_dev = true,
-    dev_hash = "5dca76dc82ee38a1ca80c4a786177d9c85742520";
+    dev_hash = "79733f25ed9e378b17d9f8a5718e616e91c35917";
 /** Create toast messages */
 
 //Check if the user can even support the bot
@@ -46,8 +46,27 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else if (typeof(MutationObserver) === "undefined") {
     alert("Your browser does not support Mutation Observers. Please download the latest version of Google Chrome.");
 } else {
-    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML) {
+    (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console) {
         'use strict';
+
+        //Extend GM_getValue
+        (function () {
+            const orig = GM_getValue;
+            /**
+             * Get a value stored in Tampermonkey
+             * @param {string} key The key
+             * @param {*} [defaultValue=null] The default value
+             * @returns {*} If the value is found in TM this will return that value; If it's not and defaultValue is set, the default value will be returned, otherwise NULL will be returned
+             */
+            GM_getValue = function (key, defaultValue) {
+                if (typeof(defaultValue === "undefiend")) {
+                    defaultValue = null;
+                }
+                var r = orig.apply(this, [key]);
+
+                return typeof(r) === "undefined" || r === null ? defaultValue : r;
+            }
+        })();
 
         //Register log monitor
         (function () {
@@ -57,20 +76,35 @@ if (typeof(window.sessionStorage) === "undefined") {
                     info: $('<span class="badge avi-txt-info">0</span>'),
                     warn: $('<span class="badge avi-txt-warn">0</span>'),
                     error: $('<span class="badge avi-txt-error">0</span>')
-                }, ul = $("<ul class='avi' style='width:500px;overflow-y:auto;max-height:250px'/>"),
-                container = $("<div/>").append(ul),
+                },
+                ul = $("<ul class='avi' style='width:100%;overflow-y:auto;max-height:250px'/>"),
+                $title = $('<div/>')
+                    .append(
+                        '<span style="float:left">' + GM_info.script.name + ' log</span>',
+                        $('<a href="javascript:;" style="float:right">Clear</a>').click(function () {
+                            console.clear();
+                            $(this).closest(".popover").remove();
+                            console.debug("Console cleared");
+                        }),
+                        '<div style="clear:both"></div>'
+                    );
+
+            const container = $("<div/>").append(ul),
                 btn = $('<button class="btn btn-default avi-log-btn">Log</button>')
                     .append(levels.log, levels.debug, levels.info, levels.warn, levels.error)
                     .popover({
-                        title: GM_info.script.name + " log",
+                        title: $title,
                         html: true,
                         trigger: "click",
                         container: "body",
                         viewport: {"selector": "body", "padding": 0},
+                        template: '<div class="popover col-lg-5 col-xs-12 col-sm-9 col-md-7" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
                         placement: "auto top",
                         content: container
+                    })
+                    .on("hidden.bs.popover", function () {
+                        ul.find(">.avi-italic").removeClass("avi-italic");
                     });
-
 
             $("body").append(btn);
             ConsoleLogHTML.connect(ul, {
@@ -86,12 +120,17 @@ if (typeof(window.sessionStorage) === "undefined") {
                  */
                 function (records) {
                     for (var r = 0; r < records.length; r++) {
+                        var n;
                         if (records[r].addedNodes.length) {
-                            for (var n = 0; n < records[r].addedNodes.length; n++) {
-                                const badge = levels[$(records[r].addedNodes[n]).attr("data-level")];
-                                badge.text(parseInt(badge.text()) + 1)
-                                    .removeClass("avi-flash-once")
-                                    .addClass("avi-flash-once");
+                            for (n = 0; n < records[r].addedNodes.length; n++) {
+                                const badge = levels[$(records[r].addedNodes[n]).addClass("avi-italic").attr("data-level")];
+                                fn.flash_once(badge.text(parseInt(badge.text()) + 1));
+                            }
+                        }
+                        if (records[r].removedNodes.length) {
+                            for (n = 0; n < records[r].removedNodes.length; n++) {
+                                const badge = levels[$(records[r].removedNodes[n]).attr("data-level")];
+                                fn.flash_once(badge.text(parseInt(badge.text()) - 1));
                             }
                         }
                     }
@@ -99,7 +138,6 @@ if (typeof(window.sessionStorage) === "undefined") {
         })();
 
         const MODULES = JSON.parse(GM_getResourceText("modules"));
-
         /**
          * The URL where we check for updates. This is different from @updateURL because we want it to come through
          * as a regular page load, not a request to the raw file
@@ -234,6 +272,19 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         /** Misc function container */
         const fn = {
+
+            /**
+             * Flash an element once
+             * @param {*|jQuery|HTMLElement} $element The element
+             * @returns {*|jQuery|HTMLElement} the element
+             */
+            flash_once: function ($element) {
+                $element.addClass("avi-flash-once");
+                setTimeout(function () {
+                    $element.removeClass("avi-flash-once");
+                }, 300);
+                return $element;
+            },
 
             /**
              * Sort a Select element
@@ -1207,5 +1258,5 @@ if (typeof(window.sessionStorage) === "undefined") {
                 }).done(module_ajax_callback);
             }
         })();
-    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML);
+    })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console);
 }

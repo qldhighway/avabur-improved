@@ -10,6 +10,10 @@
     animation: pulsate-inner 0.5s infinite alternate;
   }
 
+  &-italic {
+    font-style: italic;
+  }
+
   &-flash-once {
     animation: pulsate-inner 0.15s 2 alternate;
   }
