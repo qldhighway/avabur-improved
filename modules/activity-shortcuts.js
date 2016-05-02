@@ -20,7 +20,7 @@ exec_module({
     },
     load: function ($, module) {
         var vars = module.spec.vars,
-            $a = $("<a href='javascript:;' class='avi-tip avi-menu-shortcut'/>"),
+            $a = $("<a href='javascript:;' class='avi-tip avi-menu-shortcut' style='border-bottom:none'/>"),
             $navul = $("#navWrapper").find("ul"),
             a;
 
