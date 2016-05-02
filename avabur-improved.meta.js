@@ -32,6 +32,6 @@
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/8abb7193b43408427c312c4e93e18c06d49e86a0/modules/manifest.json
+// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/3c791db83ab7582a3fe29d870b97a586f4d63afe/modules/manifest.json
 // @noframes
 // ==/UserScript==

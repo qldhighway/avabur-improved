@@ -1,0 +1,11 @@
+{
+  "name": "avi-script-engine",
+  "version": "0.7.0",
+  "dependencies": {
+    "collections": "^3.0.0"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-browserify": "^5.0.0"
+  }
+}
