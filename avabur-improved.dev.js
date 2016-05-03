@@ -36,7 +36,7 @@
 // @noframes
 // ==/UserScript==
 
-const is_dev = true,
+var is_dev = true,
     dev_hash = "3ea6a2cd5d9c8e98b8873ac75595364b4ef8fbf8";
 
 //Check if the user can even support the bot
@@ -50,11 +50,11 @@ if (typeof(window.sessionStorage) === "undefined") {
         console.log(require('./modules'));
 
         //node dependencies
-        const FastSet = require('./node_modules/collections/fast-set');
+        var FastSet = require('./node_modules/collections/fast-set');
 
         //Extend GM_getValue
         (function () {
-            const orig = GM_getValue;
+            var orig = GM_getValue;
             /**
              * Get a value stored in Tampermonkey
              * @param {string} key The key
@@ -73,12 +73,12 @@ if (typeof(window.sessionStorage) === "undefined") {
 
         //Register log monitor
         (function () {
-            const clear = function () {
+            var clear = function () {
                 console.clear();
                 btn.popover("hide");
                 console.debug("Console cleared");
             };
-            const levels = {
+            var levels = {
                     log: $('<span class="badge">0</span>'),
                     debug: $('<span class="badge avi-txt-debug">0</span>'),
                     info: $('<span class="badge avi-txt-info">0</span>'),
@@ -123,13 +123,13 @@ if (typeof(window.sessionStorage) === "undefined") {
                  * @param {MutationRecord[]} records
                  */
                 function (records) {
-                    const badgesToFlash = new FastSet();
+                    var badgesToFlash = new FastSet();
 
                     for (var r = 0; r < records.length; r++) {
                         var n;
                         if (records[r].addedNodes.length) {
                             for (n = 0; n < records[r].addedNodes.length; n++) {
-                                const lvl = $(records[r].addedNodes[n]).addClass("avi-italic small").attr("data-level");
+                                var lvl = $(records[r].addedNodes[n]).addClass("avi-italic small").attr("data-level");
 
                                 badgesToFlash.add(lvl);
                                 levels[lvl].text(parseInt(levels[lvl].text()) + 1)
@@ -137,7 +137,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         }
                         if (records[r].removedNodes.length) {
                             for (n = 0; n < records[r].removedNodes.length; n++) {
-                                const lvl = $(records[r].removedNodes[n]).attr("data-level");
+                                var lvl = $(records[r].removedNodes[n]).attr("data-level");
                                 badgesToFlash.add(lvl);
                                 levels[lvl].text(parseInt(levels[lvl].text()) - 1);
                             }
@@ -149,12 +149,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                 })).observe(ul[0], {childList: true});
         })();
 
-        const MODULES = JSON.parse(GM_getResourceText("modules"));
+        var MODULES = JSON.parse(GM_getResourceText("modules"));
         /**
          * The URL where we check for updates. This is different from @updateURL because we want it to come through
          * as a regular page load, not a request to the raw file
          */
-        const UPDATE_URL = "https://github.com/Alorel/avabur-improved/blob/master/avabur-improved.user.js";
+        var UPDATE_URL = "https://github.com/Alorel/avabur-improved/blob/master/avabur-improved.user.js";
 
         /////////////////////////////////////////////////////
         // This is the script code. Don't change it unless //
@@ -166,7 +166,7 @@ if (typeof(window.sessionStorage) === "undefined") {
          * Handles settings. Shocker, I know.
          * @constructor
          */
-        const SettingsHandler = function () {
+        var SettingsHandler = function () {
             /** @type SettingsHandler.defaults */
             this.settings = this.defaults;
             this.load();
@@ -210,14 +210,14 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
-        const Settings = new SettingsHandler();
+        var Settings = new SettingsHandler();
 
         /* /(([0-9])+\s(minutes|seconds|hours))/g
          ^ tmp - will be used for future update
          */
 
         /** Our persistent DOM stuff */
-        const $DOM = {
+        var $DOM = {
             /** Game modals */
             modal: {
                 /** The outer wrapper */
@@ -237,7 +237,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
 
         /** Misc variables */
-        const VARS = {
+        var VARS = {
             /** Whether the market was opened */
             market_was_opened: false,
             /** A mapping of tradeskill ingredient names to their IDs */
@@ -289,7 +289,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
 
         /** Misc function container */
-        const fn = {
+        var fn = {
 
             /**
              * Flash an element once
@@ -343,11 +343,11 @@ if (typeof(window.sessionStorage) === "undefined") {
              */
             parseTimeStringLong: function (str) {
                 var time = 0;
-                const match = str.match(/([0-9]+\s+(hours?|minutes?|seconds?))/g);
+                var match = str.match(/([0-9]+\s+(hours?|minutes?|seconds?))/g);
 
                 for (var i = 0; i < match.length; i++) {
-                    const currentMatch = match[i].toLowerCase();
-                    const number = currentMatch.match(/[0-9]+/);
+                    var currentMatch = match[i].toLowerCase();
+                    var number = currentMatch.match(/[0-9]+/);
                     var multiplier;
                     if (currentMatch.indexOf("hour") !== -1) {
                         multiplier = 3600000;
@@ -370,7 +370,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     method: "GET",
                     url: UPDATE_URL,
                     onload: function (r) {
-                        const theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
+                        var theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
                         if (fn.versionCompare(GM_info.script.version, theirVersion) < 0) {
                             fn.notification('A new version of ' + GM_info.script.name + ' is available! Click your ' +
                                 'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.');
@@ -412,7 +412,7 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @param {String} type The top category name
              */
             openMarket: function (type) {
-                const doOpen = function () {
+                var doOpen = function () {
                     $DOM.market.navlinks.removeClass("active")
                         .filter("a:contains('" + type + "')").addClass("active").click();
                 };
@@ -420,9 +420,9 @@ if (typeof(window.sessionStorage) === "undefined") {
                     fn.openStdModal("#marketWrapper");
                     doOpen();
                 } else {
-                    const $document = $(document);
+                    var $document = $(document);
 
-                    const $openCategory = function (evt, xhr, opts) {
+                    var $openCategory = function (evt, xhr, opts) {
                         if (opts.url === "market.php") {
                             $document.unbind("ajaxComplete", $openCategory);
                             VARS.market_was_opened = true;
@@ -440,7 +440,7 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @returns {{low: Number, high: Number, avg:Number}}
              */
             analysePrice: function (arr) {
-                const ret = {
+                var ret = {
                     low: arr[0].price,
                     high: arr[arr.length - 1].price
                 };
@@ -467,12 +467,12 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @returns {*|jQuery|HTMLElement} $container
              */
             tabify: function ($container) {
-                const $nav = $container.find(">nav>*"),
+                var $nav = $container.find(">nav>*"),
                     $tabs = $container.find(">div>*"),
                     $activeNav = $nav.filter(".active");
 
                 $nav.click(function () {
-                    const $this = $(this);
+                    var $this = $(this);
                     $tabs.filter("[data-menu='" + $this.attr("data-menu") + "']").show().siblings().hide();
                     $this.addClass("active").siblings().removeClass("active");
                 });
@@ -579,13 +579,13 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         };
 
-        const SFX = {
+        var SFX = {
             circ_saw: new buzz.sound(fn.gh_url("res/sfx/circ_saw.wav")),
             msg_ding: new buzz.sound(fn.gh_url("res/sfx/message_ding.wav"))
         };
 
         /** Collection of mutation observers the script uses */
-        const OBSERVERS = {
+        var OBSERVERS = {
             /** Makes sure the script settings modal doesn't get nasty with the other game modals */
             script_settings: new MutationObserver(function () {
                     if (!$DOM.modal.script_settings.is(":visible")) {
@@ -596,15 +596,15 @@ if (typeof(window.sessionStorage) === "undefined") {
             chat_whispers: new MutationObserver(
                 /** @param {MutationRecord[]} records */
                 function (records) {
-                    const sound_on = Settings.settings.notifications.all.sound && Settings.settings.notifications.whisper.sound;
-                    const gm_on = Settings.settings.notifications.all.gm && Settings.settings.notifications.whisper.gm;
+                    var sound_on = Settings.settings.notifications.all.sound && Settings.settings.notifications.whisper.sound;
+                    var gm_on = Settings.settings.notifications.all.gm && Settings.settings.notifications.whisper.gm;
 
                     if (sound_on || gm_on) {
                         for (var i = 0; i < records.length; i++) {
-                            const addedNodes = records[i].addedNodes;
+                            var addedNodes = records[i].addedNodes;
                             if (addedNodes.length) {
                                 for (var j = 0; j < addedNodes.length; j++) {
-                                    const text = $(addedNodes[j]).text();
+                                    var text = $(addedNodes[j]).text();
                                     if (text.match(/^\[[0-9]+:[0-9]+:[0-9]+]\s*Whisper from/)) {
                                         if (gm_on) {
                                             fn.notification(text);
@@ -621,7 +621,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             )
         };
 
-        const $HANDLERS = {
+        var $HANDLERS = {
             click: {
                 script_menu: function () {
                     $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
@@ -633,12 +633,12 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             change: {
                 settings_notification: function () {
-                    const $this = $(this);
+                    var $this = $(this);
                     Settings.settings.notifications[$this.data("notification")][$this.data("type")] = $this.is(":checked");
                     Settings.save();
                 },
                 settings_feature: function () {
-                    const $this = $(this);
+                    var $this = $(this);
                     Settings.settings.features[$this.data("feature")] = $this.is(":checked");
                     Settings.save();
                 },
@@ -651,12 +651,12 @@ if (typeof(window.sessionStorage) === "undefined") {
                     tsorter.create($(this)[0]);
                 },
                 settings_notification: function () {
-                    const $this = $(this);
+                    var $this = $(this);
 
                     $this.prop("checked", Settings.settings.notifications[$this.data("notification")][$this.data("type")]);
                 },
                 settings_features: function () {
-                    const $this = $(this);
+                    var $this = $(this);
                     $this.prop("checked", Settings.settings.features[$this.data("feature")]);
                 }
             }
@@ -665,7 +665,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         /**
          * @type {{SFX: classes.SFX, CssManager: classes.CssManager, AloTimer: AloTimer, Request: classes.Request, Interval: classes.Interval}}
          */
-        const classes = {
+        var classes = {
 
             /**
              * A bridge for the sound effects library
@@ -764,7 +764,7 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @private
              */
             _generic: function (generated) {
-                const methodArgs = $.extend({
+                var methodArgs = $.extend({
                     url: this.url,
                     error: this.errorCallback
                 }, generated || {});
@@ -829,20 +829,20 @@ if (typeof(window.sessionStorage) === "undefined") {
             },
             set: function (callback, frequency) {
                 this.clear();
-                var int = setInterval(callback, frequency);
-                classes.Interval.prototype._intervals[this.name] = int;
+                var interval = setInterval(callback, frequency);
+                classes.Interval.prototype._intervals[this.name] = interval;
 
-                return int;
+                return interval;
             }
         };
 
 
         classes.CssManager.prototype = {
             setRules: function (rules) {
-                const generated = [];
+                var generated = [];
                 for (var selector in rules) {
                     if (rules.hasOwnProperty(selector)) {
-                        const selectorRules = [];
+                        var selectorRules = [];
 
                         for (var cssProp in rules[selector]) {
                             if (rules[selector].hasOwnProperty(cssProp)) {
@@ -878,9 +878,9 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
 
         (function () {
-            const ON_LOAD = {
+            var ON_LOAD = {
                 "Loading script CSS": function () {
-                    const urls = [fn.gh_url("res/css/avabur-improved.min.css")], $head = $("head");
+                    var urls = [fn.gh_url("res/css/avabur-improved.min.css")], $head = $("head");
 
                     for (var i = 0; i < urls.length; i++) {
                         $head.append("<link type='text/css' rel='stylesheet' href='" + urls[i] + "'/>");
@@ -906,7 +906,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     });
                 },
                 "Registering side menu entry": function () {
-                    const $helpSection = $("#helpSection"),
+                    var $helpSection = $("#helpSection"),
                         $menuLink = $('<a href="javascript:;"/>')
                             .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
                             .click($HANDLERS.click.script_menu);
@@ -920,7 +920,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     });
                 }
             };
-            const keys = Object.keys(ON_LOAD);
+            var keys = Object.keys(ON_LOAD);
             for (var i = 0; i < keys.length; i++) {
                 console.debug(keys[i]);
                 ON_LOAD[keys[i]]();
@@ -935,7 +935,7 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @param {Spec.Module} spec
              * @constructor
              */
-            const Module = function (spec) {
+            var Module = function (spec) {
                 /**
                  * The raw module spec
                  * @type {Spec.Module}
@@ -1042,7 +1042,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                  * @private
                  */
                 resolveDependencies: function () {
-                    const dependencyKeys = Object.keys(this.spec.dependencies);
+                    var dependencyKeys = Object.keys(this.spec.dependencies);
                     if (dependencyKeys.length) {
                         for (var keyIndex = 0; keyIndex < dependencyKeys.length; keyIndex++) {
                             var dependencyCategory = this.spec.dependencies[dependencyKeys[keyIndex]], i;
@@ -1153,7 +1153,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                                 }
 
                                 if (has_demo && typeof(this.spec.settings.demo[key]) === "function") {
-                                    const c_key = key;
+                                    var c_key = key;
                                     $demoTd = $('<td/>').html(
                                         $('<a href="javascript:;">Demo</a>').click(function (evt) {
                                             dis.spec.settings.demo[c_key](evt, $, dis)
@@ -1254,19 +1254,19 @@ if (typeof(window.sessionStorage) === "undefined") {
              * Executes the module
              * @param {Spec.Module} module The module manifest
              */
-            const exec_module = function (module) {
-                const mod = new Module(module);
+            var exec_module = function (module) {
+                var mod = new Module(module);
                 mod.register();
             };
 
-            const required_modules = [
+            var required_modules = [
                 "activity-shortcuts",
                 "house-timers",
                 "market-tooltips",
                 "house-notifications"
             ];
 
-            const module_ajax_callback = function (r) {
+            var module_ajax_callback = function (r) {
                 eval(r);
             };
 
