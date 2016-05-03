@@ -24,15 +24,15 @@
 // @connect        github.com
 // @connect        self
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
-// @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
 // @require        https://cdn.rawgit.com/Alorel/alo-timer/1.1/src/alotimer.min.js
 // @require        https://cdn.rawgit.com/Alorel/console-log-html/1.1/console-log-html.min.js
 
-// @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/lib/tsorter.js
+// @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/external/jalc-1.0.1.min.js
+// @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/external/buzz-1.1.10.min.js
+// @require        https://cdn.rawgit.com/Alorel/avabur-improved/develop/external/tsorter.js
 // @updateURL      https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.meta.js
 // @downloadURL    https://raw.githubusercontent.com/Alorel/avabur-improved/develop/avabur-improved.user.js
 
-// @resource modules    https://cdn.rawgit.com/Alorel/avabur-improved/3c791db83ab7582a3fe29d870b97a586f4d63afe/modules/manifest.json
 // @noframes
 // ==/UserScript==
 
@@ -47,10 +47,24 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else {
     (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console) {
         'use strict';
-        console.log(require('./modules'));
+
+        var FUNCTIONS = {
+            /**
+             * Flash an element once
+             * @param {*|jQuery|HTMLElement} $element The element
+             * @returns {*|jQuery|HTMLElement} the element
+             */
+            flash_once: function ($element) {
+                $element.removeClass("avi-flash-once");
+                setTimeout(function () {
+                    $element.addClass("avi-flash-once");
+                }, 10);
+                return $element;
+            }
+        };
 
         //node dependencies
-        var FastSet = require('./node_modules/collections/fast-set');
+        var FastSet = require('collections/fast-set');
 
         //Extend GM_getValue
         (function () {
@@ -71,85 +85,9 @@ if (typeof(window.sessionStorage) === "undefined") {
             }
         })();
 
-        //Register log monitor
-        (function () {
-            var clear = function () {
-                console.clear();
-                btn.popover("hide");
-                console.debug("Console cleared");
-            };
-            var levels = {
-                    log: $('<span class="badge">0</span>'),
-                    debug: $('<span class="badge avi-txt-debug">0</span>'),
-                    info: $('<span class="badge avi-txt-info">0</span>'),
-                    warn: $('<span class="badge avi-txt-warn">0</span>'),
-                    error: $('<span class="badge avi-txt-error">0</span>')
-                },
-                ul = $("<ul class='avi' style='width:100%;overflow-y:auto;max-height:250px'/>"),
-                $title = $('<div/>')
-                    .append(
-                        '<span style="float:left">' + GM_info.script.name + ' log</span>',
-                        $('<a href="javascript:;" style="float:right">Clear</a>'),
-                        '<div style="clear:both"></div>'
-                    ),
-                container = $("<div/>").append(ul),
-                btn = $('<button class="btn btn-default avi-log-btn">Log</button>')
-                    .append(levels.log, levels.debug, levels.info, levels.warn, levels.error)
-                    .popover({
-                        title: $title,
-                        html: true,
-                        trigger: "click",
-                        container: "body",
-                        viewport: {"selector": "body", "padding": 0},
-                        template: '<div class="popover col-lg-5 col-xs-12 col-sm-9 col-md-7" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
-                        placement: "auto top",
-                        content: container
-                    }).on("hidden.bs.popover", function () {
-                        ul.find(">.avi-italic").removeClass("avi-italic");
-                    }).on("shown.bs.popover", function () {
-                        $("#" + $(this).attr("aria-describedby")).find(">.popover-title a").click(clear);
-                    });
+        require('./internal-modules/register-chat-monitor')($, console, MutationObserver, ConsoleLogHTML, FastSet, FUNCTIONS.flash_once);
 
-            $("body").append(btn);
-            ConsoleLogHTML.connect(ul, {
-                error: "avi-txt-error",
-                warn: "avi-txt-warn",
-                info: "avi-txt-info",
-                debug: "avi-txt-debug"
-            }, true, false);
-
-            (new MutationObserver(
-                /**
-                 * @param {MutationRecord[]} records
-                 */
-                function (records) {
-                    var badgesToFlash = new FastSet();
-
-                    for (var r = 0; r < records.length; r++) {
-                        var n;
-                        if (records[r].addedNodes.length) {
-                            for (n = 0; n < records[r].addedNodes.length; n++) {
-                                var lvl = $(records[r].addedNodes[n]).addClass("avi-italic small").attr("data-level");
-
-                                badgesToFlash.add(lvl);
-                                levels[lvl].text(parseInt(levels[lvl].text()) + 1)
-                            }
-                        }
-                        if (records[r].removedNodes.length) {
-                            for (n = 0; n < records[r].removedNodes.length; n++) {
-                                var lvl = $(records[r].removedNodes[n]).attr("data-level");
-                                badgesToFlash.add(lvl);
-                                levels[lvl].text(parseInt(levels[lvl].text()) - 1);
-                            }
-                        }
-                    }
-                    badgesToFlash.forEach(function (lvl) {
-                        fn.flash_once(levels[lvl]);
-                    });
-                })).observe(ul[0], {childList: true});
-        })();
-
-        var MODULES = JSON.parse(GM_getResourceText("modules"));
+        var MODULES = require('./modules');
         /**
          * The URL where we check for updates. This is different from @updateURL because we want it to come through
          * as a regular page load, not a request to the raw file
@@ -211,10 +149,6 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
 
         var Settings = new SettingsHandler();
-
-        /* /(([0-9])+\s(minutes|seconds|hours))/g
-         ^ tmp - will be used for future update
-         */
 
         /** Our persistent DOM stuff */
         var $DOM = {
@@ -289,20 +223,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         };
 
         /** Misc function container */
-        var fn = {
-
-            /**
-             * Flash an element once
-             * @param {*|jQuery|HTMLElement} $element The element
-             * @returns {*|jQuery|HTMLElement} the element
-             */
-            flash_once: function ($element) {
-                $element.removeClass("avi-flash-once");
-                setTimeout(function () {
-                    $element.addClass("avi-flash-once");
-                }, 10);
-                return $element;
-            },
+        FUNCTIONS = $.extend(FUNCTIONS, {
 
             /**
              * Sort a Select element
@@ -371,8 +292,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                     url: UPDATE_URL,
                     onload: function (r) {
                         var theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
-                        if (fn.versionCompare(GM_info.script.version, theirVersion) < 0) {
-                            fn.notification('A new version of ' + GM_info.script.name + ' is available! Click your ' +
+                        if (FUNCTIONS.versionCompare(GM_info.script.version, theirVersion) < 0) {
+                            FUNCTIONS.notification('A new version of ' + GM_info.script.name + ' is available! Click your ' +
                                 'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.');
                         }
                     }
@@ -385,7 +306,7 @@ if (typeof(window.sessionStorage) === "undefined") {
              * @returns {$|jQuery} $el
              */
             svg: function ($this, url) {
-                $this.html('<img src="' + fn.gh_url("res/img/ajax-loader.gif") + '" alt="Loading"/>');
+                $this.html('<img src="' + FUNCTIONS.gh_url("res/img/ajax-loader.gif") + '" alt="Loading"/>');
                 $.get(url).done(function (r) {
                     $this.html($(r).find("svg"));
                 });
@@ -417,7 +338,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         .filter("a:contains('" + type + "')").addClass("active").click();
                 };
                 if (VARS.market_was_opened) {
-                    fn.openStdModal("#marketWrapper");
+                    FUNCTIONS.openStdModal("#marketWrapper");
                     doOpen();
                 } else {
                     var $document = $(document);
@@ -577,11 +498,11 @@ if (typeof(window.sessionStorage) === "undefined") {
 
                 return 0;
             }
-        };
+        });
 
         var SFX = {
-            circ_saw: new buzz.sound(fn.gh_url("res/sfx/circ_saw.wav")),
-            msg_ding: new buzz.sound(fn.gh_url("res/sfx/message_ding.wav"))
+            circ_saw: new buzz.sound(FUNCTIONS.gh_url("res/sfx/circ_saw.wav")),
+            msg_ding: new buzz.sound(FUNCTIONS.gh_url("res/sfx/message_ding.wav"))
         };
 
         /** Collection of mutation observers the script uses */
@@ -607,7 +528,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                                     var text = $(addedNodes[j]).text();
                                     if (text.match(/^\[[0-9]+:[0-9]+:[0-9]+]\s*Whisper from/)) {
                                         if (gm_on) {
-                                            fn.notification(text);
+                                            FUNCTIONS.notification(text);
                                         }
                                         if (sound_on) {
                                             SFX.msg_ding.play();
@@ -625,7 +546,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             click: {
                 script_menu: function () {
                     $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
-                    fn.openStdModal($DOM.modal.script_settings);
+                    FUNCTIONS.openStdModal($DOM.modal.script_settings);
                 },
                 delegate_click: function () {
                     $($(this).data("delegate-click")).click();
@@ -737,7 +658,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                 error: {
                     /** Generic error callback */
                     generic: function (xhr, textStatus, errorThrown) {
-                        fn.notification("[" + textStatus + "] " + xhr.responseText);
+                        FUNCTIONS.notification("[" + textStatus + "] " + xhr.responseText);
                         console.error({
                             xhr: xhr,
                             textStatus: textStatus,
@@ -880,17 +801,17 @@ if (typeof(window.sessionStorage) === "undefined") {
         (function () {
             var ON_LOAD = {
                 "Loading script CSS": function () {
-                    var urls = [fn.gh_url("res/css/avabur-improved.min.css")], $head = $("head");
+                    var urls = [FUNCTIONS.gh_url("res/css/avabur-improved.min.css")], $head = $("head");
 
                     for (var i = 0; i < urls.length; i++) {
                         $head.append("<link type='text/css' rel='stylesheet' href='" + urls[i] + "'/>");
                     }
                 },
                 "Configuring script modal": function () {
-                    $.get(fn.gh_url("res/html/script-settings.html")).done(function (r) {
+                    $.get(FUNCTIONS.gh_url("res/html/script-settings.html")).done(function (r) {
                         $DOM.modal.script_settings = $(r);
                         $("#modalContent").append($DOM.modal.script_settings);
-                        fn.tabify($DOM.modal.script_settings);
+                        FUNCTIONS.tabify($DOM.modal.script_settings);
 
                         $DOM.modal.script_settings.find('[data-setting="notifications"]')
                             .each($HANDLERS.each.settings_notification)
@@ -926,8 +847,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                 ON_LOAD[keys[i]]();
                 delete ON_LOAD[keys[i]];
             }
-            fn.check_github_for_updates();
-            (new classes.Interval("gh_update")).set(fn.check_github_for_updates, 60000);
+            FUNCTIONS.check_github_for_updates();
+            (new classes.Interval("gh_update")).set(FUNCTIONS.check_github_for_updates, 60000);
 
 
             /**
@@ -1001,7 +922,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     console.error("Unable to init module " + this.name + ": loader not present");
                     this.ok = false;
                 } else if (typeof(Module.prototype.loaded[this.name]) !== "undefined") {
-                    fn.notification("Cannot load module " + this.name + " again until it is unloaded!");
+                    FUNCTIONS.notification("Cannot load module " + this.name + " again until it is unloaded!");
                     console.warn("Cannot load module " + this.name + " again until it is unloaded!");
                     this.ok = false;
                 } else {
@@ -1051,8 +972,8 @@ if (typeof(window.sessionStorage) === "undefined") {
                                 case "fn":
                                     this.dependencies.fn = {};
                                     for (i = 0; i < dependencyCategory.length; i++) {
-                                        if (typeof(fn[dependencyCategory[i]]) !== "undefined") {
-                                            this.dependencies.fn[dependencyCategory[i]] = fn[dependencyCategory[i]];
+                                        if (typeof(FUNCTIONS[dependencyCategory[i]]) !== "undefined") {
+                                            this.dependencies.fn[dependencyCategory[i]] = FUNCTIONS[dependencyCategory[i]];
                                         } else {
                                             console.error("Failed to load functional dependency " + dependencyCategory[i] + " for module " + this.name + ": no match.");
                                             this.ok = false;
@@ -1187,7 +1108,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         $container.append($div);
 
                         $select.append('<option value="' + this.name + '">' + this.name + '</option>');
-                        fn.sortSelect($select[0]);
+                        FUNCTIONS.sortSelect($select[0]);
                         $select.find(">option:first").prop("selected", true);
                         $select.change();
                         this.applyGlobalHandlers($div);
@@ -1242,7 +1163,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     if (this.unload) {
                         this.unload($, this);
                     } else {
-                        fn.notification("Module " + this.name + " unloaded. Due to this module's specifics you'll need to reload the page to see the effects.");
+                        FUNCTIONS.notification("Module " + this.name + " unloaded. Due to this module's specifics you'll need to reload the page to see the effects.");
                     }
 
                     return this;
@@ -1271,7 +1192,7 @@ if (typeof(window.sessionStorage) === "undefined") {
             };
 
             for (var j = 0; j < required_modules.length; j++) {
-                $.ajax(fn.gh_url("modules/" + required_modules[j] + ".min.js"), {
+                $.ajax(FUNCTIONS.gh_url("modules/" + required_modules[j] + ".min.js"), {
                     dataType: "text"
                 }).done(module_ajax_callback);
             }

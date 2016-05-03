@@ -1,8 +1,8 @@
 module.exports = function (grunt) {
-    require('./lib/create-meta')(grunt);
-    require('./lib/yui-modules')(grunt);
-    require('./lib/build-module-index')(grunt);
-    require('./lib/copy-meta')(grunt);
+    require('./tools/build-module-index')(grunt);
+    require('./tools/create-meta')(grunt);
+    require('./tools/copy-meta')(grunt);
+    require('./tools/yui-modules')(grunt);
     grunt.initConfig({
         browserify: {
             js: {
