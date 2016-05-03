@@ -1,10 +1,11 @@
 module.exports = function (grunt) {
+    require('./lib/create-meta')(grunt);
+    require('./lib/yui-modules')(grunt);
+    require('./lib/build-module-index')(grunt);
     grunt.initConfig({
         browserify: {
             js: {
-                // A single entry point for our app
                 src: 'avabur-improved.dev.js',
-                // Compile to a single file to add a script tag for in your HTML
                 dest: 'avabur-improved.user.js'
             }
         }
@@ -14,5 +15,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
 
     // The default tasks to run when you type: grunt
-    grunt.registerTask('default', ['browserify']);
+    grunt.registerTask('default', ['browserify', 'node_meta']);
 };

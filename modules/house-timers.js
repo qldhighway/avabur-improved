@@ -1,4 +1,4 @@
-exec_module({
+module.exports = {
     name: "House timers",
     desc: "Shows house construction timers without the need for an alarm clock",
     id: "HOUSE_TIMERS",
@@ -6,6 +6,7 @@ exec_module({
         fn: ["parseTimeStringLong"],
         classes: ["AloTimer", "CssManager", "Interval"]
     },
+
     load: function ($, module) {
         var $baseDiv = $("<div class='col-xs-6 col-md-12'/>");
 
@@ -89,4 +90,4 @@ exec_module({
         $("#houseTimerInfo").removeClass("avi-force-block");
         (new module.dependencies.classes.Interval(module.spec.name)).clear();
     }
-});
+};

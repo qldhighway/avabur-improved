@@ -39,7 +39,6 @@
 
 const is_dev = true,
     dev_hash = "3ea6a2cd5d9c8e98b8873ac75595364b4ef8fbf8";
-/** Create toast messages */
 
 //Check if the user can even support the bot
 if (typeof(window.sessionStorage) === "undefined") {
@@ -49,6 +48,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else {
     (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console) {
         'use strict';
+        console.log(require('./modules'));
 
         //node dependencies
         const FastSet = require('./node_modules/collections/fast-set');
@@ -1279,7 +1279,9 @@ if (typeof(window.sessionStorage) === "undefined") {
         })();
     })(jQuery, window.sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console);
 }
-},{"./node_modules/collections/fast-set":3}],2:[function(require,module,exports){
+},{"./modules":2,"./node_modules/collections/fast-set":4}],2:[function(require,module,exports){
+module.exports={"ACTIVITY_SHORTCUTS":{name:"Activity Shortcuts",desc:"Registers activity shortcuts on the side menu",id:"ACTIVITY_SHORTCUTS",dependencies:{fn:["gh_url","svg"]},vars:{appends:[["sword-clash","MobList","Open Battles"],["fishing","Fishing","Open Fishing"],["log","Woodcutting","Open Woodcutting"],["metal-bar","Mining","Open Mining"],["stone-block","#loadStonecutting","Open Stonecutting"]]},load:function($,module){var vars=module.spec.vars,$a=$("<a href='javascript:;' class='avi-tip avi-menu-shortcut' style='border-bottom:none'/>"),$navul=$("#navWrapper").find("ul"),a;module.vars.li=$('<li class="avi-menu"/>');for(var i=0;i<vars.appends.length;i++){a=$a.clone().attr({"data-delegate-click":"#load"+vars.appends[i][1],title:vars.appends[i][2]});module.vars.li.append(a);module.dependencies.fn.svg(a,module.dependencies.fn.gh_url("res/svg/"+vars.appends[i][0]+".svg"))}$navul.append(module.vars.li)},unload:function($,module){module.vars.li.remove()}},"HOUSE_NOTIFICATIONS":{name:"House notifications",desc:"Creates toast & sound notifications when house construction and/or Harvestron finish",id:"HOUSE_NOTIFICATIONS",dependencies:{fn:["parseTimeStringLong","gh_url","notification"],classes:["AloTimer","Interval","SFX"]},settings:{desc:{"Construction sound":"Play a sound when construction finishes","Construction toast":"Display a toast when construction finishes"},defaults:{"Construction sound":true,"Construction toast":true},demo:{"Construction sound":function(c,b,a){a.vars.sfx.play()},"Construction toast":function(c,b,a){a.dependencies.fn.notification("Construction finished",a.spec.name)}}},funcs:{click_house:function(){document.getElementById("header_house").click()},notify:function(a){if(!a.vars.notified){console.info("Construction finished");if(a.settings["Construction sound"]){a.vars.sfx.play()}if(a.settings["Construction toast"]){a.dependencies.fn.notification("Construction finished",a.spec.name,{onclick:a.spec.funcs.click_house})}}a.vars.notified=true}},load:function(c,a){function b(){c.ajax("/house.php",{global:false}).done(function(e){if(typeof(e.m)!=="undefined"){d(e.m)}})}function d(f){var e=new a.dependencies.classes.Interval(a.spec.name);e.clear();if(f.indexOf("available again")!==-1){var g=new a.dependencies.classes.AloTimer(a.dependencies.fn.parseTimeStringLong(f));e.set(function(){if(g.isFinished()){e.clear();a.spec.funcs.notify(a)}else{a.vars.notified=false}},1000)}else{if(f.indexOf("are available")!==-1){a.spec.funcs.notify(a)}else{setTimeout(b,1000)}}}a.vars={notified:false,house_requery:function(e,g,f){if(f.url.indexOf("house")!==-1&&typeof(g.responseJSON)!=="undefined"&&typeof(g.responseJSON.m)!=="undefined"){d(g.responseJSON.m)}},sfx:new a.dependencies.classes.SFX(a.dependencies.fn.gh_url("res/sfx/circ_saw.wav"))};c(document).ajaxComplete(a.vars.house_requery);b()},unload:function(b,a){b(document).unbind("ajaxComplete",a.vars.house_requery)}},"HOUSE_TIMERS":{name:"House timers",desc:"Shows house construction timers without the need for an alarm clock",id:"HOUSE_TIMERS",dependencies:{fn:["parseTimeStringLong"],classes:["AloTimer","CssManager","Interval"]},load:function(e,d){var b=e("<div class='col-xs-6 col-md-12'/>");function c(){e.ajax("/house.php",{global:false}).done(function(g){if(typeof(g.m)!=="undefined"){f(g.m)}})}function a(g){g.clear();d.vars.paneSpan.addClass("avi-highlight").html(e('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline;padding-right:5px">Ready!</span>')).append(e("<a href='javascript:;'>(refresh)</a>").click(c));d.applyGlobalHandlers(d.vars.paneSpan)}function f(h){var g=new d.dependencies.classes.Interval(d.spec.name);g.clear();if(h.indexOf("available again")!==-1){var i=new d.dependencies.classes.AloTimer(d.dependencies.fn.parseTimeStringLong(h));g.set(function(){if(i.isFinished()){a(g)}else{d.vars.paneSpan.removeClass("avi-highlight").text(i.toString())}},1000)}else{if(h.indexOf("are available")!==-1){a(g)}else{setTimeout(c,3000)}}}d.vars={paneLabel:b.clone().addClass("col-lg-5 gold").text("Construction:"),paneSpan:e("<span>House unavailable</span>"),house_requery:function(g,i,h){if(h.url.indexOf("house")!==-1&&typeof(i.responseJSON)!=="undefined"&&typeof(i.responseJSON.m)!=="undefined"){f(i.responseJSON.m)}},css:(new d.dependencies.classes.CssManager()).setRules({"#constructionNotifier,#houseTimerTable [data-typeid='Construction']":{display:"none !important"}}).addToDOM()};d.vars.paneSpanContainer=b.clone().addClass("col-lg-7").html(d.vars.paneSpan);e("#houseTimerInfo").addClass("avi-force-block");e("#houseTimerTable").prepend(d.vars.paneLabel,d.vars.paneSpanContainer);e(document).ajaxComplete(d.vars.house_requery);e.ajax("/house.php",{global:false}).done(function(g){if(typeof(g.m)!=="undefined"){f(g.m)}})},unload:function(b,a){a.vars.paneLabel.remove();a.vars.paneSpanContainer.remove();a.vars.css.removeFromDOM();b(document).unbind("ajaxComplete",a.vars.house_requery);b("#houseTimerInfo").removeClass("avi-force-block");(new a.dependencies.classes.Interval(a.spec.name)).clear()}},"MARKET_TOOLTIPS":{name:"Market tooltips",desc:"Performs a market price lookup when you hover a supported item",id:"MARKET_TOOLTIPS",dependencies:{fn:["analysePrice","numberWithCommas","openMarket"],classes:["Request"]},vars:{CACHE_TTL:1/3600*60,html:'<table class="avi" style="margin:auto"><thead><tr><th colspan="3">Current market price (1st page)</th></tr><tr><th>Low</th><th>Average</th><th>High</th></tr></thead><tbody><tr data-id="prices"><td></td><td></td><td></td></tr></tbody></table>'},load:function($,module){function $done$currencyTooltip(r){var analysis=module.dependencies.fn.analysePrice(r.l);module.vars.dom.low_currency.text(module.dependencies.fn.numberWithCommas(analysis.low));module.vars.dom.avg_currency.text(module.dependencies.fn.numberWithCommas(analysis.avg));module.vars.dom.high_currency.text(module.dependencies.fn.numberWithCommas(analysis.high))}function $click$ingredient(){$modalBackground.click();module.dependencies.fn.openMarket("Ingredients")}function $mouseEnter$inventoryIngredients(){const $this=$(this),ingredient=$this.text().trim();if(typeof(module.spec.vars.tradeskill_mats[ingredient])==="undefined"){fn.notification("Failed to lookup "+ingredient+": ID not found")}else{(new module.dependencies.classes.Request("/market.php",module.spec.vars.CACHE_TTL)).post({type:"ingredient",page:0,q:0,ll:0,hl:0,st:module.spec.vars.tradeskill_mats[ingredient]}).done(function(r){const describedBy=$this.attr("aria-describedby"),$describedBy=$("#"+describedBy);if(describedBy&&$describedBy.length){const analysis=module.dependencies.fn.analysePrice(r.l),$tds=$describedBy.find("tr[data-id=prices]>td");$tds.first().text(module.dependencies.fn.numberWithCommas(analysis.low)).next().text(module.dependencies.fn.numberWithCommas(analysis.avg)).next().text(module.dependencies.fn.numberWithCommas(analysis.high))}})}}function $each$inventoryTable(){const $this=$(this),ingredient=$this.text().trim(),$span=$("<span>"+ingredient+"</span>");$this.html($span);$span.popover({title:ingredient,html:true,trigger:"hover",container:"body",viewport:{selector:"body",padding:0},placement:"auto right",content:$(module.spec.vars.html)});$span.mouseenter($mouseEnter$inventoryIngredients).css("cursor","pointer").click($click$ingredient)}var $colourReference=$("#currencyTooltipMarketable"),$currencyTooltip=$("#currencyTooltip"),$modalBackground=$("#modalBackground"),$allTDs;module.vars={dom:{},clickies:$("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))"),click:{currency:function(){const type=$(this).find(">td:first").text().trim();module.dependencies.fn.openMarket(type.substring(0,type.length-1))}},observers:{currency_tooltips:new MutationObserver(function(records){if(records.length&&$colourReference.is(":visible")){const cssClass=$colourReference.attr("class"),marketID=cssClass.replace("crystals","premium").replace("materials","weapon_scraps").replace("fragments","gem_fragments");module.vars.dom.row_currency.attr("class",cssClass);if(cssClass==="gold"){$allTDs.text("N/A")}else{$allTDs.text(" ");(new module.dependencies.classes.Request("/market.php",module.spec.vars.CACHE_TTL)).post({type:"currency",page:0,st:marketID}).done($done$currencyTooltip)}}}),inventory_table:new MutationObserver(function(records){for(var i=0;i<records.length;i++){if(records[i].addedNodes.length){for(var n=0;n<records[i].addedNodes.length;n++){if(records[i].addedNodes[n] instanceof HTMLTableSectionElement){const $tbody=$(records[i].addedNodes[n]);if($tbody.find("th:contains(Ingredient)").length){$tbody.find(">tr>[data-th=Item]").each($each$inventoryTable)}break}}break}}})}};module.vars.clickies.css("cursor","pointer").click(module.vars.click.currency);module.vars.dom.table_currency=$(module.spec.vars.html);module.vars.dom.row_currency=module.vars.dom.table_currency.find("tr[data-id=prices]");$allTDs=module.vars.dom.row_currency.find(">td");module.vars.dom.low_currency=$allTDs.first();module.vars.dom.avg_currency=module.vars.dom.low_currency.next();module.vars.dom.high_currency=module.vars.dom.avg_currency.next();$currencyTooltip.append(module.vars.dom.table_currency);module.vars.observers.currency_tooltips.observe($currencyTooltip[0],{attributes:true});module.vars.observers.inventory_table.observe(document.querySelector("#inventoryTable"),{attributes:true,childList:true,characterData:true})},unload:function($,module){module.vars.clickies.css("cursor","initial").unbind("click",module.vars.click.currency);if(typeof(module.vars.dom)!=="undefined"){for(var i in module.vars.dom){if(module.vars.dom.hasOwnProperty(i)){module.vars.dom[i].remove();delete module.vars.dom[i]}}}if(typeof(module.vars.observers)!=="undefined"){for(var j in module.vars.observers){if(module.vars.observers.hasOwnProperty(j)){module.vars.observers[j].disconnect()}}}}}}
+},{}],3:[function(require,module,exports){
 "use strict";
 
 var Shim = require("./shim");
@@ -1484,7 +1486,7 @@ Dict.prototype.toJSON = function () {
     return this.toObject();
 };
 
-},{"./generic-collection":4,"./generic-map":5,"./listen/property-changes":10,"./shim":16}],3:[function(require,module,exports){
+},{"./generic-collection":5,"./generic-map":6,"./listen/property-changes":11,"./shim":17}],4:[function(require,module,exports){
 "use strict";
 
 var Shim = require("./shim");
@@ -1678,7 +1680,7 @@ FastSet.prototype.logNode = function (node, write) {
 };
 
 
-},{"./dict":2,"./generic-collection":4,"./generic-set":7,"./list":8,"./listen/property-changes":10,"./shim":16,"./tree-log":17}],4:[function(require,module,exports){
+},{"./dict":3,"./generic-collection":5,"./generic-set":8,"./list":9,"./listen/property-changes":11,"./shim":17,"./tree-log":18}],5:[function(require,module,exports){
 "use strict";
 
 module.exports = GenericCollection;
@@ -1962,7 +1964,7 @@ Object.defineProperty(GenericCollection.prototype,"size",GenericCollection._size
 
 require("./shim-array");
 
-},{"./shim-array":12}],5:[function(require,module,exports){
+},{"./shim-array":13}],6:[function(require,module,exports){
 "use strict";
 
 var Object = require("./shim-object");
@@ -2165,7 +2167,7 @@ Item.prototype.compare = function (that) {
 };
 
 
-},{"./listen/map-changes":9,"./listen/property-changes":10,"./shim-object":14}],6:[function(require,module,exports){
+},{"./listen/map-changes":10,"./listen/property-changes":11,"./shim-object":15}],7:[function(require,module,exports){
 
 var Object = require("./shim-object");
 
@@ -2225,7 +2227,7 @@ GenericOrder.prototype.toJSON = function () {
     return this.toArray();
 };
 
-},{"./shim-object":14}],7:[function(require,module,exports){
+},{"./shim-object":15}],8:[function(require,module,exports){
 
 module.exports = GenericSet;
 function GenericSet() {
@@ -2299,7 +2301,7 @@ GenericSet.prototype.toggle = function (value) {
 };
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 module.exports = List;
@@ -2769,7 +2771,7 @@ Node.prototype.addAfter = function (node) {
     node.prev = this;
 };
 
-},{"./generic-collection":4,"./generic-order":6,"./listen/property-changes":10,"./listen/range-changes":11,"./shim":16}],9:[function(require,module,exports){
+},{"./generic-collection":5,"./generic-order":7,"./listen/property-changes":11,"./listen/range-changes":12,"./shim":17}],10:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -2921,7 +2923,7 @@ MapChanges.prototype.dispatchBeforeMapChange = function (key, value) {
 };
 
 
-},{"../dict":2,"../list":8,"weak-map":18}],10:[function(require,module,exports){
+},{"../dict":3,"../list":9,"weak-map":19}],11:[function(require,module,exports){
 /*
     Based in part on observable arrays from Motorola Mobility’s Montage
     Copyright (c) 2012, Motorola Mobility LLC. All Rights Reserved.
@@ -3358,7 +3360,7 @@ PropertyChanges.makePropertyObservable = function (object, key) {
     }
 };
 
-},{"../shim":16}],11:[function(require,module,exports){
+},{"../shim":17}],12:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -3502,7 +3504,7 @@ RangeChanges.prototype.dispatchBeforeRangeChange = function (plus, minus, index)
 };
 
 
-},{"../dict":2,"weak-map":18}],12:[function(require,module,exports){
+},{"../dict":3,"weak-map":19}],13:[function(require,module,exports){
 "use strict";
 
 /*
@@ -3864,7 +3866,7 @@ ArrayIterator.prototype.next = function () {
     return this._iterationObject;
 };
 
-},{"./generic-collection":4,"./generic-order":6,"./shim-function":13,"weak-map":18}],13:[function(require,module,exports){
+},{"./generic-collection":5,"./generic-order":7,"./shim-function":14,"weak-map":19}],14:[function(require,module,exports){
 
 module.exports = Function;
 
@@ -3925,7 +3927,7 @@ Function.get = function (key) {
 };
 
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -4451,7 +4453,7 @@ Object.clear = function (object) {
     return object;
 };
 
-},{"weak-map":18}],15:[function(require,module,exports){
+},{"weak-map":19}],16:[function(require,module,exports){
 
 /**
     accepts a string; returns the string with regex metacharacters escaped.
@@ -4467,7 +4469,7 @@ if (!RegExp.escape) {
 }
 
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 
 var Array = require("./shim-array");
 var Object = require("./shim-object");
@@ -4475,7 +4477,7 @@ var Function = require("./shim-function");
 var RegExp = require("./shim-regexp");
 
 
-},{"./shim-array":12,"./shim-function":13,"./shim-object":14,"./shim-regexp":15}],17:[function(require,module,exports){
+},{"./shim-array":13,"./shim-function":14,"./shim-object":15,"./shim-regexp":16}],18:[function(require,module,exports){
 "use strict";
 
 module.exports = TreeLog;
@@ -4517,7 +4519,7 @@ TreeLog.unicodeSharp = {
 };
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 // Copyright (C) 2011 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

@@ -38,7 +38,6 @@
 
 const is_dev = true,
     dev_hash = "3ea6a2cd5d9c8e98b8873ac75595364b4ef8fbf8";
-/** Create toast messages */
 
 //Check if the user can even support the bot
 if (typeof(window.sessionStorage) === "undefined") {
@@ -48,6 +47,7 @@ if (typeof(window.sessionStorage) === "undefined") {
 } else {
     (function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console) {
         'use strict';
+        console.log(require('./modules'));
 
         //node dependencies
         const FastSet = require('./node_modules/collections/fast-set');

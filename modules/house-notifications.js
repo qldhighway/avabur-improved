@@ -1,4 +1,4 @@
-exec_module({
+module.exports = {
     name: "House notifications",
     desc: "Creates toast & sound notifications when house construction and/or Harvestron finish",
     id: "HOUSE_NOTIFICATIONS",
@@ -125,4 +125,4 @@ exec_module({
     unload: function ($, module) {
         $(document).unbind("ajaxComplete", module.vars.house_requery);
     }
-});
+};

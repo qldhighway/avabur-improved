@@ -1,4 +1,4 @@
-exec_module({
+module.exports = {
     name: "Activity Shortcuts",
     desc: "Registers activity shortcuts on the side menu",
     id: "ACTIVITY_SHORTCUTS",
@@ -40,4 +40,4 @@ exec_module({
     unload: function ($, module) {
         module.vars.li.remove();
     }
-});
+};

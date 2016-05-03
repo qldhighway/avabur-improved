@@ -1,4 +1,4 @@
-exec_module({
+module.exports = {
     name: "Market tooltips",
     desc: "Performs a market price lookup when you hover a supported item",
     id: "MARKET_TOOLTIPS",
@@ -196,4 +196,4 @@ exec_module({
             }
         }
     }
-});
+};
