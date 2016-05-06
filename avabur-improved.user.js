@@ -743,31 +743,25 @@ var is_dev = true,
     (function () {
         var ON_LOAD = {
             "Loading script CSS": function () {
-                var urls = [fn.gh_url("res/css/avabur-improved.min.css")], $head = $("head");
-
-                for (var i = 0; i < urls.length; i++) {
-                    $head.append("<link type='text/css' rel='stylesheet' href='" + urls[i] + "'/>");
-                }
+                $("head").append('<style>' + require("./core/css") + '</style>');
             },
 
             "Configuring script modal": function () {
-                $.get(fn.gh_url("res/html/script-settings.html")).done(function (r) {
-                    $DOM.modal.script_settings = $(require('./core/html')['script-settings']);
-                    $("#modalContent").append($DOM.modal.script_settings);
-                    fn.tabify($DOM.modal.script_settings);
+                $DOM.modal.script_settings = $(require('./core/html')['script-settings']);
+                $("#modalContent").append($DOM.modal.script_settings);
+                fn.tabify($DOM.modal.script_settings);
 
-                    $DOM.modal.script_settings.find('[data-setting="notifications"]')
-                        .each($HANDLERS.each.settings_notification)
-                        .change($HANDLERS.change.settings_notification);
+                $DOM.modal.script_settings.find('[data-setting="notifications"]')
+                    .each($HANDLERS.each.settings_notification)
+                    .change($HANDLERS.change.settings_notification);
 
-                    $DOM.modal.script_settings.find('[data-setting="features"]')
-                        .each($HANDLERS.each.settings_features)
-                        .change($HANDLERS.change.settings_feature);
+                $DOM.modal.script_settings.find('[data-setting="features"]')
+                    .each($HANDLERS.each.settings_features)
+                    .change($HANDLERS.change.settings_feature);
 
-                    $("#avi-module-settings-select").change($HANDLERS.change.module_settings_select);
+                $("#avi-module-settings-select").change($HANDLERS.change.module_settings_select);
 
-                    OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
-                });
+                OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
             },
             "Registering side menu entry": function () {
                 var $helpSection = $("#helpSection"),
@@ -1124,9 +1118,11 @@ var is_dev = true,
         }
     })();
 })(jQuery, sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console, HTMLSelectElement, require, GM_info.script, GM_getValue, GM_setValue, JSON);
-},{"./core/html":2,"./core/log":3,"./core/settings-handler":4,"./modules":5,"collections/fast-set":7}],2:[function(require,module,exports){
-module.exports={"script-settings":"<div style=\"display:none\"> <nav class=\"center\"> <a href=\"javascript:;\" data-menu=\"modules\"> <button class=\"btn btn-primary\">Modules</button> </a> <a href=\"javascript:;\" data-menu=\"global-settings\"> <button class=\"btn btn-primary\">Global settings</button> </a> <a href=\"javascript:;\" data-menu=\"module-settings\"> <button class=\"btn btn-primary\">Module settings</button> </a> <a href=\"javascript:;\" data-menu=\"about\"> <button class=\"btn btn-primary\">About</button> </a> </nav> <div class=\"mt10\"> <div data-menu=\"modules\"> <table class=\"table table-condensed table-bordered avi\"> <thead> <th>Name</th> <th>Description</th> <th> <span>Unloadable</span> <sup title=\"An unloadable module can be turned off at runtime without having to refresh the page\" class=\"avi-tip\">?</sup> </th> </thead> <tbody> </tbody> </table> </div> <div data-menu=\"module-settings\"> <select id=\"avi-module-settings-select\" style=\"margin:auto;display:block\"></select> <div id=\"module-settings-container\" class=\"mt10\"></div> </div> <div data-menu=\"global-settings\"> <table class=\"table table-condensed table-bordered avi\"> <thead> <tr> <th>Feature</th> <th>Setting</th> <th>Description</th> </tr> </thead> <tbody id=\"avi-settings\"> <tr> <td>Enable sound</td> <td> <input type=\"checkbox\" data-setting=\"notifications\" data-notification=\"all\" data-type=\"sound\"> </td> <td> No sounds will play if you untick this </td> </tr> <tr> <td>Enable toasts</td> <td> <input type=\"checkbox\" data-setting=\"notifications\" data-notification=\"all\" data-type=\"gm\"> </td> <td> No toasts will display if you untick this </td> </tr> </tbody> </table> </div> <div data-menu=\"about\"> <div class=\"avi-table avi-margin-auto\"> <div> <span>Author:</span> <a href=\"javascript:;\" class=\"profileLink\">Alorel</a> </div> <div> <span>Resources:</span> <div> <ul class=\"avi\"> <li><a href=\"https://github.com/Alorel/avabur-improved\" target=\"_blank\">Homepage</a></li> <li> <a href=\"https://github.com/Alorel/avabur-improved/issues\" target=\"_blank\"> Bugs and suggestions </a> </li> <li> <a href=\"https://github.com/Alorel/avabur-improved/releases\" target=\"_blank\"> Changelog </a> </li> <li> <a href=\"http://avabur.boards.net/thread/881\" target=\"_blank\">Forum thread</a> </li> </ul> </div> </div> </div> </div> </div> </div>"};
+},{"./core/css":2,"./core/html":3,"./core/log":4,"./core/settings-handler":5,"./modules":6,"collections/fast-set":8}],2:[function(require,module,exports){
+module.exports=".avi-margin-auto,table.avi{margin-left:auto;margin-right:auto}.avi-highlight{animation:pulsate-inner 0.5s infinite alternate}.avi-italic{font-style:italic}.avi-flash-once{animation:pulsate-inner 0.15s 2 alternate}.avi-force-hide{display:none !important}.avi-force-block{display:block !important}.avi-table{display:table}.avi-table>*{display:table-row}.avi-table>*>*{display:table-cell;padding:2px}.avi-link{text-decoration:underline;cursor:pointer}.avi-tip{border-bottom:1px dotted}.avi-menu-shortcut{line-height:initial !important}.avi-menu-shortcut>svg{border:1px solid;padding:2px;width:24px;height:24px}table.avi{border-collapse:collapse;font-size:small;font-weight:normal;width:auto}table.avi>thead>tr>*,table.avi>tbody>tr>*{border:1px solid;padding:2px;text-align:center}ul.avi{list-style:none;-webkit-margin-before:0;-webkit-margin-after:0;-webkit-margin-start:0;-webkit-margin-end:0;-webkit-padding-start:0}.bold{font-weight:bold}.toast-item-close{cursor:pointer}.toast-item p{margin-right:25px}.popover{background-color:rgba(0,0,0,0.8);max-width:initial !important}.popover>.arrow{display:none}.avi-menu{text-align:center}.avi-menu>:not(:last-child){margin-right:5px}.avi-menu a{display:inline-block !important;width:auto}table.sortable th{cursor:pointer}table.sortable th.descend:after{content:\" \\25B4\" !important}table.sortable th.ascend:after{content:\" \\25BE\" !important}table.sortable th:not(.descent):not(.ascend):after{content:\" \\25B4\\25BE\"}#viewedClanDescription{min-height:148px}.materials{color:#DA8300}.fragments{color:#BB51D4}.avi-log-btn{padding:2px;position:fixed;left:0;bottom:0}.avi-log-btn .badge{padding:3px 3px;margin-left:2px}.avi-txt-debug{color:#0AD !important}.avi-txt-info{color:#00B000 !important}.avi-txt-warn{color:#EEE600 !important}.avi-txt-error{color:#C81423 !important}";
 },{}],3:[function(require,module,exports){
+module.exports={"script-settings":"<div style=\"display:none\"> <nav class=\"center\"> <a href=\"javascript:;\" data-menu=\"modules\"> <button class=\"btn btn-primary\">Modules</button> </a> <a href=\"javascript:;\" data-menu=\"global-settings\"> <button class=\"btn btn-primary\">Global settings</button> </a> <a href=\"javascript:;\" data-menu=\"module-settings\"> <button class=\"btn btn-primary\">Module settings</button> </a> <a href=\"javascript:;\" data-menu=\"about\"> <button class=\"btn btn-primary\">About</button> </a> </nav> <div class=\"mt10\"> <div data-menu=\"modules\"> <table class=\"table table-condensed table-bordered avi\"> <thead> <th>Name</th> <th>Description</th> <th> <span>Unloadable</span> <sup title=\"An unloadable module can be turned off at runtime without having to refresh the page\" class=\"avi-tip\">?</sup> </th> </thead> <tbody> </tbody> </table> </div> <div data-menu=\"module-settings\"> <select id=\"avi-module-settings-select\" style=\"margin:auto;display:block\"></select> <div id=\"module-settings-container\" class=\"mt10\"></div> </div> <div data-menu=\"global-settings\"> <table class=\"table table-condensed table-bordered avi\"> <thead> <tr> <th>Feature</th> <th>Setting</th> <th>Description</th> </tr> </thead> <tbody id=\"avi-settings\"> <tr> <td>Enable sound</td> <td> <input type=\"checkbox\" data-setting=\"notifications\" data-notification=\"all\" data-type=\"sound\"> </td> <td> No sounds will play if you untick this </td> </tr> <tr> <td>Enable toasts</td> <td> <input type=\"checkbox\" data-setting=\"notifications\" data-notification=\"all\" data-type=\"gm\"> </td> <td> No toasts will display if you untick this </td> </tr> </tbody> </table> </div> <div data-menu=\"about\"> <div class=\"avi-table avi-margin-auto\"> <div> <span>Author:</span> <a href=\"javascript:;\" class=\"profileLink\">Alorel</a> </div> <div> <span>Resources:</span> <div> <ul class=\"avi\"> <li><a href=\"https://github.com/Alorel/avabur-improved\" target=\"_blank\">Homepage</a></li> <li> <a href=\"https://github.com/Alorel/avabur-improved/issues\" target=\"_blank\"> Bugs and suggestions </a> </li> <li> <a href=\"https://github.com/Alorel/avabur-improved/releases\" target=\"_blank\"> Changelog </a> </li> <li> <a href=\"http://avabur.boards.net/thread/881\" target=\"_blank\">Forum thread</a> </li> </ul> </div> </div> </div> </div> </div> </div>"};
+},{}],4:[function(require,module,exports){
 /** @module CoreLog */
 
 /**
@@ -1217,7 +1213,7 @@ module.exports = function ($, console, MutationObserver, ConsoleLogHTML, FastSet
             badgesToFlash.forEach(forEachBadges);
         })).observe(ul[0], {childList: true});
 };
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 module.exports = function ($, GM_getValue, GM_setValue, GMInfo_script, JSON, console) {
     /**
      * Handles settings. Shocker, I know.
@@ -1269,9 +1265,9 @@ module.exports = function ($, GM_getValue, GM_setValue, GMInfo_script, JSON, con
 
     return new SettingsHandler();
 };
-},{}],5:[function(require,module,exports){
-module.exports={"ACTIVITY_SHORTCUTS":{name:"Activity Shortcuts",desc:"Registers activity shortcuts on the side menu",id:"ACTIVITY_SHORTCUTS",dependencies:{fn:["gh_url","svg"]},vars:{appends:[["sword-clash","MobList","Open Battles"],["fishing","Fishing","Open Fishing"],["log","Woodcutting","Open Woodcutting"],["metal-bar","Mining","Open Mining"],["stone-block","#loadStonecutting","Open Stonecutting"]]},load:function(e,n){var s,t=n.spec.vars,i=e("<a href='javascript:;' class='avi-tip avi-menu-shortcut' style='border-bottom:none'/>"),a=e("#navWrapper").find("ul");n.vars.li=e('<li class="avi-menu"/>');for(var o=0;o<t.appends.length;o++)s=i.clone().attr({"data-delegate-click":"#load"+t.appends[o][1],title:t.appends[o][2]}),n.vars.li.append(s),n.dependencies.fn.svg(s,n.dependencies.fn.gh_url("res/svg/"+t.appends[o][0]+".svg"));a.append(n.vars.li)},unload:function(e,n){n.vars.li.remove()}},"HOUSE_NOTIFICATIONS":{name:"House notifications",desc:"Creates toast & sound notifications when house construction and/or Harvestron finish",id:"HOUSE_NOTIFICATIONS",dependencies:{fn:["parseTimeStringLong","gh_url","notification"],classes:["AloTimer","Interval","SFX"]},settings:{desc:{"Construction sound":"Play a sound when construction finishes","Construction toast":"Display a toast when construction finishes"},defaults:{"Construction sound":!0,"Construction toast":!0},demo:{"Construction sound":function(n,e,s){s.vars.sfx.play()},"Construction toast":function(n,e,s){s.dependencies.fn.notification("Construction finished",s.spec.name)}}},funcs:{click_house:function(){document.getElementById("header_house").click()},notify:function(n){n.vars.notified||(console.info("Construction finished"),n.settings["Construction sound"]&&n.vars.sfx.play(),n.settings["Construction toast"]&&n.dependencies.fn.notification("Construction finished",n.spec.name,{onclick:n.spec.funcs.click_house})),n.vars.notified=!0}},load:function(n,e){function s(){n.ajax("/house.php",{global:!1}).done(function(n){"undefined"!=typeof n.m&&o(n.m)})}function o(n){var o=new e.dependencies.classes.Interval(e.spec.name);if(o.clear(),-1!==n.indexOf("available again")){var i=new e.dependencies.classes.AloTimer(e.dependencies.fn.parseTimeStringLong(n));o.set(function(){i.isFinished()?(o.clear(),e.spec.funcs.notify(e)):e.vars.notified=!1},1e3)}else-1!==n.indexOf("are available")?e.spec.funcs.notify(e):setTimeout(s,1e3)}e.vars={notified:!1,house_requery:function(n,e,s){-1!==s.url.indexOf("house")&&"undefined"!=typeof e.responseJSON&&"undefined"!=typeof e.responseJSON.m&&o(e.responseJSON.m)},sfx:new e.dependencies.classes.SFX(e.dependencies.fn.gh_url("res/sfx/circ_saw.wav"))},n(document).ajaxComplete(e.vars.house_requery),s()},unload:function(n,e){n(document).unbind("ajaxComplete",e.vars.house_requery)}},"HOUSE_TIMERS":{name:"House timers",desc:"Shows house construction timers without the need for an alarm clock",id:"HOUSE_TIMERS",dependencies:{fn:["parseTimeStringLong"],classes:["AloTimer","CssManager","Interval"]},load:function(e,a){function n(){e.ajax("/house.php",{global:!1}).done(function(e){"undefined"!=typeof e.m&&o(e.m)})}function s(s){s.clear(),a.vars.paneSpan.addClass("avi-highlight").html(e('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline;padding-right:5px">Ready!</span>')).append(e("<a href='javascript:;'>(refresh)</a>").click(n)),a.applyGlobalHandlers(a.vars.paneSpan)}function o(e){var o=new a.dependencies.classes.Interval(a.spec.name);if(o.clear(),-1!==e.indexOf("available again")){var r=new a.dependencies.classes.AloTimer(a.dependencies.fn.parseTimeStringLong(e));o.set(function(){r.isFinished()?s(o):a.vars.paneSpan.removeClass("avi-highlight").text(r.toString())},1e3)}else-1!==e.indexOf("are available")?s(o):setTimeout(n,3e3)}var r=e("<div class='col-xs-6 col-md-12'/>");a.vars={paneLabel:r.clone().addClass("col-lg-5 gold").text("Construction:"),paneSpan:e("<span>House unavailable</span>"),house_requery:function(e,a,n){-1!==n.url.indexOf("house")&&"undefined"!=typeof a.responseJSON&&"undefined"!=typeof a.responseJSON.m&&o(a.responseJSON.m)},css:(new a.dependencies.classes.CssManager).setRules({"#constructionNotifier,#houseTimerTable [data-typeid='Construction']":{display:"none !important"}}).addToDOM()},a.vars.paneSpanContainer=r.clone().addClass("col-lg-7").html(a.vars.paneSpan),e("#houseTimerInfo").addClass("avi-force-block"),e("#houseTimerTable").prepend(a.vars.paneLabel,a.vars.paneSpanContainer),e(document).ajaxComplete(a.vars.house_requery),e.ajax("/house.php",{global:!1}).done(function(e){"undefined"!=typeof e.m&&o(e.m)})},unload:function(e,a){a.vars.paneLabel.remove(),a.vars.paneSpanContainer.remove(),a.vars.css.removeFromDOM(),e(document).unbind("ajaxComplete",a.vars.house_requery),e("#houseTimerInfo").removeClass("avi-force-block"),new a.dependencies.classes.Interval(a.spec.name).clear()}},"MARKET_TOOLTIPS":{name:"Market tooltips",desc:"Performs a market price lookup when you hover a supported item",id:"MARKET_TOOLTIPS",dependencies:{fn:["analysePrice","numberWithCommas","openMarket"],classes:["Request"]},vars:{CACHE_TTL:1/3600*60,html:'<table class="avi" style="margin:auto"><thead><tr><th colspan="3">Current market price (1st page)</th></tr><tr><th>Low</th><th>Average</th><th>High</th></tr></thead><tbody><tr data-id="prices"><td></td><td></td><td></td></tr></tbody></table>'},load:function(e,r){function t(e){var t=r.dependencies.fn.analysePrice(e.l);r.vars.dom.low_currency.text(r.dependencies.fn.numberWithCommas(t.low)),r.vars.dom.avg_currency.text(r.dependencies.fn.numberWithCommas(t.avg)),r.vars.dom.high_currency.text(r.dependencies.fn.numberWithCommas(t.high))}function n(){d.click(),r.dependencies.fn.openMarket("Ingredients")}function s(){const t=e(this),n=t.text().trim();"undefined"==typeof r.spec.vars.tradeskill_mats[n]?fn.notification("Failed to lookup "+n+": ID not found"):new r.dependencies.classes.Request("/market.php",r.spec.vars.CACHE_TTL).post({type:"ingredient",page:0,q:0,ll:0,hl:0,st:r.spec.vars.tradeskill_mats[n]}).done(function(n){const s=t.attr("aria-describedby"),a=e("#"+s);if(s&&a.length){const o=r.dependencies.fn.analysePrice(n.l),c=a.find("tr[data-id=prices]>td");c.first().text(r.dependencies.fn.numberWithCommas(o.low)).next().text(r.dependencies.fn.numberWithCommas(o.avg)).next().text(r.dependencies.fn.numberWithCommas(o.high))}})}function a(){const t=e(this),a=t.text().trim(),o=e("<span>"+a+"</span>");t.html(o),o.popover({title:a,html:!0,trigger:"hover",container:"body",viewport:{selector:"body",padding:0},placement:"auto right",content:e(r.spec.vars.html)}),o.mouseenter(s).css("cursor","pointer").click(n)}var o,c=e("#currencyTooltipMarketable"),i=e("#currencyTooltip"),d=e("#modalBackground");r.vars={dom:{},clickies:e("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))"),click:{currency:function(){const t=e(this).find(">td:first").text().trim();r.dependencies.fn.openMarket(t.substring(0,t.length-1))}},observers:{currency_tooltips:new MutationObserver(function(e){if(e.length&&c.is(":visible")){const n=c.attr("class"),s=n.replace("crystals","premium").replace("materials","weapon_scraps").replace("fragments","gem_fragments");r.vars.dom.row_currency.attr("class",n),"gold"===n?o.text("N/A"):(o.text(" "),new r.dependencies.classes.Request("/market.php",r.spec.vars.CACHE_TTL).post({type:"currency",page:0,st:s}).done(t))}}),inventory_table:new MutationObserver(function(r){for(var t=0;t<r.length;t++)if(r[t].addedNodes.length){for(var n=0;n<r[t].addedNodes.length;n++)if(r[t].addedNodes[n]instanceof HTMLTableSectionElement){const s=e(r[t].addedNodes[n]);s.find("th:contains(Ingredient)").length&&s.find(">tr>[data-th=Item]").each(a);break}break}})}},r.vars.clickies.css("cursor","pointer").click(r.vars.click.currency),r.vars.dom.table_currency=e(r.spec.vars.html),r.vars.dom.row_currency=r.vars.dom.table_currency.find("tr[data-id=prices]"),o=r.vars.dom.row_currency.find(">td"),r.vars.dom.low_currency=o.first(),r.vars.dom.avg_currency=r.vars.dom.low_currency.next(),r.vars.dom.high_currency=r.vars.dom.avg_currency.next(),i.append(r.vars.dom.table_currency),r.vars.observers.currency_tooltips.observe(i[0],{attributes:!0}),r.vars.observers.inventory_table.observe(document.querySelector("#inventoryTable"),{attributes:!0,childList:!0,characterData:!0})},unload:function(e,r){if(r.vars.clickies.css("cursor","initial").unbind("click",r.vars.click.currency),"undefined"!=typeof r.vars.dom)for(var t in r.vars.dom)r.vars.dom.hasOwnProperty(t)&&(r.vars.dom[t].remove(),delete r.vars.dom[t]);if("undefined"!=typeof r.vars.observers)for(var n in r.vars.observers)r.vars.observers.hasOwnProperty(n)&&r.vars.observers[n].disconnect()}}}
 },{}],6:[function(require,module,exports){
+module.exports={"ACTIVITY_SHORTCUTS":{name:"Activity Shortcuts",desc:"Registers activity shortcuts on the side menu",id:"ACTIVITY_SHORTCUTS",dependencies:{fn:["gh_url","svg"]},vars:{appends:[["sword-clash","MobList","Open Battles"],["fishing","Fishing","Open Fishing"],["log","Woodcutting","Open Woodcutting"],["metal-bar","Mining","Open Mining"],["stone-block","#loadStonecutting","Open Stonecutting"]]},load:function(e,n){var s,t=n.spec.vars,i=e("<a href='javascript:;' class='avi-tip avi-menu-shortcut' style='border-bottom:none'/>"),a=e("#navWrapper").find("ul");n.vars.li=e('<li class="avi-menu"/>');for(var o=0;o<t.appends.length;o++)s=i.clone().attr({"data-delegate-click":"#load"+t.appends[o][1],title:t.appends[o][2]}),n.vars.li.append(s),n.dependencies.fn.svg(s,n.dependencies.fn.gh_url("res/svg/"+t.appends[o][0]+".svg"));a.append(n.vars.li)},unload:function(e,n){n.vars.li.remove()}},"HOUSE_NOTIFICATIONS":{name:"House notifications",desc:"Creates toast & sound notifications when house construction and/or Harvestron finish",id:"HOUSE_NOTIFICATIONS",dependencies:{fn:["parseTimeStringLong","gh_url","notification"],classes:["AloTimer","Interval","SFX"]},settings:{desc:{"Construction sound":"Play a sound when construction finishes","Construction toast":"Display a toast when construction finishes"},defaults:{"Construction sound":!0,"Construction toast":!0},demo:{"Construction sound":function(n,e,s){s.vars.sfx.play()},"Construction toast":function(n,e,s){s.dependencies.fn.notification("Construction finished",s.spec.name)}}},funcs:{click_house:function(){document.getElementById("header_house").click()},notify:function(n){n.vars.notified||(console.info("Construction finished"),n.settings["Construction sound"]&&n.vars.sfx.play(),n.settings["Construction toast"]&&n.dependencies.fn.notification("Construction finished",n.spec.name,{onclick:n.spec.funcs.click_house})),n.vars.notified=!0}},load:function(n,e){function s(){n.ajax("/house.php",{global:!1}).done(function(n){"undefined"!=typeof n.m&&o(n.m)})}function o(n){var o=new e.dependencies.classes.Interval(e.spec.name);if(o.clear(),-1!==n.indexOf("available again")){var i=new e.dependencies.classes.AloTimer(e.dependencies.fn.parseTimeStringLong(n));o.set(function(){i.isFinished()?(o.clear(),e.spec.funcs.notify(e)):e.vars.notified=!1},1e3)}else-1!==n.indexOf("are available")?e.spec.funcs.notify(e):setTimeout(s,1e3)}e.vars={notified:!1,house_requery:function(n,e,s){-1!==s.url.indexOf("house")&&"undefined"!=typeof e.responseJSON&&"undefined"!=typeof e.responseJSON.m&&o(e.responseJSON.m)},sfx:new e.dependencies.classes.SFX(e.dependencies.fn.gh_url("res/sfx/circ_saw.wav"))},n(document).ajaxComplete(e.vars.house_requery),s()},unload:function(n,e){n(document).unbind("ajaxComplete",e.vars.house_requery)}},"HOUSE_TIMERS":{name:"House timers",desc:"Shows house construction timers without the need for an alarm clock",id:"HOUSE_TIMERS",dependencies:{fn:["parseTimeStringLong"],classes:["AloTimer","CssManager","Interval"]},load:function(e,a){function n(){e.ajax("/house.php",{global:!1}).done(function(e){"undefined"!=typeof e.m&&o(e.m)})}function s(s){s.clear(),a.vars.paneSpan.addClass("avi-highlight").html(e('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline;padding-right:5px">Ready!</span>')).append(e("<a href='javascript:;'>(refresh)</a>").click(n)),a.applyGlobalHandlers(a.vars.paneSpan)}function o(e){var o=new a.dependencies.classes.Interval(a.spec.name);if(o.clear(),-1!==e.indexOf("available again")){var r=new a.dependencies.classes.AloTimer(a.dependencies.fn.parseTimeStringLong(e));o.set(function(){r.isFinished()?s(o):a.vars.paneSpan.removeClass("avi-highlight").text(r.toString())},1e3)}else-1!==e.indexOf("are available")?s(o):setTimeout(n,3e3)}var r=e("<div class='col-xs-6 col-md-12'/>");a.vars={paneLabel:r.clone().addClass("col-lg-5 gold").text("Construction:"),paneSpan:e("<span>House unavailable</span>"),house_requery:function(e,a,n){-1!==n.url.indexOf("house")&&"undefined"!=typeof a.responseJSON&&"undefined"!=typeof a.responseJSON.m&&o(a.responseJSON.m)},css:(new a.dependencies.classes.CssManager).setRules({"#constructionNotifier,#houseTimerTable [data-typeid='Construction']":{display:"none !important"}}).addToDOM()},a.vars.paneSpanContainer=r.clone().addClass("col-lg-7").html(a.vars.paneSpan),e("#houseTimerInfo").addClass("avi-force-block"),e("#houseTimerTable").prepend(a.vars.paneLabel,a.vars.paneSpanContainer),e(document).ajaxComplete(a.vars.house_requery),e.ajax("/house.php",{global:!1}).done(function(e){"undefined"!=typeof e.m&&o(e.m)})},unload:function(e,a){a.vars.paneLabel.remove(),a.vars.paneSpanContainer.remove(),a.vars.css.removeFromDOM(),e(document).unbind("ajaxComplete",a.vars.house_requery),e("#houseTimerInfo").removeClass("avi-force-block"),new a.dependencies.classes.Interval(a.spec.name).clear()}},"MARKET_TOOLTIPS":{name:"Market tooltips",desc:"Performs a market price lookup when you hover a supported item",id:"MARKET_TOOLTIPS",dependencies:{fn:["analysePrice","numberWithCommas","openMarket"],classes:["Request"]},vars:{CACHE_TTL:1/3600*60,html:'<table class="avi" style="margin:auto"><thead><tr><th colspan="3">Current market price (1st page)</th></tr><tr><th>Low</th><th>Average</th><th>High</th></tr></thead><tbody><tr data-id="prices"><td></td><td></td><td></td></tr></tbody></table>'},load:function(e,r){function t(e){var t=r.dependencies.fn.analysePrice(e.l);r.vars.dom.low_currency.text(r.dependencies.fn.numberWithCommas(t.low)),r.vars.dom.avg_currency.text(r.dependencies.fn.numberWithCommas(t.avg)),r.vars.dom.high_currency.text(r.dependencies.fn.numberWithCommas(t.high))}function n(){d.click(),r.dependencies.fn.openMarket("Ingredients")}function s(){const t=e(this),n=t.text().trim();"undefined"==typeof r.spec.vars.tradeskill_mats[n]?fn.notification("Failed to lookup "+n+": ID not found"):new r.dependencies.classes.Request("/market.php",r.spec.vars.CACHE_TTL).post({type:"ingredient",page:0,q:0,ll:0,hl:0,st:r.spec.vars.tradeskill_mats[n]}).done(function(n){const s=t.attr("aria-describedby"),a=e("#"+s);if(s&&a.length){const o=r.dependencies.fn.analysePrice(n.l),c=a.find("tr[data-id=prices]>td");c.first().text(r.dependencies.fn.numberWithCommas(o.low)).next().text(r.dependencies.fn.numberWithCommas(o.avg)).next().text(r.dependencies.fn.numberWithCommas(o.high))}})}function a(){const t=e(this),a=t.text().trim(),o=e("<span>"+a+"</span>");t.html(o),o.popover({title:a,html:!0,trigger:"hover",container:"body",viewport:{selector:"body",padding:0},placement:"auto right",content:e(r.spec.vars.html)}),o.mouseenter(s).css("cursor","pointer").click(n)}var o,c=e("#currencyTooltipMarketable"),i=e("#currencyTooltip"),d=e("#modalBackground");r.vars={dom:{},clickies:e("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))"),click:{currency:function(){const t=e(this).find(">td:first").text().trim();r.dependencies.fn.openMarket(t.substring(0,t.length-1))}},observers:{currency_tooltips:new MutationObserver(function(e){if(e.length&&c.is(":visible")){const n=c.attr("class"),s=n.replace("crystals","premium").replace("materials","weapon_scraps").replace("fragments","gem_fragments");r.vars.dom.row_currency.attr("class",n),"gold"===n?o.text("N/A"):(o.text(" "),new r.dependencies.classes.Request("/market.php",r.spec.vars.CACHE_TTL).post({type:"currency",page:0,st:s}).done(t))}}),inventory_table:new MutationObserver(function(r){for(var t=0;t<r.length;t++)if(r[t].addedNodes.length){for(var n=0;n<r[t].addedNodes.length;n++)if(r[t].addedNodes[n]instanceof HTMLTableSectionElement){const s=e(r[t].addedNodes[n]);s.find("th:contains(Ingredient)").length&&s.find(">tr>[data-th=Item]").each(a);break}break}})}},r.vars.clickies.css("cursor","pointer").click(r.vars.click.currency),r.vars.dom.table_currency=e(r.spec.vars.html),r.vars.dom.row_currency=r.vars.dom.table_currency.find("tr[data-id=prices]"),o=r.vars.dom.row_currency.find(">td"),r.vars.dom.low_currency=o.first(),r.vars.dom.avg_currency=r.vars.dom.low_currency.next(),r.vars.dom.high_currency=r.vars.dom.avg_currency.next(),i.append(r.vars.dom.table_currency),r.vars.observers.currency_tooltips.observe(i[0],{attributes:!0}),r.vars.observers.inventory_table.observe(document.querySelector("#inventoryTable"),{attributes:!0,childList:!0,characterData:!0})},unload:function(e,r){if(r.vars.clickies.css("cursor","initial").unbind("click",r.vars.click.currency),"undefined"!=typeof r.vars.dom)for(var t in r.vars.dom)r.vars.dom.hasOwnProperty(t)&&(r.vars.dom[t].remove(),delete r.vars.dom[t]);if("undefined"!=typeof r.vars.observers)for(var n in r.vars.observers)r.vars.observers.hasOwnProperty(n)&&r.vars.observers[n].disconnect()}}}
+},{}],7:[function(require,module,exports){
 "use strict";
 
 var Shim = require("./shim");
@@ -1476,7 +1472,7 @@ Dict.prototype.toJSON = function () {
     return this.toObject();
 };
 
-},{"./generic-collection":8,"./generic-map":9,"./listen/property-changes":14,"./shim":20}],7:[function(require,module,exports){
+},{"./generic-collection":9,"./generic-map":10,"./listen/property-changes":15,"./shim":21}],8:[function(require,module,exports){
 "use strict";
 
 var Shim = require("./shim");
@@ -1670,7 +1666,7 @@ FastSet.prototype.logNode = function (node, write) {
 };
 
 
-},{"./dict":6,"./generic-collection":8,"./generic-set":11,"./list":12,"./listen/property-changes":14,"./shim":20,"./tree-log":21}],8:[function(require,module,exports){
+},{"./dict":7,"./generic-collection":9,"./generic-set":12,"./list":13,"./listen/property-changes":15,"./shim":21,"./tree-log":22}],9:[function(require,module,exports){
 "use strict";
 
 module.exports = GenericCollection;
@@ -1954,7 +1950,7 @@ Object.defineProperty(GenericCollection.prototype,"size",GenericCollection._size
 
 require("./shim-array");
 
-},{"./shim-array":16}],9:[function(require,module,exports){
+},{"./shim-array":17}],10:[function(require,module,exports){
 "use strict";
 
 var Object = require("./shim-object");
@@ -2157,7 +2153,7 @@ Item.prototype.compare = function (that) {
 };
 
 
-},{"./listen/map-changes":13,"./listen/property-changes":14,"./shim-object":18}],10:[function(require,module,exports){
+},{"./listen/map-changes":14,"./listen/property-changes":15,"./shim-object":19}],11:[function(require,module,exports){
 
 var Object = require("./shim-object");
 
@@ -2217,7 +2213,7 @@ GenericOrder.prototype.toJSON = function () {
     return this.toArray();
 };
 
-},{"./shim-object":18}],11:[function(require,module,exports){
+},{"./shim-object":19}],12:[function(require,module,exports){
 
 module.exports = GenericSet;
 function GenericSet() {
@@ -2291,7 +2287,7 @@ GenericSet.prototype.toggle = function (value) {
 };
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 
 module.exports = List;
@@ -2761,7 +2757,7 @@ Node.prototype.addAfter = function (node) {
     node.prev = this;
 };
 
-},{"./generic-collection":8,"./generic-order":10,"./listen/property-changes":14,"./listen/range-changes":15,"./shim":20}],13:[function(require,module,exports){
+},{"./generic-collection":9,"./generic-order":11,"./listen/property-changes":15,"./listen/range-changes":16,"./shim":21}],14:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -2913,7 +2909,7 @@ MapChanges.prototype.dispatchBeforeMapChange = function (key, value) {
 };
 
 
-},{"../dict":6,"../list":12,"weak-map":22}],14:[function(require,module,exports){
+},{"../dict":7,"../list":13,"weak-map":23}],15:[function(require,module,exports){
 /*
     Based in part on observable arrays from Motorola Mobility’s Montage
     Copyright (c) 2012, Motorola Mobility LLC. All Rights Reserved.
@@ -3350,7 +3346,7 @@ PropertyChanges.makePropertyObservable = function (object, key) {
     }
 };
 
-},{"../shim":20}],15:[function(require,module,exports){
+},{"../shim":21}],16:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -3494,7 +3490,7 @@ RangeChanges.prototype.dispatchBeforeRangeChange = function (plus, minus, index)
 };
 
 
-},{"../dict":6,"weak-map":22}],16:[function(require,module,exports){
+},{"../dict":7,"weak-map":23}],17:[function(require,module,exports){
 "use strict";
 
 /*
@@ -3856,7 +3852,7 @@ ArrayIterator.prototype.next = function () {
     return this._iterationObject;
 };
 
-},{"./generic-collection":8,"./generic-order":10,"./shim-function":17,"weak-map":22}],17:[function(require,module,exports){
+},{"./generic-collection":9,"./generic-order":11,"./shim-function":18,"weak-map":23}],18:[function(require,module,exports){
 
 module.exports = Function;
 
@@ -3917,7 +3913,7 @@ Function.get = function (key) {
 };
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -4443,7 +4439,7 @@ Object.clear = function (object) {
     return object;
 };
 
-},{"weak-map":22}],19:[function(require,module,exports){
+},{"weak-map":23}],20:[function(require,module,exports){
 
 /**
     accepts a string; returns the string with regex metacharacters escaped.
@@ -4459,7 +4455,7 @@ if (!RegExp.escape) {
 }
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 
 var Array = require("./shim-array");
 var Object = require("./shim-object");
@@ -4467,7 +4463,7 @@ var Function = require("./shim-function");
 var RegExp = require("./shim-regexp");
 
 
-},{"./shim-array":16,"./shim-function":17,"./shim-object":18,"./shim-regexp":19}],21:[function(require,module,exports){
+},{"./shim-array":17,"./shim-function":18,"./shim-object":19,"./shim-regexp":20}],22:[function(require,module,exports){
 "use strict";
 
 module.exports = TreeLog;
@@ -4509,7 +4505,7 @@ TreeLog.unicodeSharp = {
 };
 
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 // Copyright (C) 2011 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

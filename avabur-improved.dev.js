@@ -742,31 +742,25 @@ var is_dev = true,
     (function () {
         var ON_LOAD = {
             "Loading script CSS": function () {
-                var urls = [fn.gh_url("res/css/avabur-improved.min.css")], $head = $("head");
-
-                for (var i = 0; i < urls.length; i++) {
-                    $head.append("<link type='text/css' rel='stylesheet' href='" + urls[i] + "'/>");
-                }
+                $("head").append('<style>' + require("./core/css") + '</style>');
             },
 
             "Configuring script modal": function () {
-                $.get(fn.gh_url("res/html/script-settings.html")).done(function (r) {
-                    $DOM.modal.script_settings = $(require('./core/html')['script-settings']);
-                    $("#modalContent").append($DOM.modal.script_settings);
-                    fn.tabify($DOM.modal.script_settings);
+                $DOM.modal.script_settings = $(require('./core/html')['script-settings']);
+                $("#modalContent").append($DOM.modal.script_settings);
+                fn.tabify($DOM.modal.script_settings);
 
-                    $DOM.modal.script_settings.find('[data-setting="notifications"]')
-                        .each($HANDLERS.each.settings_notification)
-                        .change($HANDLERS.change.settings_notification);
+                $DOM.modal.script_settings.find('[data-setting="notifications"]')
+                    .each($HANDLERS.each.settings_notification)
+                    .change($HANDLERS.change.settings_notification);
 
-                    $DOM.modal.script_settings.find('[data-setting="features"]')
-                        .each($HANDLERS.each.settings_features)
-                        .change($HANDLERS.change.settings_feature);
+                $DOM.modal.script_settings.find('[data-setting="features"]')
+                    .each($HANDLERS.each.settings_features)
+                    .change($HANDLERS.change.settings_feature);
 
-                    $("#avi-module-settings-select").change($HANDLERS.change.module_settings_select);
+                $("#avi-module-settings-select").change($HANDLERS.change.module_settings_select);
 
-                    OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
-                });
+                OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
             },
             "Registering side menu entry": function () {
                 var $helpSection = $("#helpSection"),

@@ -3,6 +3,7 @@ module.exports = function (grunt) {
     require('./tools/create-meta')(grunt);
     require('./tools/copy-meta')(grunt);
     require('./tools/inlineHTML')(grunt);
+    require('./tools/scss')(grunt);
     grunt.initConfig({
         browserify: {
             js: {
@@ -33,7 +34,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    grunt.registerTask('dev', ['build_module_index', 'inline_html', 'node_meta', 'browserify']);
-    grunt.registerTask('release', ['common', 'uglify', 'copy_meta']);
-    grunt.registerTask('browserify-min', ['browserify', 'uglify', 'copy_meta']);
+    grunt.registerTask('dev', ['build_module_index', 'inline_html', 'node_meta', 'scss', 'browserify']);
+    grunt.registerTask('release', ['dev', 'uglify', 'copy_meta']);
 };

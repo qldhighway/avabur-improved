@@ -9,6 +9,7 @@
     "grunt-browserify": "^5.0.0",
     "grunt-contrib-uglify": "^1.0.1",
     "html-minifier": "^2.1.2",
+    "node-sass": "^3.7.0",
     "uglify-js": "^2.6.2"
   }
 }
