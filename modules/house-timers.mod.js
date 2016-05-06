@@ -6,7 +6,6 @@ module.exports = {
         fn: ["parseTimeStringLong"],
         classes: ["AloTimer", "CssManager", "Interval"]
     },
-
     load: function ($, module) {
         var $baseDiv = $("<div class='col-xs-6 col-md-12'/>");
 

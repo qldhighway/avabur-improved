@@ -9,6 +9,6 @@ module.exports = function (file) {
     if (contents.length == 2) {
         return "// " + START_TAG + contents[1] + END_TAG + "\n";
     } else {
-        throw new Error("Metablock not found");
+        throw new Error("Metablock not found. Our content array is as follows: " + JSON.stringify(contents));
     }
 };

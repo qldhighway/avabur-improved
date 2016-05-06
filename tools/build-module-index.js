@@ -1,7 +1,10 @@
-var fs = require('fs');
+var fs = require('fs'),
+    UglifyJS = require("uglify-js"),
+    dir = 'modules/',
+    outputFileName = 'index.js';
 
 module.exports = function (grunt) {
-    grunt.registerTask('build_module_index', 'Builds the module index', function (dir, outputFileName) {
+    grunt.registerTask('build_module_index', 'Builds the module index', function () {
         var done = this.async();
         fs.readdir(dir, function (err, files) {
             if (err) {
@@ -10,11 +13,16 @@ module.exports = function (grunt) {
                 var reqs = {},
                     realDirPath = fs.realpathSync(dir);
                 for (var i = 0; i < files.length; i++) {
-                    if (files[i].match(/\.min.js$/)) {
+                    if (files[i].match(/\.mod.js$/)) {
                         var realPath = realDirPath + "/" + files[i],
-                            readFile = fs.readFileSync(realPath, 'utf8').split("module.exports=")[1],
-                            id = require(realPath).id;
-                        reqs[id] = readFile.substr(0, readFile.length - 1);
+                            req = require(realPath);
+
+                        if (typeof(req.id) !== "string") {
+                            throw new Error("Failed to parse " + files[i] + ": the ID field is mandatory.")
+                        } else {
+                            var readFile = UglifyJS.minify(realDirPath + "/" + files[i]).code.split("module.exports=")[1];
+                            reqs[req.id] = readFile.substr(0, readFile.length - 1);
+                        }
                     }
                 }
                 var ids = Object.keys(reqs);

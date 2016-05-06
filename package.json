@@ -7,7 +7,8 @@
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
-    "grunt-yui-compressor": "^0.4.0",
-    "yuicompressor": "^2.4.8"
+    "grunt-contrib-uglify": "^1.0.1",
+    "html-minifier": "^2.1.2",
+    "uglify-js": "^2.6.2"
   }
 }

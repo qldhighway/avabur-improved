@@ -1,3 +1,5 @@
+/** @module HOUSE_NOTIFICATIONS */
+
 module.exports = {
     name: "House notifications",
     desc: "Creates toast & sound notifications when house construction and/or Harvestron finish",
@@ -51,7 +53,9 @@ module.exports = {
         }
     },
     /**
-     * @type Spec.Module.load
+     * 
+     * @param {*|jQuery|HTMLElement} $
+     * @param {Module} module
      */
     load: function ($, module) {
         function refresh() {

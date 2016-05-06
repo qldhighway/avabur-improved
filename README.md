@@ -3,7 +3,6 @@
 
 ----------
 
-
 This is a **currently in-development** UserScript to be used with
 [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) on
 Chrome (Greasemonkey is **not** supported; use the latest version of Chrome) for
