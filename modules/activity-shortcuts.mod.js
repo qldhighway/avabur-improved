@@ -15,7 +15,7 @@ module.exports = {
             ['fishing', 'Fishing', 'Open Fishing'],
             ['log', 'Woodcutting', 'Open Woodcutting'],
             ['metal-bar', 'Mining', 'Open Mining'],
-            ['stone-block', '#loadStonecutting', 'Open Stonecutting']
+            ['stone-block', 'Stonecutting', 'Open Stonecutting']
         ]
     },
     load: function ($, module) {
