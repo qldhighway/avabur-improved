@@ -36,411 +36,39 @@
 // @noframes
 // ==/UserScript==
 
-var is_dev = true,
-    dev_hash = "1f878fbb282667124559b3b576882fd229d2cd81";
 (/**
- *
- * @param $
- * @param CACHE_STORAGE
- * @param MutationObserver
- * @param buzz
- * @param AloTimer
- * @param ConsoleLogHTML
- * @param {console} console
- * @param HTMLSelectElement
- * @param {Function} require Require a module
- * @param {GM_info.script} GMInfo_script
- * @param {GM_getValue} GM_getValue x
- * @param GM_setValue
- * @param {JSON} JSON
+ * Main script
+ * @param {sessionStorage} CACHE_STORAGE
  */
-    function ($, CACHE_STORAGE, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console, HTMLSelectElement, require, GMInfo_script, GM_getValue, GM_setValue, JSON) {
+    function (CACHE_STORAGE) {
     'use strict';
-    var fn = {
-        /**
-         * Flash an element once
-         * @param {*|jQuery|HTMLElement} $element The element
-         * @returns {*|jQuery|HTMLElement} the element
-         */
-        flash_once: function ($element) {
-            $element.removeClass("avi-flash-once");
-            setTimeout(function () {
-                $element.addClass("avi-flash-once");
-            }, 10);
-            return $element;
-        }
-    };
+    require('./core/log');
 
-    //node dependencies
-    var FastSet = require('collections/fast-set');
-
-    require('./core/log')($, console, MutationObserver, ConsoleLogHTML, FastSet, fn.flash_once, GMInfo_script.name);
+    var fn = require('./core/fn');
 
     const MODULES = require('./modules');
-    /**
-     * The URL where we check for updates. This is different from @updateURL because we want it to come through
-     * as a regular page load, not a request to the raw file
-     */
-    var UPDATE_URL = "https://github.com/Alorel/avabur-improved/blob/master/avabur-improved.user.js";
 
-    /////////////////////////////////////////////////////
-    // This is the script code. Don't change it unless //
-    // you know what you're doing ;)                   //
-    /////////////////////////////////////////////////////
-
-
-    /** @var SettingsHandler */
-    var Settings = require('./core/settings-handler')($, GM_getValue, GM_setValue, GMInfo_script, JSON, console);
+    var Settings = require('./core/settings-handler');
 
     /** Our persistent DOM stuff */
     var $DOM = {
         /** Game modals */
         modal: {
-            /** The outer wrapper */
-            modal_wrapper: $("#modalWrapper"),
-            /** The faded background for modals */
-            modal_background: $("#modalBackground"),
             /** The title for modal windows */
             modal_title: $("#modalTitle"),
             /** The script settings modal */
             script_settings: null
-        },
-        /** Market DOM */
-        market: {
-            /** The market tabs */
-            navlinks: $("#marketTypeSelector").find("a")
         }
     };
+
+    /** @type CoreData */
+    var DATA = require('./core/data');
 
     /** Misc variables */
     var VARS = {
         /** Whether the market was opened */
-        market_was_opened: false,
-        /** A mapping of tradeskill ingredient names to their IDs */
-        tradeskill_mats: {
-            "Aberration Mind Source": 0,
-            "Animal Eye": 10,
-            "Animal Tongue": 11,
-            "Animal Tooth": 12,
-            "Animal Wing": 13,
-            "Beast Fur": 20,
-            "Beast Limb": 21,
-            "Beast Tooth": 22,
-            "Beast Wing": 23,
-            "Bird Nest": 122,
-            "Chunk of Coal": 130,
-            "Chunk of Graphite": 132,
-            "Construct Power": 30,
-            "Copper Ore": 133,
-            "Dragon Eye": 40,
-            "Dragon Scale": 41,
-            "Dragon Tail": 42,
-            "Elemental Energy": 50,
-            "Fish Fin": 112,
-            "Golden Apple": 121,
-            "Honeycomb": 123,
-            "Humanoid Bone": 60,
-            "Humanoid Flesh": 61,
-            "Humanoid Limb": 62,
-            "Lucky Coin": 141,
-            "Magical Stone": 140,
-            "Octopus Ink": 110,
-            "Ooze Gel": 70,
-            "Plant Branch": 80,
-            "Plant Leaf": 81,
-            "Plant Root": 82,
-            "Plant Vine": 83,
-            "Protection Stone": 142,
-            "Rainbow Shard": 131,
-            "Rune Stone": 143,
-            "Serpent Eye": 90,
-            "Serpent Tail": 91,
-            "Serpent Tongue": 92,
-            "Squid Tentacle": 113,
-            "Turtle Shell": 111,
-            "Vermin Eye": 100,
-            "Vermin Tooth": 101,
-            "Yellow Pollen": 120
-        }
+        market_was_opened: false
     };
-
-    /** Misc function container */
-    fn = $.extend(fn, {
-
-        /**
-         * Sort a Select element
-         * @param {HTMLSelectElement} select The element to sort
-         * @param {Number} [startAt=0] The first item index to sort
-         */
-        sortSelect: function (select, startAt) {
-            if (select instanceof HTMLSelectElement) {
-                if (typeof startAt === "undefined") {
-                    startAt = 0;
-                }
-
-                var texts = [];
-
-                for (var i = startAt; i < select.length; i++) {
-                    texts[i] = [
-                        select.options[i].text.toUpperCase(),
-                        select.options[i].text,
-                        select.options[i].value
-                    ].join('|');
-                }
-
-                texts.sort();
-
-                texts.forEach(function (text, index) {
-                    var parts = text.split('|');
-
-                    select.options[startAt + index].text = parts[1];
-                    select.options[startAt + index].value = parts[2];
-                });
-            }
-        },
-
-        /**
-         * Parses the long variation of the time string
-         * @param {String} str The time string
-         * @returns {Number} The time in ms representing this duration
-         */
-        parseTimeStringLong: function (str) {
-            var time = 0;
-            var match = str.match(/([0-9]+\s+(hours?|minutes?|seconds?))/g);
-
-            for (var i = 0; i < match.length; i++) {
-                var currentMatch = match[i].toLowerCase();
-                var number = currentMatch.match(/[0-9]+/);
-                var multiplier;
-                if (currentMatch.indexOf("hour") !== -1) {
-                    multiplier = 3600000;
-                } else if (currentMatch.indexOf("minute") !== -1) {
-                    multiplier = 60000;
-                } else {
-                    multiplier = 1000;
-                }
-
-                time += parseInt(number) * multiplier;
-            }
-
-            return time;
-        },
-        /**
-         * Checks GitHub for script updates
-         */
-        check_github_for_updates: function () {
-            GM_xmlhttpRequest({
-                method: "GET",
-                url: UPDATE_URL,
-                onload: function (r) {
-                    var theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
-                    if (fn.versionCompare(GMInfo_script.version, theirVersion) < 0) {
-                        fn.notification('A new version of ' + GMInfo_script.name + ' is available! Click your ' +
-                            'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.');
-                    }
-                }
-            });
-        },
-        /**
-         * Inserts inline SVG by AJAXing its URL
-         * @param {$|jQuery} $this The element to insert the SVG into
-         * @param {String} url The URL of the SVG file
-         * @returns {$|jQuery} $el
-         */
-        svg: function ($this, url) {
-            $this.html('<img src="' + fn.gh_url("res/img/ajax-loader.gif") + '" alt="Loading"/>');
-            $.get(url).done(function (r) {
-                $this.html($(r).find("svg"));
-            });
-            return $this;
-        },
-        /**
-         * Creates a floaty notification
-         * @param {String} text Text to display
-         * @param {String} [title=GM_info.script.name] The notification title
-         * @param {Object} [options={}] Overrides as shown here: https://tampermonkey.net/documentation.php#GM_notification
-         */
-        notification: function (text, title, options) {
-            if (Settings.settings.notifications.all.gm) {
-                GM_notification($.extend({
-                    text: text,
-                    title: title || GMInfo_script.name,
-                    highlight: true,
-                    timeout: 5000
-                }, options || {}));
-            }
-        },
-        /**
-         * Opens the market
-         * @param {String} type The top category name
-         */
-        openMarket: function (type) {
-            var doOpen = function () {
-                $DOM.market.navlinks.removeClass("active")
-                    .filter("a:contains('" + type + "')").addClass("active").click();
-            };
-            if (VARS.market_was_opened) {
-                fn.openStdModal("#marketWrapper");
-                doOpen();
-            } else {
-                var $document = $(document);
-
-                var $openCategory = function (evt, xhr, opts) {
-                    if (opts.url === "market.php") {
-                        $document.unbind("ajaxComplete", $openCategory);
-                        VARS.market_was_opened = true;
-                        doOpen();
-                    }
-                };
-
-                $document.ajaxComplete($openCategory);
-                $("#viewMarket").click();
-            }
-        },
-        /**
-         * Analyses the price array
-         * @param {Object} arr The price array from the market
-         * @returns {{low: Number, high: Number, avg:Number}}
-         */
-        analysePrice: function (arr) {
-            var ret = {
-                low: arr[0].price,
-                high: arr[arr.length - 1].price
-            };
-            ret.avg = Math.round((parseFloat(ret.low) + parseFloat(ret.high)) / 2);
-            return ret;
-        },
-        /**
-         * Turns a raw GitHub URL into a CDN one
-         * @param {String} path Path to the file
-         * @param {String} [author=Alorel] The repository admin
-         * @param {String} [repo=avabur-improved] The repository
-         * @returns {String} The created URL
-         */
-        gh_url: function (path, author, repo) {
-            author = author || "Alorel";
-            repo = repo || "avabur-improved";
-
-            return "https://cdn.rawgit.com/" + author + "/" + repo + "/" +
-                (is_dev ? dev_hash : GMInfo_script.version) + "/" + path;
-        },
-        /**
-         * Tabifies the div
-         * @param {jQuery|$|HTMLElement|*} $container The div to tabify
-         * @returns {*|jQuery|HTMLElement} $container
-         */
-        tabify: function ($container) {
-            var $nav = $container.find(">nav>*"),
-                $tabs = $container.find(">div>*"),
-                $activeNav = $nav.filter(".active");
-
-            $nav.click(function () {
-                var $this = $(this);
-                $tabs.filter("[data-menu='" + $this.attr("data-menu") + "']").show().siblings().hide();
-                $this.addClass("active").siblings().removeClass("active");
-            });
-
-            ($activeNav.length ? $activeNav : $nav).first().click();
-
-            return $container;
-        },
-        /**
-         * Puts commas in large numbers
-         * @param {Object|String} x The number
-         * @returns {String}
-         */
-        numberWithCommas: function (x) {
-            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        },
-        /**
-         * Toggles the visibility CSS attribute of the element
-         * @param {*|jQuery|HTMLElement} $el The element
-         * @param {Boolean} shouldBeVisible Whether the element should be visible
-         */
-        toggleVisibility: function ($el, shouldBeVisible) {
-            $el.css("visibility", shouldBeVisible ? "visible" : "hidden");
-        },
-        /**
-         * Opens one of the standard modals
-         * @param {String|HTMLElement|jQuery|$} item The modal to open, or its selector
-         * @returns {*|jQuery|HTMLElement} The modal
-         */
-        openStdModal: function (item) {
-            var $el;
-            if (item instanceof $) {
-                $el = item;
-            } else if (item instanceof HTMLElement || typeof(item) === "string") {
-                $el = $(item);
-            } else {
-                console.error("Failed to open modal: Invalid selector as shown below");
-                console.error(item);
-                return false;
-            }
-
-            $el.show().siblings().hide();
-            $DOM.modal.modal_background.fadeIn();
-            $DOM.modal.modal_wrapper.fadeIn();
-
-            return $el;
-        },
-        /**
-         * Compares the two versions
-         * @param {String} v1 The first version
-         * @param {String} v2 The second version
-         * @param {{lexicographical:Boolean,zeroExtend:Boolean}} [options] Options
-         * @return
-         * 0 if the versions are equal
-         * a negative integer iff v1 &lt; v2
-         * a positive integer iff v1 &gt; v2
-         * NaN if either version string is in the wrong format
-         */
-        versionCompare: function (v1, v2, options) {
-            var lexicographical = options && options.lexicographical,
-                zeroExtend = options && options.zeroExtend,
-                v1parts = v1.split('.'),
-                v2parts = v2.split('.');
-
-            function isValidPart(x) {
-                return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
-            }
-
-            if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) {
-                return NaN;
-            }
-
-            if (zeroExtend) {
-                while (v1parts.length < v2parts.length) v1parts.push("0");
-                while (v2parts.length < v1parts.length) v2parts.push("0");
-            }
-
-            if (!lexicographical) {
-                v1parts = v1parts.map(Number);
-                v2parts = v2parts.map(Number);
-            }
-
-            for (var i = 0; i < v1parts.length; ++i) {
-                if (v2parts.length == i) {
-                    return 1;
-                }
-
-                if (v1parts[i] == v2parts[i]) {
-
-                }
-                else if (v1parts[i] > v2parts[i]) {
-                    return 1;
-                }
-                else {
-                    return -1;
-                }
-            }
-
-            if (v1parts.length != v2parts.length) {
-                return -1;
-            }
-
-            return 0;
-        }
-    });
 
     var SFX = {
         circ_saw: new buzz.sound(fn.gh_url("res/sfx/circ_saw.wav")),
@@ -459,8 +87,8 @@ var is_dev = true,
         chat_whispers: new MutationObserver(
             /** @param {MutationRecord[]} records */
             function (records) {
-                var sound_on = Settings.settings.notifications.all.sound && Settings.settings.notifications.whisper.sound;
-                var gm_on = Settings.settings.notifications.all.gm && Settings.settings.notifications.whisper.gm;
+                var sound_on = Settings.running.notifications.all.sound && Settings.running.notifications.whisper.sound;
+                var gm_on = Settings.running.notifications.all.gm && Settings.running.notifications.whisper.gm;
 
                 if (sound_on || gm_on) {
                     for (var i = 0; i < records.length; i++) {
@@ -487,7 +115,7 @@ var is_dev = true,
     var $HANDLERS = {
         click: {
             script_menu: function () {
-                $DOM.modal.modal_title.text(GMInfo_script.name + " " + GMInfo_script.version);
+                $DOM.modal.modal_title.text(GM_info.script.name + " " + GM_info.script.version);
                 fn.openStdModal($DOM.modal.script_settings);
             },
             delegate_click: function () {
@@ -497,12 +125,12 @@ var is_dev = true,
         change: {
             settings_notification: function () {
                 var $this = $(this);
-                Settings.settings.notifications[$this.data("notification")][$this.data("type")] = $this.is(":checked");
+                Settings.running.notifications[$this.data("notification")][$this.data("type")] = $this.is(":checked");
                 Settings.save();
             },
             settings_feature: function () {
                 var $this = $(this);
-                Settings.settings.features[$this.data("feature")] = $this.is(":checked");
+                Settings.running.features[$this.data("feature")] = $this.is(":checked");
                 Settings.save();
             },
             module_settings_select: function () {
@@ -516,11 +144,11 @@ var is_dev = true,
             settings_notification: function () {
                 var $this = $(this);
 
-                $this.prop("checked", Settings.settings.notifications[$this.data("notification")][$this.data("type")]);
+                $this.prop("checked", Settings.running.notifications[$this.data("notification")][$this.data("type")]);
             },
             settings_features: function () {
                 var $this = $(this);
-                $this.prop("checked", Settings.settings.features[$this.data("feature")]);
+                $this.prop("checked", Settings.running.features[$this.data("feature")]);
             }
         }
     };
@@ -593,6 +221,7 @@ var is_dev = true,
         }
     };
 
+    //noinspection JSCheckFunctionSignatures
     classes.Request.prototype = {
         /** Ajax callbacks container */
         callbacks: {
@@ -660,7 +289,7 @@ var is_dev = true,
          * @returns {classes.SFX}
          */
         play: function () {
-            if (Settings.settings.notifications.all.sound) {
+            if (Settings.running.notifications.all.sound) {
                 this.buzz.play();
             }
 
@@ -676,6 +305,7 @@ var is_dev = true,
         }
     };
 
+    //noinspection JSCheckFunctionSignatures
     classes.Interval.prototype = {
         _intervals: {},
         isRunning: function () {
@@ -761,19 +391,19 @@ var is_dev = true,
 
                 $("#avi-module-settings-select").change($HANDLERS.change.module_settings_select);
 
-                OBSERVERS.script_settings.observe($DOM.modal.modal_wrapper[0], {attributes: true});
+                OBSERVERS.script_settings.observe(document.getElementById("modalWrapper"), {attributes: true});
             },
             "Registering side menu entry": function () {
                 var $helpSection = $("#helpSection"),
                     $menuLink = $('<a href="javascript:;"/>')
-                        .html('<li class="active">' + GMInfo_script.name + " " + GMInfo_script.version + '</li>')
+                        .html('<li class="active">' + GM_info.script.name + " " + GM_info.script.version + '</li>')
                         .click($HANDLERS.click.script_menu);
 
                 $helpSection.append($menuLink);
                 $("#navWrapper").css("padding-top", $menuLink.height()).find("ul");
             },
             "Starting whisper monitor": function () {
-                OBSERVERS.chat_whispers.observe(document.querySelector("#chatMessageList"), {
+                OBSERVERS.chat_whispers.observe(document.getElementById("chatMessageList"), {
                     childList: true
                 });
             }
@@ -1117,157 +747,614 @@ var is_dev = true,
             }
         }
     })();
-})(jQuery, sessionStorage, MutationObserver, buzz, AloTimer, ConsoleLogHTML, console, HTMLSelectElement, require, GM_info.script, GM_getValue, GM_setValue, JSON);
-},{"./core/css":2,"./core/html":3,"./core/log":4,"./core/settings-handler":5,"./modules":6,"collections/fast-set":8}],2:[function(require,module,exports){
+})(sessionStorage);
+},{"./core/css":2,"./core/data":3,"./core/fn":4,"./core/html":5,"./core/log":6,"./core/settings-handler":7,"./modules":8}],2:[function(require,module,exports){
 module.exports=".avi-margin-auto,table.avi{margin-left:auto;margin-right:auto}.avi-highlight{animation:pulsate-inner 0.5s infinite alternate}.avi-italic{font-style:italic}.avi-flash-once{animation:pulsate-inner 0.15s 2 alternate}.avi-force-hide{display:none !important}.avi-force-block{display:block !important}.avi-table{display:table}.avi-table>*{display:table-row}.avi-table>*>*{display:table-cell;padding:2px}.avi-link{text-decoration:underline;cursor:pointer}.avi-tip{border-bottom:1px dotted}.avi-menu-shortcut{line-height:initial !important}.avi-menu-shortcut>svg{border:1px solid;padding:2px;width:24px;height:24px}table.avi{border-collapse:collapse;font-size:small;font-weight:normal;width:auto}table.avi>thead>tr>*,table.avi>tbody>tr>*{border:1px solid;padding:2px;text-align:center}ul.avi{list-style:none;-webkit-margin-before:0;-webkit-margin-after:0;-webkit-margin-start:0;-webkit-margin-end:0;-webkit-padding-start:0}.bold{font-weight:bold}.toast-item-close{cursor:pointer}.toast-item p{margin-right:25px}.popover{background-color:rgba(0,0,0,0.8);max-width:initial !important}.popover>.arrow{display:none}.avi-menu{text-align:center}.avi-menu>:not(:last-child){margin-right:5px}.avi-menu a{display:inline-block !important;width:auto}table.sortable th{cursor:pointer}table.sortable th.descend:after{content:\" \\25B4\" !important}table.sortable th.ascend:after{content:\" \\25BE\" !important}table.sortable th:not(.descent):not(.ascend):after{content:\" \\25B4\\25BE\"}#viewedClanDescription{min-height:148px}.materials{color:#DA8300}.fragments{color:#BB51D4}.avi-log-btn{padding:2px;position:fixed;left:0;bottom:0}.avi-log-btn .badge{padding:3px 3px;margin-left:2px}.avi-txt-debug{color:#0AD !important}.avi-txt-info{color:#00B000 !important}.avi-txt-warn{color:#EEE600 !important}.avi-txt-error{color:#C81423 !important}";
 },{}],3:[function(require,module,exports){
-module.exports={"script-settings":"<div style=\"display:none\"> <nav class=\"center\"> <a href=\"javascript:;\" data-menu=\"modules\"> <button class=\"btn btn-primary\">Modules</button> </a> <a href=\"javascript:;\" data-menu=\"global-settings\"> <button class=\"btn btn-primary\">Global settings</button> </a> <a href=\"javascript:;\" data-menu=\"module-settings\"> <button class=\"btn btn-primary\">Module settings</button> </a> <a href=\"javascript:;\" data-menu=\"about\"> <button class=\"btn btn-primary\">About</button> </a> </nav> <div class=\"mt10\"> <div data-menu=\"modules\"> <table class=\"table table-condensed table-bordered avi\"> <thead> <th>Name</th> <th>Description</th> <th> <span>Unloadable</span> <sup title=\"An unloadable module can be turned off at runtime without having to refresh the page\" class=\"avi-tip\">?</sup> </th> </thead> <tbody> </tbody> </table> </div> <div data-menu=\"module-settings\"> <select id=\"avi-module-settings-select\" style=\"margin:auto;display:block\"></select> <div id=\"module-settings-container\" class=\"mt10\"></div> </div> <div data-menu=\"global-settings\"> <table class=\"table table-condensed table-bordered avi\"> <thead> <tr> <th>Feature</th> <th>Setting</th> <th>Description</th> </tr> </thead> <tbody id=\"avi-settings\"> <tr> <td>Enable sound</td> <td> <input type=\"checkbox\" data-setting=\"notifications\" data-notification=\"all\" data-type=\"sound\"> </td> <td> No sounds will play if you untick this </td> </tr> <tr> <td>Enable toasts</td> <td> <input type=\"checkbox\" data-setting=\"notifications\" data-notification=\"all\" data-type=\"gm\"> </td> <td> No toasts will display if you untick this </td> </tr> </tbody> </table> </div> <div data-menu=\"about\"> <div class=\"avi-table avi-margin-auto\"> <div> <span>Author:</span> <a href=\"javascript:;\" class=\"profileLink\">Alorel</a> </div> <div> <span>Resources:</span> <div> <ul class=\"avi\"> <li><a href=\"https://github.com/Alorel/avabur-improved\" target=\"_blank\">Homepage</a></li> <li> <a href=\"https://github.com/Alorel/avabur-improved/issues\" target=\"_blank\"> Bugs and suggestions </a> </li> <li> <a href=\"https://github.com/Alorel/avabur-improved/releases\" target=\"_blank\"> Changelog </a> </li> <li> <a href=\"http://avabur.boards.net/thread/881\" target=\"_blank\">Forum thread</a> </li> </ul> </div> </div> </div> </div> </div> </div>"};
+/**
+ * @typedef {Object} CoreData
+ * @prop {{}} tradeskill_mats Tradeskill material ID mapping
+ * @prop {{}} gem_ids Gem ID mapping
+ */
+module.exports = {
+    /** A mapping of tradeskill ingredient names to their IDs */
+    tradeskill_mats: {
+        "Aberration Mind Source": 0,
+        "Animal Eye": 10,
+        "Animal Tongue": 11,
+        "Animal Tooth": 12,
+        "Animal Wing": 13,
+        "Beast Fur": 20,
+        "Beast Limb": 21,
+        "Beast Tooth": 22,
+        "Beast Wing": 23,
+        "Bird Nest": 122,
+        "Chunk of Coal": 130,
+        "Chunk of Graphite": 132,
+        "Construct Power": 30,
+        "Copper Ore": 133,
+        "Dragon Eye": 40,
+        "Dragon Scale": 41,
+        "Dragon Tail": 42,
+        "Elemental Energy": 50,
+        "Fish Fin": 112,
+        "Golden Apple": 121,
+        Honeycomb: 123,
+        "Humanoid Bone": 60,
+        "Humanoid Flesh": 61,
+        "Humanoid Limb": 62,
+        "Lucky Coin": 141,
+        "Magical Stone": 140,
+        "Octopus Ink": 110,
+        "Ooze Gel": 70,
+        "Plant Branch": 80,
+        "Plant Leaf": 81,
+        "Plant Root": 82,
+        "Plant Vine": 83,
+        "Protection Stone": 142,
+        "Rainbow Shard": 131,
+        "Rune Stone": 143,
+        "Serpent Eye": 90,
+        "Serpent Tail": 91,
+        "Serpent Tongue": 92,
+        "Squid Tentacle": 113,
+        "Turtle Shell": 111,
+        "Vermin Eye": 100,
+        "Vermin Tooth": 101,
+        "Yellow Pollen": 120
+    },
+
+    /** Gem types vs their IDs */
+    gem_ids: {
+        Strength: 0,
+        Health: 1,
+        Coordination: 2,
+        Agility: 3,
+        Retaliation: 10,
+        Restoration: 11,
+        Dueling: 12,
+        Sniping: 13,
+        Sorcery: 14,
+        Brawling: 15,
+        Elusion: 16,
+        Normalizing: 20,
+        Hunting: 21,
+        Taming: 22,
+        Destruction: 23,
+        Slaying: 24,
+        Weathering: 25,
+        Murdering: 26,
+        Solidifying: 27,
+        Weedwhacking: 28,
+        Charming: 29,
+        Exterminating: 30,
+        Swiftness: 40,
+        Potency: 41,
+        Recklessness: 42,
+        Resilience: 43,
+        Retribution: 44,
+        Recovery: 45,
+        Harvesting: 46,
+        Smithing: 47,
+        Etching: 48,
+        Wisdom: 50,
+        Greed: 51,
+        Luck: 52,
+        Mastery: 53,
+        Celerity: 60,
+        Piercing: 61,
+        Chronokinesis: 62,
+        Endurance: 55
+    }
+};
 },{}],4:[function(require,module,exports){
-/** @module CoreLog */
+/** @module CoreFn */
 
 /**
- * Test
- * @param $
- * @param console
- * @param MutationObserver
- * @param ConsoleLogHTML
- * @param FastSet
- * @param flash_once
- * @param scriptName
+ * Whether we're in the dev version
+ * @type {boolean}
  */
-module.exports = function ($, console, MutationObserver, ConsoleLogHTML, FastSet, flash_once, scriptName) {
-    var clear = function () {
-            console.clear();
-            console.debug("Console cleared");
-        },
-        height = "250px",
-        baseSpan = $("<span class='badge'>0</span>"),
-        levels = {
-            log: baseSpan.clone(),
-            debug: baseSpan.clone().addClass("avi-txt-debug"),
-            info: baseSpan.clone().addClass("avi-txt-info"),
-            warn: baseSpan.clone().addClass("avi-txt-warn"),
-            error: baseSpan.clone().addClass("avi-txt-error")
-        },
-        ul = $("<ul class='avi' style='width:100%;overflow-y:auto;max-height:" + height + "'/>"),
-        $title = $('<div/>')
-            .append(
-                '<span style="float:left">' + scriptName + ' log</span>',
-                $('<a href="javascript:;" style="float:right">Clear</a>'),
-                '<div style="clear:both"></div>'
-            ),
-        container = $("<div/>").append(ul),
-        forEachBadges = function (lvl) {
-            flash_once(levels[lvl]);
-        },
-        btn = $('<button class="btn btn-default avi-log-btn">Log</button>')
-            .append(levels.log, levels.debug, levels.info, levels.warn, levels.error)
-            .popover({
-                title: $title,
-                html: true,
-                trigger: "click",
-                container: "body",
-                viewport: {"selector": "body", "padding": 0},
-                template: '<div class="popover col-lg-5 col-xs-12 col-sm-9 col-md-7" role="tooltip" style="min-height:' + height + '"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
-                placement: "auto top",
-                content: container
-            }).on("hidden.bs.popover", function () {
-                ul.find(">.avi-italic").removeClass("avi-italic");
-            }).on("shown.bs.popover", function () {
-                $("#" + $(this).attr("aria-describedby")).find(">.popover-title a").click(clear);
-            });
+var is_dev = true,
 
-    $("body").append(btn);
-    ConsoleLogHTML.connect(ul, {
-        error: "avi-txt-error",
-        warn: "avi-txt-warn",
-        info: "avi-txt-info",
-        debug: "avi-txt-debug"
-    }, true, false);
-
-    (new MutationObserver(
-        /**
-         * @param {MutationRecord[]} records
-         */
-        function (records) {
-            var badgesToFlash = new FastSet();
-
-            for (var record = 0; record < records.length; record++) {
-                var mutantNode, logLevel;
-                if (records[record].addedNodes.length) {
-                    for (mutantNode = 0; mutantNode < records[record].addedNodes.length; mutantNode++) {
-                        logLevel = $(records[record].addedNodes[mutantNode]).addClass("avi-italic small").attr("data-level");
-
-                        badgesToFlash.add(logLevel);
-                        levels[logLevel].text(parseInt(levels[logLevel].text()) + 1)
-                    }
-                }
-                if (records[record].removedNodes.length) {
-                    for (mutantNode = 0; mutantNode < records[record].removedNodes.length; mutantNode++) {
-                        logLevel = $(records[record].removedNodes[mutantNode]).attr("data-level");
-                        badgesToFlash.add(logLevel);
-                        levels[logLevel].text(parseInt(levels[logLevel].text()) - 1);
-                    }
-                }
-            }
-            badgesToFlash.forEach(forEachBadges);
-        })).observe(ul[0], {childList: true});
-};
-},{}],5:[function(require,module,exports){
-module.exports = function ($, GM_getValue, GM_setValue, GMInfo_script, JSON, console) {
     /**
-     * Handles settings. Shocker, I know.
-     * @constructor
+     * Our current commit hash
+     * @type {string}
      */
-    var SettingsHandler = function () {
-        /** @type SettingsHandler.defaults */
-        this.settings = this.defaults;
-        this.load();
-    };
+    dev_hash = "1f878fbb282667124559b3b576882fd229d2cd81",
 
-    SettingsHandler.prototype = {
-        /** Default settings */
-        defaults: {
-            /**
-             * Notification settings.
-             * sound: [bool] Whether to play a sound
-             * gm: [bool] Whether to show the Greasemonkey notification
-             */
-            notifications: {
-                /** Global overrides */
-                all: {
-                    sound: false,
-                    gm: false
-                },
-                /** Whisper notifcations */
-                whisper: {
-                    sound: true,
-                    gm: true
-                },
-                construction: {
-                    sound: true,
-                    gm: true
+    /**
+     * The URL where we check for updates. This is different from @updateURL because we want it to come through
+     * as a regular page load, not a request to the raw file
+     * @type {string}
+     */
+    UPDATE_URL = "https://github.com/Alorel/avabur-improved/blob/master/avabur-improved.user.js",
+
+    /**
+     * The default author for gh_url
+     * @type {string}
+     */
+    DEFAULT_GH_AUTHOR = "Alorel",
+
+    /**
+     * The default repo for gh_url
+     * @type {string}
+     */
+    DEFAULT_GH_REPO = "avabur-improved",
+
+// ====================================================================================================================
+
+    /**
+     * Our settings handler
+     * @type SettingsHandler
+     */
+    Settings = require('./settings-handler'),
+
+    /**
+     * Whether the market has been opened yet
+     * @type {boolean}
+     */
+    market_was_opened = false,
+
+    /**
+     * Market navigation menu
+     * @type {*|jQuery|HTMLElement}
+     */
+    $MarketNavLinks = $("#marketTypeSelector").find("a"),
+
+    /**
+     * The standard game modal wrapper
+     * @type {*|jQuery|HTMLElement}
+     */
+    $ModalWrapper = $("#modalWrapper"),
+    /**
+     * The faded background for modals
+     * @type {*|jQuery|HTMLElement}
+     */
+    $ModalBackground = $("#modalBackground");
+
+/**
+ * Core functions
+ */
+var coreFn = {
+    /**
+     * Flash an element once
+     * @param {*|jQuery|HTMLElement} $element The element
+     * @returns {*|jQuery|HTMLElement} the element
+     */
+    flash_once: function ($element) {
+        $element.removeClass("avi-flash-once");
+        setTimeout(function () {
+            $element.addClass("avi-flash-once");
+        }, 10);
+        return $element;
+    },
+
+    /**
+     * Sort a Select element
+     * @param {HTMLSelectElement} select The element to sort
+     * @param {Number} [startAt=0] The first item index to sort
+     */
+    sortSelect: function (select, startAt) {
+        if (select instanceof HTMLSelectElement) {
+            if (typeof startAt === "undefined") {
+                startAt = 0;
+            }
+
+            var texts = [];
+
+            for (var i = startAt; i < select.length; i++) {
+                texts[i] = [
+                    select.options[i].text.toUpperCase(),
+                    select.options[i].text,
+                    select.options[i].value
+                ].join('|');
+            }
+
+            texts.sort();
+
+            texts.forEach(function (text, index) {
+                var parts = text.split('|');
+
+                select.options[startAt + index].text = parts[1];
+                select.options[startAt + index].value = parts[2];
+            });
+        }
+    },
+
+    /**
+     * Parses the long variation of the time string
+     * @param {String} str The time string
+     * @returns {Number} The time in ms representing this duration
+     */
+    parseTimeStringLong: function (str) {
+        var time = 0;
+        var match = str.match(/([0-9]+\s+(hours?|minutes?|seconds?))/g);
+
+        for (var i = 0; i < match.length; i++) {
+            var currentMatch = match[i].toLowerCase();
+            var number = currentMatch.match(/[0-9]+/);
+            var multiplier;
+            if (currentMatch.indexOf("hour") !== -1) {
+                multiplier = 3600000;
+            } else if (currentMatch.indexOf("minute") !== -1) {
+                multiplier = 60000;
+            } else {
+                multiplier = 1000;
+            }
+
+            time += parseInt(number) * multiplier;
+        }
+
+        return time;
+    },
+    /**
+     * Checks GitHub for script updates
+     */
+    check_github_for_updates: function () {
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: UPDATE_URL,
+            onload: function (r) {
+                var theirVersion = r.responseText.match(/\/\/\s+@version\s+([^\n<>]+)/)[1];
+                if (coreFn.versionCompare(GM_info.script.version, theirVersion) < 0) {
+                    coreFn.notification('A new version of ' + GM_info.script.name + ' is available! Click your ' +
+                        'Greasemonkey/Tampermonkey icon, select "Check for updates" and reload the page in a few seconds.');
                 }
+            }
+        });
+    },
+    /**
+     * Inserts inline SVG by AJAXing its URL
+     * @param {$|jQuery} $this The element to insert the SVG into
+     * @param {String} url The URL of the SVG file
+     * @returns {$|jQuery} $el
+     */
+    svg: function ($this, url) {
+        $this.html('<img src="' + coreFn.gh_url("res/img/ajax-loader.gif") + '" alt="Loading"/>');
+        $.get(url).done(function (r) {
+            $this.html($(r).find("svg"));
+        });
+        return $this;
+    },
+    /**
+     * Creates a floaty notification
+     * @param {String} text Text to display
+     * @param {String} [title=GM_info.script.name] The notification title
+     * @param {Object} [options={}] Overrides as shown here: https://tampermonkey.net/documentation.php#GM_notification
+     */
+    notification: function (text, title, options) {
+        if (Settings.running.notifications.all.gm) {
+            GM_notification($.extend({
+                text: text,
+                title: title || GM_info.script.name,
+                highlight: true,
+                timeout: 5000
+            }, options || {}));
+        }
+    },
+    /**
+     * Opens the market
+     * @param {String} type The top category name
+     */
+    openMarket: function (type) {
+        var doOpen = function () {
+            $MarketNavLinks.removeClass("active")
+                .filter("a:contains('" + type + "')").addClass("active").click();
+        };
+        if (market_was_opened) {
+            coreFn.openStdModal("#marketWrapper");
+            doOpen();
+        } else {
+            var $document = $(document);
+
+            var $openCategory = function (evt, xhr, opts) {
+                if (opts.url === "market.php") {
+                    $document.unbind("ajaxComplete", $openCategory);
+                    market_was_opened = true;
+                    doOpen();
+                }
+            };
+
+            $document.ajaxComplete($openCategory);
+            $("#viewMarket").click();
+        }
+    },
+    /**
+     * Analyses the price array
+     * @param {Object} arr The price array from the market
+     * @returns {{low: Number, high: Number, avg:Number}}
+     */
+    analysePrice: function (arr) {
+        var low = arr[0].price,
+            high = arr[arr.length - 1].price;
+        return {
+            low: low,
+            high: high,
+            avg: Math.round((parseFloat(low) + parseFloat(high)) / 2)
+        };
+    },
+    /**
+     * Turns a raw GitHub URL into a CDN one
+     * @param {String} path Path to the file
+     * @param {String} [author=Alorel] The repository admin
+     * @param {String} [repo=avabur-improved] The repository
+     * @returns {String} The created URL
+     */
+    gh_url: function (path, author, repo) {
+        author = author || DEFAULT_GH_AUTHOR;
+        repo = repo || DEFAULT_GH_REPO;
+
+        return "https://cdn.rawgit.com/" + author + "/" + repo + "/" +
+            (is_dev ? dev_hash : GM_info.script.version) + "/" + path;
+    },
+    /**
+     * Tabifies the div
+     * @param {jQuery|$|HTMLElement|*} $container The div to tabify
+     * @returns {*|jQuery|HTMLElement} $container
+     */
+    tabify: function ($container) {
+        var $nav = $container.find(">nav>*"),
+            $tabs = $container.find(">div>*"),
+            $activeNav = $nav.filter(".active");
+
+        $nav.click(function () {
+            var $this = $(this);
+            $tabs.filter("[data-menu='" + $this.attr("data-menu") + "']").show().siblings().hide();
+            $this.addClass("active").siblings().removeClass("active");
+        });
+
+        ($activeNav.length ? $activeNav : $nav).first().click();
+
+        return $container;
+    },
+    /**
+     * Puts commas in large numbers
+     * @param {Object|String} x The number
+     * @returns {String}
+     */
+    numberWithCommas: function (x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    },
+    /**
+     * Toggles the visibility CSS attribute of the element
+     * @param {*|jQuery|HTMLElement} $el The element
+     * @param {Boolean} shouldBeVisible Whether the element should be visible
+     */
+    toggleVisibility: function ($el, shouldBeVisible) {
+        $el.css("visibility", shouldBeVisible ? "visible" : "hidden");
+    },
+    /**
+     * Opens one of the standard modals
+     * @param {String|HTMLElement|jQuery|$} item The modal to open, or its selector
+     * @returns {*|jQuery|HTMLElement} The modal
+     */
+    openStdModal: function (item) {
+        var $el;
+        if (item instanceof $) {
+            $el = item;
+        } else if (item instanceof HTMLElement || typeof(item) === "string") {
+            $el = $(item);
+        } else {
+            console.error("Failed to open modal: Invalid selector as shown below");
+            console.error(item);
+            return false;
+        }
+
+        $el.show().siblings().hide();
+        $ModalBackground.fadeIn();
+        $ModalWrapper.fadeIn();
+
+        return $el;
+    },
+    /**
+     * Compares the two versions
+     * @param {String} v1 The first version
+     * @param {String} v2 The second version
+     * @param {{lexicographical:Boolean,zeroExtend:Boolean}} [options] Options
+     * @return
+     * 0 if the versions are equal
+     * a negative integer iff v1 &lt; v2
+     * a positive integer iff v1 &gt; v2
+     * NaN if either version string is in the wrong format
+     */
+    versionCompare: function (v1, v2, options) {
+        var lexicographical = options && options.lexicographical,
+            zeroExtend = options && options.zeroExtend,
+            v1parts = v1.split('.'),
+            v2parts = v2.split('.');
+
+        function isValidPart(x) {
+            return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
+        }
+
+        if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) {
+            return NaN;
+        }
+
+        if (zeroExtend) {
+            while (v1parts.length < v2parts.length) v1parts.push("0");
+            while (v2parts.length < v1parts.length) v2parts.push("0");
+        }
+
+        if (!lexicographical) {
+            v1parts = v1parts.map(Number);
+            v2parts = v2parts.map(Number);
+        }
+
+        for (var i = 0; i < v1parts.length; ++i) {
+            if (v2parts.length == i) {
+                return 1;
+            }
+
+            if (v1parts[i] == v2parts[i]) {
+
+            }
+            else if (v1parts[i] > v2parts[i]) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        }
+
+        if (v1parts.length != v2parts.length) {
+            return -1;
+        }
+
+        return 0;
+    }
+};
+
+module.exports = coreFn;
+},{"./settings-handler":7}],5:[function(require,module,exports){
+module.exports={"script-settings":"<div style=\"display:none\"> <nav class=\"center\"> <a href=\"javascript:;\" data-menu=\"modules\"> <button class=\"btn btn-primary\">Modules</button> </a> <a href=\"javascript:;\" data-menu=\"global-settings\"> <button class=\"btn btn-primary\">Global settings</button> </a> <a href=\"javascript:;\" data-menu=\"module-settings\"> <button class=\"btn btn-primary\">Module settings</button> </a> <a href=\"javascript:;\" data-menu=\"about\"> <button class=\"btn btn-primary\">About</button> </a> </nav> <div class=\"mt10\"> <div data-menu=\"modules\"> <table class=\"table table-condensed table-bordered avi\"> <thead> <th>Name</th> <th>Description</th> <th> <span>Unloadable</span> <sup title=\"An unloadable module can be turned off at runtime without having to refresh the page\" class=\"avi-tip\">?</sup> </th> </thead> <tbody> </tbody> </table> </div> <div data-menu=\"module-settings\"> <select id=\"avi-module-settings-select\" style=\"margin:auto;display:block\"></select> <div id=\"module-settings-container\" class=\"mt10\"></div> </div> <div data-menu=\"global-settings\"> <table class=\"table table-condensed table-bordered avi\"> <thead> <tr> <th>Feature</th> <th>Setting</th> <th>Description</th> </tr> </thead> <tbody id=\"avi-settings\"> <tr> <td>Enable sound</td> <td> <input type=\"checkbox\" data-setting=\"notifications\" data-notification=\"all\" data-type=\"sound\"> </td> <td> No sounds will play if you untick this </td> </tr> <tr> <td>Enable toasts</td> <td> <input type=\"checkbox\" data-setting=\"notifications\" data-notification=\"all\" data-type=\"gm\"> </td> <td> No toasts will display if you untick this </td> </tr> </tbody> </table> </div> <div data-menu=\"about\"> <div class=\"avi-table avi-margin-auto\"> <div> <span>Author:</span> <a href=\"javascript:;\" class=\"profileLink\">Alorel</a> </div> <div> <span>Resources:</span> <div> <ul class=\"avi\"> <li><a href=\"https://github.com/Alorel/avabur-improved\" target=\"_blank\">Homepage</a></li> <li> <a href=\"https://github.com/Alorel/avabur-improved/issues\" target=\"_blank\"> Bugs and suggestions </a> </li> <li> <a href=\"https://github.com/Alorel/avabur-improved/releases\" target=\"_blank\"> Changelog </a> </li> <li> <a href=\"http://avabur.boards.net/thread/881\" target=\"_blank\">Forum thread</a> </li> </ul> </div> </div> </div> </div> </div> </div>"};
+},{}],6:[function(require,module,exports){
+var FastSet = require('collections/fast-set'),
+    flash_once = require('./fn').flash_once,
+    clear = function () {
+        console.clear();
+        console.debug("Console cleared");
+    },
+    height = "250px",
+    baseSpan = $("<span class='badge'>0</span>"),
+    levels = {
+        log: baseSpan.clone(),
+        debug: baseSpan.clone().addClass("avi-txt-debug"),
+        info: baseSpan.clone().addClass("avi-txt-info"),
+        warn: baseSpan.clone().addClass("avi-txt-warn"),
+        error: baseSpan.clone().addClass("avi-txt-error")
+    },
+    ul = $("<ul class='avi' style='width:100%;overflow-y:auto;max-height:" + height + "'/>"),
+    $title = $('<div/>')
+        .append(
+            '<span style="float:left">' + GM_info.script.name + ' log</span>',
+            $('<a href="javascript:;" style="float:right">Clear</a>'),
+            '<div style="clear:both"></div>'
+        ),
+    container = $("<div/>").append(ul),
+    forEachBadges = function (lvl) {
+        flash_once(levels[lvl]);
+    },
+    btn = $('<button class="btn btn-default avi-log-btn">Log</button>')
+        .append(levels.log, levels.debug, levels.info, levels.warn, levels.error)
+        .popover({
+            title: $title,
+            html: true,
+            trigger: "click",
+            container: "body",
+            viewport: {"selector": "body", "padding": 0},
+            template: '<div class="popover col-lg-5 col-xs-12 col-sm-9 col-md-7" role="tooltip" style="min-height:' + height + '"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+            placement: "auto top",
+            content: container
+        }).on("hidden.bs.popover", function () {
+            ul.find(">.avi-italic").removeClass("avi-italic");
+        }).on("shown.bs.popover", function () {
+            $("#" + $(this).attr("aria-describedby")).find(">.popover-title a").click(clear);
+        });
+
+document.body.appendChild(btn[0]);
+ConsoleLogHTML.connect(ul, {
+    error: "avi-txt-error",
+    warn: "avi-txt-warn",
+    info: "avi-txt-info",
+    debug: "avi-txt-debug"
+}, true, false);
+
+(new MutationObserver(
+    /**
+     * @param {MutationRecord[]} records
+     */
+    function (records) {
+        var badgesToFlash = new FastSet();
+
+        for (var record = 0; record < records.length; record++) {
+            var mutantNode, logLevel;
+            if (records[record].addedNodes.length) {
+                for (mutantNode = 0; mutantNode < records[record].addedNodes.length; mutantNode++) {
+                    logLevel = $(records[record].addedNodes[mutantNode]).addClass("avi-italic small").attr("data-level");
+
+                    badgesToFlash.add(logLevel);
+                    levels[logLevel][0].innerText = parseInt(levels[logLevel].text()) + 1;
+                }
+            }
+            if (records[record].removedNodes.length) {
+                for (mutantNode = 0; mutantNode < records[record].removedNodes.length; mutantNode++) {
+                    logLevel = $(records[record].removedNodes[mutantNode]).attr("data-level");
+                    badgesToFlash.add(logLevel);
+                    levels[logLevel][0].innerText = parseInt(levels[logLevel].text()) - 1;
+                }
+            }
+        }
+        badgesToFlash.forEach(forEachBadges);
+    })).observe(ul[0], {childList: true});
+},{"./fn":4,"collections/fast-set":10}],7:[function(require,module,exports){
+/** @module SettingsHandler */
+
+/**
+ * Handles settings. Shocker, I know.
+ * @constructor
+ */
+var SettingsHandler = function () {
+    /**
+     * Settings container
+     * @type {{}}
+     */
+    this.running = this.defaults;
+    
+    
+    this.load();
+};
+
+SettingsHandler.prototype = {
+    /** Default settings */
+    defaults: {
+        /**
+         * Notification settings.
+         * sound: [bool] Whether to play a sound
+         * gm: [bool] Whether to show the Greasemonkey notification
+         */
+        notifications: {
+            /** Global overrides */
+            all: {
+                sound: false,
+                gm: false
             },
-            features: {
-                house_timer: true
+            /** Whisper notifcations */
+            whisper: {
+                sound: true,
+                gm: true
+            },
+            construction: {
+                sound: true,
+                gm: true
             }
         },
-        save: function () {
-            GM_setValue("settings", JSON.stringify(this.settings));
-            console.info(GMInfo_script.name + " settings saved.");
-        },
-        load: function () {
-            this.settings = $.extend(true, this.defaults, JSON.parse(GM_getValue("settings") || "{}"));
-            console.debug(GMInfo_script.name + " settings loaded.");
+        features: {
+            house_timer: true
         }
-    };
-
-    return new SettingsHandler();
+    },
+    /**
+     * Save the settings
+     */
+    save: function () {
+        GM_setValue("settings", JSON.stringify(this.running));
+        console.info(GM_info.script.name + " settings saved.");
+    },
+    /**
+     * Load the settings
+     */
+    load: function () {
+        this.running = $.extend(true, this.defaults, JSON.parse(GM_getValue("settings") || "{}"));
+        console.debug(GM_info.script.name + " settings loaded.");
+    }
 };
-},{}],6:[function(require,module,exports){
+
+var exp = new SettingsHandler();
+
+module.exports = exp;
+},{}],8:[function(require,module,exports){
 module.exports={"ACTIVITY_SHORTCUTS":{name:"Activity Shortcuts",desc:"Registers activity shortcuts on the side menu",id:"ACTIVITY_SHORTCUTS",dependencies:{fn:["gh_url","svg"]},vars:{appends:[["sword-clash","MobList","Open Battles"],["fishing","Fishing","Open Fishing"],["log","Woodcutting","Open Woodcutting"],["metal-bar","Mining","Open Mining"],["stone-block","#loadStonecutting","Open Stonecutting"]]},load:function(e,n){var s,t=n.spec.vars,i=e("<a href='javascript:;' class='avi-tip avi-menu-shortcut' style='border-bottom:none'/>"),a=e("#navWrapper").find("ul");n.vars.li=e('<li class="avi-menu"/>');for(var o=0;o<t.appends.length;o++)s=i.clone().attr({"data-delegate-click":"#load"+t.appends[o][1],title:t.appends[o][2]}),n.vars.li.append(s),n.dependencies.fn.svg(s,n.dependencies.fn.gh_url("res/svg/"+t.appends[o][0]+".svg"));a.append(n.vars.li)},unload:function(e,n){n.vars.li.remove()}},"HOUSE_NOTIFICATIONS":{name:"House notifications",desc:"Creates toast & sound notifications when house construction and/or Harvestron finish",id:"HOUSE_NOTIFICATIONS",dependencies:{fn:["parseTimeStringLong","gh_url","notification"],classes:["AloTimer","Interval","SFX"]},settings:{desc:{"Construction sound":"Play a sound when construction finishes","Construction toast":"Display a toast when construction finishes"},defaults:{"Construction sound":!0,"Construction toast":!0},demo:{"Construction sound":function(n,e,s){s.vars.sfx.play()},"Construction toast":function(n,e,s){s.dependencies.fn.notification("Construction finished",s.spec.name)}}},funcs:{click_house:function(){document.getElementById("header_house").click()},notify:function(n){n.vars.notified||(console.info("Construction finished"),n.settings["Construction sound"]&&n.vars.sfx.play(),n.settings["Construction toast"]&&n.dependencies.fn.notification("Construction finished",n.spec.name,{onclick:n.spec.funcs.click_house})),n.vars.notified=!0}},load:function(n,e){function s(){n.ajax("/house.php",{global:!1}).done(function(n){"undefined"!=typeof n.m&&o(n.m)})}function o(n){var o=new e.dependencies.classes.Interval(e.spec.name);if(o.clear(),-1!==n.indexOf("available again")){var i=new e.dependencies.classes.AloTimer(e.dependencies.fn.parseTimeStringLong(n));o.set(function(){i.isFinished()?(o.clear(),e.spec.funcs.notify(e)):e.vars.notified=!1},1e3)}else-1!==n.indexOf("are available")?e.spec.funcs.notify(e):setTimeout(s,1e3)}e.vars={notified:!1,house_requery:function(n,e,s){-1!==s.url.indexOf("house")&&"undefined"!=typeof e.responseJSON&&"undefined"!=typeof e.responseJSON.m&&o(e.responseJSON.m)},sfx:new e.dependencies.classes.SFX(e.dependencies.fn.gh_url("res/sfx/circ_saw.wav"))},n(document).ajaxComplete(e.vars.house_requery),s()},unload:function(n,e){n(document).unbind("ajaxComplete",e.vars.house_requery)}},"HOUSE_TIMERS":{name:"House timers",desc:"Shows house construction timers without the need for an alarm clock",id:"HOUSE_TIMERS",dependencies:{fn:["parseTimeStringLong"],classes:["AloTimer","CssManager","Interval"]},load:function(e,a){function n(){e.ajax("/house.php",{global:!1}).done(function(e){"undefined"!=typeof e.m&&o(e.m)})}function s(s){s.clear(),a.vars.paneSpan.addClass("avi-highlight").html(e('<span data-delegate-click="#header_house" style="cursor:pointer;text-decoration:underline;padding-right:5px">Ready!</span>')).append(e("<a href='javascript:;'>(refresh)</a>").click(n)),a.applyGlobalHandlers(a.vars.paneSpan)}function o(e){var o=new a.dependencies.classes.Interval(a.spec.name);if(o.clear(),-1!==e.indexOf("available again")){var r=new a.dependencies.classes.AloTimer(a.dependencies.fn.parseTimeStringLong(e));o.set(function(){r.isFinished()?s(o):a.vars.paneSpan.removeClass("avi-highlight").text(r.toString())},1e3)}else-1!==e.indexOf("are available")?s(o):setTimeout(n,3e3)}var r=e("<div class='col-xs-6 col-md-12'/>");a.vars={paneLabel:r.clone().addClass("col-lg-5 gold").text("Construction:"),paneSpan:e("<span>House unavailable</span>"),house_requery:function(e,a,n){-1!==n.url.indexOf("house")&&"undefined"!=typeof a.responseJSON&&"undefined"!=typeof a.responseJSON.m&&o(a.responseJSON.m)},css:(new a.dependencies.classes.CssManager).setRules({"#constructionNotifier,#houseTimerTable [data-typeid='Construction']":{display:"none !important"}}).addToDOM()},a.vars.paneSpanContainer=r.clone().addClass("col-lg-7").html(a.vars.paneSpan),e("#houseTimerInfo").addClass("avi-force-block"),e("#houseTimerTable").prepend(a.vars.paneLabel,a.vars.paneSpanContainer),e(document).ajaxComplete(a.vars.house_requery),e.ajax("/house.php",{global:!1}).done(function(e){"undefined"!=typeof e.m&&o(e.m)})},unload:function(e,a){a.vars.paneLabel.remove(),a.vars.paneSpanContainer.remove(),a.vars.css.removeFromDOM(),e(document).unbind("ajaxComplete",a.vars.house_requery),e("#houseTimerInfo").removeClass("avi-force-block"),new a.dependencies.classes.Interval(a.spec.name).clear()}},"MARKET_TOOLTIPS":{name:"Market tooltips",desc:"Performs a market price lookup when you hover a supported item",id:"MARKET_TOOLTIPS",dependencies:{fn:["analysePrice","numberWithCommas","openMarket"],classes:["Request"]},vars:{CACHE_TTL:1/3600*60,html:'<table class="avi" style="margin:auto"><thead><tr><th colspan="3">Current market price (1st page)</th></tr><tr><th>Low</th><th>Average</th><th>High</th></tr></thead><tbody><tr data-id="prices"><td></td><td></td><td></td></tr></tbody></table>'},load:function(e,r){function t(e){var t=r.dependencies.fn.analysePrice(e.l);r.vars.dom.low_currency.text(r.dependencies.fn.numberWithCommas(t.low)),r.vars.dom.avg_currency.text(r.dependencies.fn.numberWithCommas(t.avg)),r.vars.dom.high_currency.text(r.dependencies.fn.numberWithCommas(t.high))}function n(){d.click(),r.dependencies.fn.openMarket("Ingredients")}function s(){const t=e(this),n=t.text().trim();"undefined"==typeof r.spec.vars.tradeskill_mats[n]?fn.notification("Failed to lookup "+n+": ID not found"):new r.dependencies.classes.Request("/market.php",r.spec.vars.CACHE_TTL).post({type:"ingredient",page:0,q:0,ll:0,hl:0,st:r.spec.vars.tradeskill_mats[n]}).done(function(n){const s=t.attr("aria-describedby"),a=e("#"+s);if(s&&a.length){const o=r.dependencies.fn.analysePrice(n.l),c=a.find("tr[data-id=prices]>td");c.first().text(r.dependencies.fn.numberWithCommas(o.low)).next().text(r.dependencies.fn.numberWithCommas(o.avg)).next().text(r.dependencies.fn.numberWithCommas(o.high))}})}function a(){const t=e(this),a=t.text().trim(),o=e("<span>"+a+"</span>");t.html(o),o.popover({title:a,html:!0,trigger:"hover",container:"body",viewport:{selector:"body",padding:0},placement:"auto right",content:e(r.spec.vars.html)}),o.mouseenter(s).css("cursor","pointer").click(n)}var o,c=e("#currencyTooltipMarketable"),i=e("#currencyTooltip"),d=e("#modalBackground");r.vars={dom:{},clickies:e("#allThemTables").find(".currencyWithTooltip:not(:contains(Gold))"),click:{currency:function(){const t=e(this).find(">td:first").text().trim();r.dependencies.fn.openMarket(t.substring(0,t.length-1))}},observers:{currency_tooltips:new MutationObserver(function(e){if(e.length&&c.is(":visible")){const n=c.attr("class"),s=n.replace("crystals","premium").replace("materials","weapon_scraps").replace("fragments","gem_fragments");r.vars.dom.row_currency.attr("class",n),"gold"===n?o.text("N/A"):(o.text(" "),new r.dependencies.classes.Request("/market.php",r.spec.vars.CACHE_TTL).post({type:"currency",page:0,st:s}).done(t))}}),inventory_table:new MutationObserver(function(r){for(var t=0;t<r.length;t++)if(r[t].addedNodes.length){for(var n=0;n<r[t].addedNodes.length;n++)if(r[t].addedNodes[n]instanceof HTMLTableSectionElement){const s=e(r[t].addedNodes[n]);s.find("th:contains(Ingredient)").length&&s.find(">tr>[data-th=Item]").each(a);break}break}})}},r.vars.clickies.css("cursor","pointer").click(r.vars.click.currency),r.vars.dom.table_currency=e(r.spec.vars.html),r.vars.dom.row_currency=r.vars.dom.table_currency.find("tr[data-id=prices]"),o=r.vars.dom.row_currency.find(">td"),r.vars.dom.low_currency=o.first(),r.vars.dom.avg_currency=r.vars.dom.low_currency.next(),r.vars.dom.high_currency=r.vars.dom.avg_currency.next(),i.append(r.vars.dom.table_currency),r.vars.observers.currency_tooltips.observe(i[0],{attributes:!0}),r.vars.observers.inventory_table.observe(document.querySelector("#inventoryTable"),{attributes:!0,childList:!0,characterData:!0})},unload:function(e,r){if(r.vars.clickies.css("cursor","initial").unbind("click",r.vars.click.currency),"undefined"!=typeof r.vars.dom)for(var t in r.vars.dom)r.vars.dom.hasOwnProperty(t)&&(r.vars.dom[t].remove(),delete r.vars.dom[t]);if("undefined"!=typeof r.vars.observers)for(var n in r.vars.observers)r.vars.observers.hasOwnProperty(n)&&r.vars.observers[n].disconnect()}}}
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 var Shim = require("./shim");
@@ -1472,7 +1559,7 @@ Dict.prototype.toJSON = function () {
     return this.toObject();
 };
 
-},{"./generic-collection":9,"./generic-map":10,"./listen/property-changes":15,"./shim":21}],8:[function(require,module,exports){
+},{"./generic-collection":11,"./generic-map":12,"./listen/property-changes":17,"./shim":23}],10:[function(require,module,exports){
 "use strict";
 
 var Shim = require("./shim");
@@ -1666,7 +1753,7 @@ FastSet.prototype.logNode = function (node, write) {
 };
 
 
-},{"./dict":7,"./generic-collection":9,"./generic-set":12,"./list":13,"./listen/property-changes":15,"./shim":21,"./tree-log":22}],9:[function(require,module,exports){
+},{"./dict":9,"./generic-collection":11,"./generic-set":14,"./list":15,"./listen/property-changes":17,"./shim":23,"./tree-log":24}],11:[function(require,module,exports){
 "use strict";
 
 module.exports = GenericCollection;
@@ -1950,7 +2037,7 @@ Object.defineProperty(GenericCollection.prototype,"size",GenericCollection._size
 
 require("./shim-array");
 
-},{"./shim-array":17}],10:[function(require,module,exports){
+},{"./shim-array":19}],12:[function(require,module,exports){
 "use strict";
 
 var Object = require("./shim-object");
@@ -2153,7 +2240,7 @@ Item.prototype.compare = function (that) {
 };
 
 
-},{"./listen/map-changes":14,"./listen/property-changes":15,"./shim-object":19}],11:[function(require,module,exports){
+},{"./listen/map-changes":16,"./listen/property-changes":17,"./shim-object":21}],13:[function(require,module,exports){
 
 var Object = require("./shim-object");
 
@@ -2213,7 +2300,7 @@ GenericOrder.prototype.toJSON = function () {
     return this.toArray();
 };
 
-},{"./shim-object":19}],12:[function(require,module,exports){
+},{"./shim-object":21}],14:[function(require,module,exports){
 
 module.exports = GenericSet;
 function GenericSet() {
@@ -2287,7 +2374,7 @@ GenericSet.prototype.toggle = function (value) {
 };
 
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 module.exports = List;
@@ -2757,7 +2844,7 @@ Node.prototype.addAfter = function (node) {
     node.prev = this;
 };
 
-},{"./generic-collection":9,"./generic-order":11,"./listen/property-changes":15,"./listen/range-changes":16,"./shim":21}],14:[function(require,module,exports){
+},{"./generic-collection":11,"./generic-order":13,"./listen/property-changes":17,"./listen/range-changes":18,"./shim":23}],16:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -2909,7 +2996,7 @@ MapChanges.prototype.dispatchBeforeMapChange = function (key, value) {
 };
 
 
-},{"../dict":7,"../list":13,"weak-map":23}],15:[function(require,module,exports){
+},{"../dict":9,"../list":15,"weak-map":25}],17:[function(require,module,exports){
 /*
     Based in part on observable arrays from Motorola Mobility’s Montage
     Copyright (c) 2012, Motorola Mobility LLC. All Rights Reserved.
@@ -3346,7 +3433,7 @@ PropertyChanges.makePropertyObservable = function (object, key) {
     }
 };
 
-},{"../shim":21}],16:[function(require,module,exports){
+},{"../shim":23}],18:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -3490,7 +3577,7 @@ RangeChanges.prototype.dispatchBeforeRangeChange = function (plus, minus, index)
 };
 
 
-},{"../dict":7,"weak-map":23}],17:[function(require,module,exports){
+},{"../dict":9,"weak-map":25}],19:[function(require,module,exports){
 "use strict";
 
 /*
@@ -3852,7 +3939,7 @@ ArrayIterator.prototype.next = function () {
     return this._iterationObject;
 };
 
-},{"./generic-collection":9,"./generic-order":11,"./shim-function":18,"weak-map":23}],18:[function(require,module,exports){
+},{"./generic-collection":11,"./generic-order":13,"./shim-function":20,"weak-map":25}],20:[function(require,module,exports){
 
 module.exports = Function;
 
@@ -3913,7 +4000,7 @@ Function.get = function (key) {
 };
 
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 var WeakMap = require("weak-map");
@@ -4439,7 +4526,7 @@ Object.clear = function (object) {
     return object;
 };
 
-},{"weak-map":23}],20:[function(require,module,exports){
+},{"weak-map":25}],22:[function(require,module,exports){
 
 /**
     accepts a string; returns the string with regex metacharacters escaped.
@@ -4455,7 +4542,7 @@ if (!RegExp.escape) {
 }
 
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 
 var Array = require("./shim-array");
 var Object = require("./shim-object");
@@ -4463,7 +4550,7 @@ var Function = require("./shim-function");
 var RegExp = require("./shim-regexp");
 
 
-},{"./shim-array":17,"./shim-function":18,"./shim-object":19,"./shim-regexp":20}],22:[function(require,module,exports){
+},{"./shim-array":19,"./shim-function":20,"./shim-object":21,"./shim-regexp":22}],24:[function(require,module,exports){
 "use strict";
 
 module.exports = TreeLog;
@@ -4505,7 +4592,7 @@ TreeLog.unicodeSharp = {
 };
 
 
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 // Copyright (C) 2011 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
