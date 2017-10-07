@@ -250,7 +250,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         Interval.prototype = {
             _intervals: {},
             isRunning: function () {
-                return typeof(this._intervals[this.name]) !== "undefined"
+                return typeof(this._intervals[this.name]) !== "undefined";
             },
             clear: function () {
                 if (this.isRunning()) {
@@ -342,7 +342,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     if (text.indexOf("available again") !== -1) { // Working
                         const timer = new AloTimer(fn.parseTimeStringLong(text));
                         interval.set(function () {
-                            if (timer.isFinished()) {
+                            if (timer.hasFinished) {
                                 fn.house_status_update_end(interval);
                             } else {
                                 $DOM.house_monitor.status.removeClass("avi-highlight").text(timer.toString());
@@ -352,7 +352,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                         fn.house_status_update_end(interval);
                     } else {
                         setTimeout(function () {
-                            $.get("/house.php")
+                            $.get("/house.php");
                         }, 3000);
                     }
                 }
@@ -891,7 +891,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                                 characterData: true
                             });
                             $(document).ajaxComplete(Request.prototype.callbacks.success.house_requery);
-                            $.get("/house.php")
+                            $.get("/house.php");
                         });
                     } else {
                         console.log("(skipped due to user settings)");
