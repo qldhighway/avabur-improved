@@ -26,7 +26,7 @@
 // @require        https://cdn.rawgit.com/qldhighway/avabur-improved/0.6.7/lib/toastmessage/jquery.toastmessage.min.js
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
 // @require        https://cdn.rawgit.com/qldhighway/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
-// @require        https://cdn.rawgit.com/qldhighway/alo-timer/master/src/alotimer.min.js
+// @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
 
 // @noframes
 // ==/UserScript==
