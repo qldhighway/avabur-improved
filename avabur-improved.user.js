@@ -2,17 +2,17 @@
 // @name           Avabur Improved
 // @namespace      org.alorel.avaburimproved
 // @author         Alorel <a.molcanovas@gmail.com>
-// @homepage       https://github.com/Alorel/avabur-improved
+// @homepage       https://github.com/qldhighway/avabur-improved
 // @description    Some welcome additions to Avabur's UI choices
 // @include        https://avabur.com/game.php
 // @include        http://avabur.com/game.php
 // @include        https://www.avabur.com/game.php
 // @include        http://www.avabur.com/game.php
 // @version        0.6.7
-// @icon           https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-16.png
-// @icon64         https://cdn.rawgit.com/Alorel/avabur-improved/0.6.3/res/img/logo-64.png
-// @downloadURL    https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
-// @updateURL      https://github.com/Alorel/avabur-improved/raw/master/avabur-improved.user.js
+// @icon           https://cdn.rawgit.com/qldhighway/avabur-improved/0.6.3/res/img/logo-16.png
+// @icon64         https://cdn.rawgit.com/qldhighway/avabur-improved/0.6.3/res/img/logo-64.png
+// @downloadURL    https://github.com/qldhighway/avabur-improved/raw/master/avabur-improved.user.js
+// @updateURL      https://github.com/qldhighway/avabur-improved/raw/master/avabur-improved.user.js
 // @run-at         document-end
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -23,10 +23,10 @@
 // @connect        githubusercontent.com
 // @connect        github.com
 // @connect        self
-// @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/toastmessage/jquery.toastmessage.min.js
+// @require        https://cdn.rawgit.com/qldhighway/avabur-improved/0.6.7/lib/toastmessage/jquery.toastmessage.min.js
 // @require        https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.10/buzz.min.js
-// @require        https://cdn.rawgit.com/Alorel/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
-// @require        https://cdn.rawgit.com/Alorel/alo-timer/master/src/alotimer.min.js
+// @require        https://cdn.rawgit.com/qldhighway/avabur-improved/0.6.7/lib/jalc-1.0.1.min.js
+// @require        https://cdn.rawgit.com/qldhighway/alo-timer/master/src/alotimer.min.js
 
 // @noframes
 // ==/UserScript==
@@ -73,7 +73,7 @@ if (typeof(window.sessionStorage) === "undefined") {
         /**
          * Creates a GitHub CDN URL
          * @param {String} path Path to the file without leading slashes
-         * @param {String} [author] The author. Defaults to Alorel
+         * @param {String} [author] The author. Defaults to qldhighway
          * @param {String} [repo] The repository. Defaults to avabur-improved
          * @returns {String} The URL
          */
@@ -128,7 +128,7 @@ if (typeof(window.sessionStorage) === "undefined") {
          * The URL where we check for updates. This is different from @updateURL because we want it to come through
          * as a regular page load, not a request to the raw file
          */
-        const UPDATE_URL = "https://github.com/Alorel/avabur-improved/blob/master/avabur-improved.user.js";
+        const UPDATE_URL = "https://github.com/qldhighway/avabur-improved/blob/master/avabur-improved.user.js";
 
         /////////////////////////////////////////////////////
         // This is the script code. Don't change it unless //
@@ -901,7 +901,7 @@ if (typeof(window.sessionStorage) === "undefined") {
                     if (fn.versionCompare(GM_getValue("last_ver") || "999999", GM_info.script.version) < 0) {
                         $().toastmessage('showToast', {
                             text: GM_info.script.name + " has been updated! See the changelog " +
-                            "<a href='https://github.com/Alorel/avabur-improved/releases' target='_blank'>here</a>",
+                            "<a href='https://github.com/qldhighway/avabur-improved/releases' target='_blank'>here</a>",
                             sticky: true,
                             position: 'top-left',
                             type: 'success'
