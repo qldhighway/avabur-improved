@@ -78,7 +78,7 @@ if (typeof(window.sessionStorage) === "undefined") {
          * @returns {String} The URL
          */
         const gh_url = function (path, author, repo) {
-            author = author || "Alorel";
+            author = author || "qldhighway";
             repo = repo || "avabur-improved";
 
             return "https://cdn.rawgit.com/" + author + "/" + repo + "/" +
